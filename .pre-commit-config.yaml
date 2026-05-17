@@ -1,0 +1,23 @@
+repos:
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.6.0
+    hooks:
+      - id: detect-secrets
+        args: ['--allow-multiple-files', '--baseline', '.secrets.baseline']
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+
+  - repo: local
+    hooks:
+      - id: dotnet-format
+        name: dotnet format check
+        entry: dotnet format --verify-no-changes
+        language: system
+        types: [csharp]
+        pass_filenames: false
