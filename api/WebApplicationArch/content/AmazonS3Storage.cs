@@ -18,6 +18,19 @@ namespace WebApplicationArch.content
 
         private string BucketName { get; set; }
 
+        // Preferred constructor — uses the Lambda execution role (IAM), no credentials needed.
+        public AmazonS3Storage(string bucketName, string region)
+        {
+            amazonClient = new AmazonS3Client(new AmazonS3Config()
+            {
+                MaxErrorRetry = 15,
+                RegionEndpoint = RegionEndpoint.GetBySystemName(region)
+            });
+            BucketName = bucketName;
+        }
+
+        // Legacy constructor kept for local dev where IAM role is not available.
+        // Prefer passing credentials via environment variables or AWS credential chain instead.
         public AmazonS3Storage(string awsAccessKey, string awsSecretAccessKey, string bucketName, string region)
         {
             amazonClient = new AmazonS3Client(awsAccessKey, awsSecretAccessKey, new AmazonS3Config()

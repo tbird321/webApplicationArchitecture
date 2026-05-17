@@ -8,8 +8,14 @@ namespace ContentManagementApplication.security
 {
     public class UserSecurity
     {
-        private static string SecretGuid = "91692457-0D03-491A-98D4-0E5462F67D7B";
-        private const string initVector = "pemgail9uzpgzl88";
+        // Read from environment variable TOKEN_SECRET (set in Lambda config or local .env).
+        // Falls back to a placeholder — override this in every deployment environment.
+        private static string SecretGuid = Environment.GetEnvironmentVariable("TOKEN_SECRET")
+            ?? throw new InvalidOperationException("TOKEN_SECRET environment variable is not set. Set it in Lambda environment variables or local dev config.");
+
+        // Read from environment variable TOKEN_IV (16-char string).
+        private static string initVector = Environment.GetEnvironmentVariable("TOKEN_IV")
+            ?? throw new InvalidOperationException("TOKEN_IV environment variable is not set.");
         private const int keysize = 256;
         private const int EXPIRATION_MINUTES = 60;
 
