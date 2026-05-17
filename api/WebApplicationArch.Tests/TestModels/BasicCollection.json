@@ -1,0 +1,7 @@
+{
+  "id": 1,
+  "name": "Test Collection",
+  "description": "A test collection for unit testing",
+  "type": "standard",
+  "websiteId": 1
+} 

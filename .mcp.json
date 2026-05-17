@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "webcms": {
+      "command": "node",
+      "args": ["mcp/src/index.js"],
+      "env": {
+        "MCP_API_KEY": "${MCP_API_KEY}",
+        "LAMBDA_API_BASE_URL": "${LAMBDA_API_BASE_URL}",
+        "WEBSITE_ID": "${WEBSITE_ID}"
+      }
+    }
+  }
+}

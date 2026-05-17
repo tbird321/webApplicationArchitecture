@@ -1,0 +1,551 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "An AWS Serverless Application with Page and Article Endpoints This template is partially managed by Amazon.Lambda.Annotations (v1.0.0.0).",
+  "Resources": {
+    "WebArchAPI": {
+      "Type": "AWS::Serverless::Api",
+      "Properties": {
+        "StageName": "prod",
+        "Cors": {
+          "AllowMethods": "'GET,POST,OPTIONS'",
+          "AllowHeaders": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+          "AllowOrigin": "'*'"
+        }
+      }
+    },
+    "GetPageByIdFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetPageById",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/page/{id}/{websiteId}",
+              "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GetPageByNameFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetPageByName",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/page/search/{name}/{websiteId}",
+              "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "SavePageAndArticlesFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::SavePageAndArticles",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/page",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "UpsertArticlesFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::UpsertArticle",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/article",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "SearchPagesFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::SearchPages",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "SearchPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/page/search",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "SearchCollectionFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::searchCollections",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "SearchPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/collection/search",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GetArticleByIdFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetArticleById",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetArticle": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/article/{id}",
+              "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GetTopics": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetTopics",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetArticle": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/topic",
+              "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GetKeywords": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetKeywords",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetArticle": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/keyword",
+              "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GetLayouts": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetLayouts",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetArticle": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/layout",
+              "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GetWebsites": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetWebsites",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetArticle": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/website",
+              "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "SearchArticlesFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::SearchArticles",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "SearchArticle": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/article/search",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "UpsertCollectionsFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::UpsertCollection",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/collection",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GetCollectionPageByIdFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetCollectionPageAsync",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/collection/{id}",
+              "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "AssociatePagesWithCollection": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::AssociatePagesWithCollection",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/collection/{id}/page",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "DeleteCollection": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::DeleteCollection",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/collection/{id}",
+              "Method": "DELETE",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "DeletePageFromCollection": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::DeletePageFromCollection",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "GetPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/collection/{id}/page/{pageId}",
+              "Method": "DELETE",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "PublishPageFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::PublishPage",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "PublishPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/page/{id}/publish",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "UnpublishPageFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::UnpublishPage",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "UnpublishPage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/page/{id}/unpublish",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "PublishArticleFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::PublishArticle",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "PublishArticle": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/article/{id}/publish",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "UnpublishArticleFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::UnpublishArticle",
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Events": {
+          "UnpublishArticle": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/article/{id}/unpublish",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "ApiURL": {
+      "Description": "API endpoint URL for Prod environment",
+      "Value": {
+        "Fn::Sub": "https://${WebArchAPI}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+      }
+    }
+  }
+}

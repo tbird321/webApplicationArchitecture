@@ -1,0 +1,33 @@
+{
+    "id": 100,
+    "name": "page 2",
+    "description": "Description",
+    "topics": [],
+    "keywords": [],
+    "style": "Blue Style",
+    "layout": "Standard",
+    "articles": [
+        {
+            "id": 5,
+            "articleId": "2SampleID",
+            "name": "SampleName2",
+            "description": "SampleDescription2",
+            "topics": [ "sample2ArticleTopic1" ],
+            "keywords": [],
+            "memeImagePath": "sampleMemePath2",
+            "sequence_no": "1",
+            "articlePath": "page2Article1.html"
+        },
+        {
+            "id": 6,
+            "articleId": "2SampleID1",
+            "name": "SampleName",
+            "description": "SampleDescription",
+            "topics": [],
+            "keywords": [],
+            "sequence_no": "2",
+            "memeImagePath": "sampleMemePath1",
+            "articlePath": "page2Article2.html"
+        }
+    ]
+}

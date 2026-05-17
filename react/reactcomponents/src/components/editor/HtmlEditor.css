@@ -1,0 +1,37 @@
+/* Container styles */
+.html-editor-container {
+    height: 100%;
+    width: 100%;
+  }
+  
+  /* Top menu styles */
+  .html-editor-container .top-menu {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #ccc;
+    padding: 10px;
+  }
+  
+  /* Content styles for both edit and non-edit modes */
+  .html-editor-container .content {
+    height: calc(100% - 40px);
+    width: 100%;
+    overflow-y: auto;
+  }
+  
+  /* Textarea for raw HTML viewing/editing */
+  .html-editor-container .source-view-textarea {
+    width: 100%;
+    height: 100%;
+    resize: none;
+  }
+  
+  /* Resizable container for the TinyMCE editor 
+  // Stop resizing the editor
+  */
+  .resizable-container {
+    resize: none I !important;
+    overflow: auto;
+    border: 1px solid #ccc;
+    min-height: 200px;
+  }

@@ -1,0 +1,46 @@
+.tree-container ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tree-container li {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tree-node {
+    display: flex;
+    align-items: center;
+    padding: 0px 0; /* Reduced padding */
+    margin: 0;
+}
+.tree-node:hover {
+    background-color: #f0f0f0 !important;
+}
+
+.tree-node.selected {
+    background-color: rgba(0, 0, 255, 0.2) !important;
+}
+
+.tree-toggle {
+    cursor: pointer;
+    margin-right: 1px; /* Reduced margin */
+}
+
+.tree-icon {
+    margin-right: 1px; /* Reduced margin */
+}
+
+.tree-indent {
+    margin-inline-start: 15px; /* Reduced indent */
+}
+
+.page-icon {
+    color: blue;
+}
+
+.article-icon {
+    color: green;
+}

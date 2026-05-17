@@ -1,0 +1,64 @@
+.page-collections-editor {
+    padding: 24px;
+}
+
+.page-collections-editor .collection-card {
+    margin-bottom: 24px;
+}
+
+.page-collections-editor .collection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.page-collections-editor .collection-type-chip {
+    margin-bottom: 16px;
+}
+
+.page-collections-editor .pages-list {
+    margin-top: 16px;
+}
+
+.page-collections-editor .page-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.page-collections-editor .page-item .drag-icon {
+    margin-right: 8px;
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.page-collections-editor .page-item .page-text {
+    flex-grow: 1;
+}
+
+.page-collections-editor .page-item .delete-button {
+    margin-left: 8px;
+}
+
+.page-collections-editor .available-pages-section {
+    margin-top: 24px;
+}
+
+.page-collections-editor .search-grid-container {
+    margin-top: 16px;
+}
+
+.page-collections-editor .dialog-content {
+    min-width: 400px;
+}
+
+.page-collections-editor .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.page-collections-editor .message-snackbar {
+    z-index: 1400;
+} 

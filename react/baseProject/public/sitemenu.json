@@ -1,0 +1,34 @@
+[
+    {
+        "id": "menu1",
+        "menuText": "Temple",
+        "menuItems": [
+            {
+                "id": "menu1.1",
+                "text": "Temple Preparation",
+                "article": "Temple_Prep_Class_Main"
+            }
+        ]
+    },
+    {
+        "id": "menu2",
+        "menuText": "Come Follow Me",
+        "menuItems": [
+            {
+                "id": "menu2.1",
+                "text": "Study Guides"
+            }
+        ]
+    },
+    {
+        "id": "menu3",
+        "menuText": "Book of Mormon",
+        "menuItems": [
+            {
+                "id": "menu2.1",
+                "text": "Intro to the Book of Mormon",
+                "article": "Book_of_Mormon-Intro"
+            }
+        ]
+    }
+]

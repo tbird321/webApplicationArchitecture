@@ -1,0 +1,13 @@
+/* ImageGallery.css */
+/* ImageGallery.css */
+  
+  .imageItem img {
+    width: 100%;
+    overflow: auto;
+    display: block; /* Remove extra space below the image */
+  }
+  .scrollableImageList {
+    overflow: auto; /* Vertical scroll */
+}
+  
+  

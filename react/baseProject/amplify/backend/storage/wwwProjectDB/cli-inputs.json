@@ -1,0 +1,33 @@
+{
+  "resourceName": "wwwProjectDB",
+  "tableName": "Articles",
+  "partitionKey": {
+    "fieldName": "UniqueId",
+    "fieldType": "string"
+  },
+  "gsi": [
+    {
+      "name": "NameIndex",
+      "partitionKey": {
+        "fieldName": "Name",
+        "fieldType": "string"
+      },
+      "sortKey": {
+        "fieldName": "FilePath",
+        "fieldType": "string"
+      }
+    },
+    {
+      "name": "FilePathIndex",
+      "partitionKey": {
+        "fieldName": "FilePath",
+        "fieldType": "string"
+      },
+      "sortKey": {
+        "fieldName": "FileName",
+        "fieldType": "string"
+      }
+    }
+  ],
+  "triggerFunctions": []
+}

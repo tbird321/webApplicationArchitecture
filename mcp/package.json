@@ -1,0 +1,17 @@
+{
+  "name": "webcms-mcp",
+  "version": "0.1.0",
+  "description": "MCP server exposing WebCMS content tools (pages, articles, menus, collections, metadata) to AI agents.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

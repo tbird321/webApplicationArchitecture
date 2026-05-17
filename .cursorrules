@@ -1,0 +1,473 @@
+# Content Management System - Cursor Rules
+
+## Architecture Overview
+
+This is a multi-tenant content management system with the following architecture:
+
+### Frontend (React)
+- **baseProject**: Main CMS application using React 18.2.0
+- **reactcomponents**: Custom component library (@tbirdcomponents/reactcomponents v0.1.92)
+- **WebTemplates**: Legacy ASP.NET templates
+
+### Backend (AWS Lambda + MySQL)
+- **WebApplicationArch**: AWS Lambda API Gateway functions
+- **MySQLConnector**: Data access layer with DAO pattern
+- **MySQLConnectorTest**: Comprehensive unit tests
+
+### Key Technologies
+- React 18.2.0 with Material-UI (MUI)
+- AWS Amplify for authentication and storage
+- TinyMCE for rich text editing
+- MySQL with AWS Secrets Manager
+- AWS Lambda for serverless API
+
+## Coding Standards & Patterns
+
+### React Component Structure
+
+#### Component Organization
+```javascript
+// 1. Imports (external libraries first, then internal)
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Button } from '@mui/material/Button';
+import { ComponentName } from '@tbirdcomponents/reactcomponents';
+import { useAppStateContext } from '../../hooks/appState/useAppStateContext';
+
+// 2. Component definition with destructured props
+const ComponentName = ({ prop1, prop2, onCallback }) => {
+    // 3. State declarations
+    const [state1, setState1] = useState(initialValue);
+    const { ContextValue } = useAppStateContext();
+    
+    // 4. Event handlers (useCallback for performance)
+    const handleEvent = useCallback((param) => {
+        // Handler logic
+    }, [dependencies]);
+    
+    // 5. Effects
+    useEffect(() => {
+        // Effect logic
+    }, [dependencies]);
+    
+    // 6. Render
+    return (
+        <div className="component-container">
+            {/* JSX content */}
+        </div>
+    );
+};
+
+export default ComponentName;
+```
+
+#### State Management Patterns
+```javascript
+// Use Context for global state
+const { Authorization, WebSiteState, FileProcessing, DatabaseProcessing } = useAppStateContext();
+
+// Local state for component-specific data
+const [localState, setLocalState] = useState(initialValue);
+
+// Derived state with useMemo
+const derivedValue = useMemo(() => {
+    return computeValue(dependencies);
+}, [dependencies]);
+```
+
+### Data Models
+
+#### Page Model Structure
+```javascript
+const pageModel = {
+    id: number,
+    websiteId: number,
+    name: string,
+    description: string,
+    topics: string[],
+    keywords: string[],
+    style: string,
+    layout: string,
+    layoutid: number,
+    articles: ArticleModel[]
+};
+```
+
+#### Article Model Structure
+```javascript
+const articleModel = {
+    id: number,
+    sequence_no: number,
+    articleId: string,
+    name: string,
+    description: string,
+    topics: string[],
+    keywords: string[],
+    memeImagePath: string,
+    articlePath: string,
+    websiteId: number
+};
+```
+
+### API Integration Patterns
+
+#### Database Operations
+```javascript
+// Always use try-catch with proper error handling
+const handleDatabaseOperation = async () => {
+    try {
+        const result = await DatabaseProcessing.operationName(params);
+        return result;
+    } catch (error) {
+        console.error("Database operation failed:", error);
+        // Handle error appropriately
+        throw error;
+    }
+};
+```
+
+#### File Operations
+```javascript
+// S3 file operations with proper error handling
+const handleFileOperation = async (folder, fileName, content, contentType) => {
+    try {
+        await FileProcessing.saveFileData(folder, fileName, content, contentType);
+    } catch (error) {
+        console.error("File operation failed:", error);
+        throw error;
+    }
+};
+```
+
+### Component Library Usage
+
+#### Custom Components from @tbirdcomponents/reactcomponents
+```javascript
+// Import patterns
+import { HtmlEditor, SearchGrid, NestedDynamicMenu } from '@tbirdcomponents/reactcomponents';
+
+// Usage patterns
+<HtmlEditor 
+    initialHtml={htmlContent}
+    onSave={handleSave}
+    cssfilePath={dynamicCSSURL}
+    imagesUploadHandler={handleImageUpload}
+    images={imageList}
+/>
+
+<SearchGrid
+    onRowSelect={handleRowSelect}
+    onSearch={handleSearch}
+    pageSize={pageSize}
+    columns={columnDefinitions}
+    items={dataItems}
+    imageList={imageList}
+/>
+```
+
+### Authentication & Authorization
+
+#### User State Management
+```javascript
+// Check authentication status
+const isLoggedIn = Authorization.isUserLoggedIn();
+
+// Get authenticated user
+const user = await Authorization.getAuthenticatedUser();
+
+// Handle login/logout
+const handleLogin = async (username, password) => {
+    const user = await Authorization.authenticateUser(username, password);
+    // Handle successful login
+};
+```
+
+### Styling & Theming
+
+#### CSS Class Naming
+```css
+/* Use BEM methodology for CSS classes */
+.component-name { }
+.component-name__element { }
+.component-name__element--modifier { }
+
+/* Layout classes follow pattern: layout-{processed-layout-string} */
+.layout-1-2-3 { }
+.layout-1-3-2-3 { }
+```
+
+#### Dynamic CSS Loading
+```javascript
+// Dynamic CSS injection for themes
+useEffect(() => {
+    if (!dynamicCSSURL) return;
+    
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = dynamicCSSURL;
+    document.head.appendChild(link);
+    
+    return () => {
+        if (document.head.contains(link)) {
+            document.head.removeChild(link);
+        }
+    };
+}, [dynamicCSSURL]);
+```
+
+### Error Handling Patterns
+
+#### React Error Boundaries
+```javascript
+// Always wrap async operations in try-catch
+const handleAsyncOperation = async () => {
+    try {
+        const result = await asyncOperation();
+        return result;
+    } catch (error) {
+        console.error("Operation failed:", error);
+        // Provide user-friendly error message
+        setErrorState(error.message);
+    }
+};
+```
+
+#### API Error Responses
+```javascript
+// Standard API response pattern
+const apiResponse = {
+    statusCode: 200,
+    body: JSON.stringify(data),
+    headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+    }
+};
+```
+
+### Performance Optimization
+
+#### React Optimization Patterns
+```javascript
+// Use useCallback for event handlers
+const handleClick = useCallback(() => {
+    // Handler logic
+}, [dependencies]);
+
+// Use useMemo for expensive computations
+const expensiveValue = useMemo(() => {
+    return computeExpensiveValue(data);
+}, [data]);
+
+// Use React.memo for component memoization
+const MemoizedComponent = React.memo(({ props }) => {
+    return <div>{props.value}</div>;
+});
+```
+
+### Database Patterns
+
+#### Connection Management
+```javascript
+// Always use connection pooling and proper disposal
+using (var connection = CreateMySqlConnection())
+{
+    await connection.OpenAsync();
+    using (var transaction = await connection.BeginTransactionAsync())
+    {
+        try
+        {
+            // Database operations
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+}
+```
+
+#### Parameterized Queries
+```javascript
+// Always use parameterized queries to prevent SQL injection
+var command = new MySqlCommand("SELECT * FROM table WHERE id = @id", connection);
+command.Parameters.AddWithValue("@id", id);
+```
+
+### Testing Patterns
+
+#### Unit Test Structure
+```javascript
+[Test]
+public async Task TestMethodName()
+{
+    // Arrange
+    var testData = new TestModel();
+    
+    // Act
+    var result = await methodUnderTest(testData);
+    
+    // Assert
+    Assert.IsNotNull(result);
+    Assert.AreEqual(expectedValue, result.Property);
+}
+```
+
+### File Organization
+
+#### Directory Structure
+```
+src/
+├── hooks/                    # Custom React hooks
+│   ├── appState/            # Application state management
+│   └── configuration/       # Configuration management
+├── sitecontent/             # Main application components
+│   ├── content/            # Content management components
+│   ├── contentAdmin/       # Administrative components
+│   ├── authentication/     # Auth components
+│   └── lookup/            # Search and lookup components
+└── components/             # Reusable components
+```
+
+### Naming Conventions
+
+#### React Components
+- Use PascalCase for component names: `PageContainer`, `HtmlEditor`
+- Use camelCase for props and variables: `pageModel`, `handleClick`
+- Use kebab-case for CSS classes: `page-container`, `html-editor`
+
+#### Database & API
+- Use PascalCase for C# classes: `PageModel`, `ArticleDAO`
+- Use camelCase for properties: `pageName`, `articleId`
+- Use snake_case for database columns: `page_name`, `article_id`
+
+### Security Considerations
+
+#### Input Validation
+```javascript
+// Always validate user input
+const validateInput = (input) => {
+    if (!input || typeof input !== 'string') {
+        throw new Error('Invalid input');
+    }
+    return input.trim();
+};
+```
+
+#### Authentication Checks
+```javascript
+// Always check authentication before sensitive operations
+if (!Authorization.isUserLoggedIn()) {
+    return <LoginComponent />;
+}
+```
+
+### AWS Integration Patterns
+
+#### Secrets Management
+```javascript
+// Use AWS Secrets Manager for sensitive data
+const connectionModel = await ConnectionManager.GetSecretAsync(environment);
+```
+
+#### S3 File Operations
+```javascript
+// Standard S3 file path pattern
+const filePath = `websites/${config.Site.siteName}/${fileName}`;
+```
+
+### Common Patterns to Follow
+
+1. **Always use async/await** for database and file operations
+2. **Implement proper error handling** with try-catch blocks
+3. **Use React hooks** (useState, useEffect, useCallback, useMemo) appropriately
+4. **Follow the established component structure** with clear separation of concerns
+5. **Use the custom component library** (@tbirdcomponents/reactcomponents) for consistency
+6. **Implement proper loading states** and user feedback
+7. **Use Material-UI components** for consistent UI/UX
+8. **Follow the multi-tenant architecture** with websiteId scoping
+9. **Implement proper cleanup** in useEffect hooks
+10. **Use TypeScript-like prop validation** even in JavaScript
+
+### Anti-Patterns to Avoid
+
+1. **Don't use var** - always use const or let
+2. **Don't mutate state directly** - always use setState functions
+3. **Don't forget error boundaries** for async operations
+4. **Don't hardcode values** - use configuration and environment variables
+5. **Don't ignore authentication** - always check user permissions
+6. **Don't use inline styles** - use CSS classes and Material-UI styling
+7. **Don't forget cleanup** in useEffect hooks
+8. **Don't use synchronous database operations** - always use async/await
+
+### Multi-Tenant Architecture
+
+#### Website Scoping
+```javascript
+// Always include websiteId in database operations
+const searchCriteria = {
+    ...criteria,
+    websiteId: WebSiteState.websiteID()
+};
+
+// Use website-specific file paths
+const filePath = `websites/${config.Site.siteName}/${fileName}`;
+```
+
+### Component Library Integration
+
+#### Using Custom Components
+```javascript
+// Import from the custom library
+import { HtmlEditor, SearchGrid, NestedDynamicMenu } from '@tbirdcomponents/reactcomponents';
+
+// Use with proper props
+<HtmlEditor 
+    initialHtml={htmlContent}
+    onSave={handleSave}
+    cssfilePath={dynamicCSSURL}
+    imagesUploadHandler={handleImageUpload}
+    images={imageList}
+/>
+```
+
+### State Management Best Practices
+
+#### Context Usage
+```javascript
+// Use the established context pattern
+const { Authorization, WebSiteState, FileProcessing, DatabaseProcessing } = useAppStateContext();
+
+// Access configuration through context
+const { configLoaded, config } = useConfig();
+```
+
+### File and Database Operations
+
+#### S3 File Management
+```javascript
+// Standard file operation pattern
+const handleFileSave = async (folder, fileName, content, contentType) => {
+    try {
+        await FileProcessing.saveFileData(folder, fileName, content, contentType);
+    } catch (error) {
+        console.error("File save failed:", error);
+        throw error;
+    }
+};
+```
+
+#### Database Operations
+```javascript
+// Standard database operation pattern
+const handleDatabaseOperation = async (params) => {
+    try {
+        const result = await DatabaseProcessing.operationName(params);
+        return result;
+    } catch (error) {
+        console.error("Database operation failed:", error);
+        throw error;
+    }
+};
+``` 

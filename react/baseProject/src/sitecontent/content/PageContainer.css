@@ -1,0 +1,401 @@
+.articleContents {
+    padding-left:15%;
+    padding-right:15%;
+}
+
+/* Prevent floating controls from overlapping following content blocks */
+.articleContents::after {
+    content: "";
+    display: block;
+    clear: both;
+}
+
+.layout-standard {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 480px) {
+    .layout-2-1 {
+        grid-template-columns: 1fr !important;
+    }
+    .articleContents {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+}
+
+@media (max-width: 768px) {
+    .layout-2-1 {
+        grid-template-columns: 1fr !important;
+    }
+    .articleContents {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+}
+
+/* First item in each pattern spans all columns */
+.layout-1 > div:nth-child(1n + 1) {
+    grid-column: 1 / -1;
+}
+
+.layout-1-1_3-2_3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 equal columns for the 2nd and 3rd items in each pattern */
+    grid-template-rows: auto; /* Adjusts row height automatically based on content */
+    gap: 10px;
+}
+    /* First item in each pattern spans all columns */
+    .layout-1-1_3-2_3 > div:nth-child(5n + 1) {
+        grid-column: 1 / -1;
+    }
+
+    /* Second item in each pattern takes up the first 1/3 */
+    .layout-1-1_3-2_3 > div:nth-child(5n + 2) {
+        grid-column: 1 / 2;
+    }
+
+    /* Third item in each pattern takes up the last 2/3 */
+    .layout-1-1_3-2_3 > div:nth-child(5n + 3) {
+        grid-column: 2 / 4;
+    }
+
+    /* Fourth item in each pattern takes up the first 2/3 */
+    .layout-1-1_3-2_3 > div:nth-child(5n + 4) {
+        grid-column: 1 / 3;
+    }
+
+    /* Fifth item in each pattern takes up the last 1/3 */
+    .layout-1-1_3-2_3 > div:nth-child(5n + 5) {
+        grid-column: 3 / 4;
+    }
+
+.layout-1-1_3 {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: auto; /* Adjusts row height automatically based on content */
+    gap: 10px;
+}
+
+    /* First item in each pattern spans all columns */
+    .layout-1-1_3 > div:nth-child(3n + 1) {
+        grid-column: 1 / -1;
+    }
+
+    /* Second item in each pattern takes up the first 1/3 */
+    .layout-1-1_3 > div:nth-child(3n + 2) {
+        grid-column: 1 / 2;
+    }
+
+    /* Third item in each pattern takes up the last 2/3 */
+    .layout-1-1_3 > div:nth-child(3n + 3) {
+        grid-column: 2 / 3;
+    }
+
+.layout-1-2-3 {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* This will actually define a grid with 6 equal columns, but we will span the items across these columns to achieve the desired widths */
+    grid-template-rows: auto; /* Adjusts row height automatically based on content */
+    gap: 10px; /* Adjust space between grid items */
+}
+
+    /* First item spans all 6 columns */
+    .layout-1-2-3 > div:nth-child(6n + 1) {
+        grid-column: 1 / -1;
+    }
+
+    /* Second and third items span 3 columns each (to make up half the container each) */
+    .layout-1-2-3 > div:nth-child(6n + 2),
+    .layout-1-2-3 > div:nth-child(6n + 3) {
+        grid-column: span 3;
+    }
+
+    /* Fourth, fifth, and sixth items span 2 columns each (to make up a third of the container each) */
+    .layout-1-2-3 > div:nth-child(6n + 4),
+    .layout-1-2-3 > div:nth-child(6n + 5),
+    .layout-1-2-3 > div:nth-child(6n + 6) {
+        grid-column: span 2;
+    }
+
+
+.layout-1-2_3-1_3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+    /* First item in each pattern spans all columns */
+    .layout-1-2_3-1_3 > div:nth-child(5n + 1) {
+        grid-column: 1 / -1;
+    }
+
+    /* Second item in each pattern takes up the first 2/3 */
+    .layout-1-2_3-1_3 > div:nth-child(5n + 2) {
+        grid-column: 1 / 3;
+    }
+
+    /* Third item in each pattern takes up the last 1/3 */
+    .layout-1-2_3-1_3 > div:nth-child(5n + 3) {
+        grid-column: 3 / 4;
+    }
+
+    /* Fourth item in each pattern takes up the first 1/3 */
+    .layout-1-2_3-1_3 > div:nth-child(5n + 4) {
+        grid-column: 1 / 2;
+    }
+
+    /* Fifth item in each pattern takes up the last 2/3 */
+    .layout-1-2_3-1_3 > div:nth-child(5n + 5) {
+        grid-column: 2 / 4;
+    }
+
+.layout-1-2_3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Creates a grid with two columns, with the first column twice as wide as the second */
+    gap: 10px; /* Adjust space between grid items */
+}
+
+    /* First item spans both columns to take the full width of the row */
+    .layout-1-2_3 > div:nth-child(3n + 1) {
+        grid-column: 1 / -1;
+    }
+
+    /* Second item takes up the first 2/3 of the width (2 column out of the total 3 fractions) */
+    .layout-1-2_3 > div:nth-child(3n + 2) {
+        grid-column: 1 / 2;
+    }
+
+    /* Third item takes up the last 1/3 of the width (1 columns out of the total 3 fractions) */
+    .layout-1-2_3 > div:nth-child(3n + 3) {
+        grid-column: 2 / 3;
+    }
+
+.layout-1-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Creates a grid with two equal columns */
+    gap: 10px; /* Adjust space between grid items */
+}
+
+    /* First item spans both columns to take the full width of the row */
+    .layout-1-2 > div:nth-child(3n + 1) {
+        grid-column: 1 / -1;
+    }
+
+    /* Second and third items take up one column each, filling the second row */
+    .layout-1-2 > div:nth-child(3n + 2),
+    .layout-1-2 > div:nth-child(3n + 3) {
+        grid-column: auto;
+    }
+
+.layout-1-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px; /* Adjust space between grid items */
+}
+
+    /* First item spans both columns to take the full width of the row */
+    .layout-1-3 > div:nth-child(4n + 1) {
+        grid-column: 1 / -1;
+    }
+
+    /* Second and third items take up one column each, filling the second row */
+    .layout-1-3 > div:nth-child(4n + 2),
+    .layout-1-3 > div:nth-child(4n + 3),
+    .layout-1-3 > div:nth-child(4n + 4) {
+        grid-column: auto;
+    }
+
+.layout-1_3 {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Creates a grid with two columns, the first column is 1/3 and the second is 2/3 of the row */
+    gap: 10px; /* Adjust space between grid items */
+}
+
+    /* First item in each row takes up the first 1/3 of the space */
+    .layout-1_3 > div:nth-child(2n + 1) {
+        grid-column: 1 / 2;
+    }
+
+    /* Second item in each row takes up the last 2/3 of the space */
+    .layout-1_3 > div:nth-child(2n + 2) {
+        grid-column: 2 / 3;
+    }
+
+.layout-1_3-1 {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* 1/3 to 2/3 ratio for the grid */
+    grid-auto-rows: auto; /* Row height adjusts to content */
+    gap: 10px; /* Space between grid items */
+}
+
+    /* First item in each pattern takes up the first 1/3 */
+    .layout-1_3-1 > div:nth-child(3n + 1) {
+        grid-column: 1 / 2;
+    }
+
+    /* Second item in each pattern takes up the last 2/3 */
+    .layout-1_3-1 > div:nth-child(3n + 2) {
+        grid-column: 2 / 3;
+    }
+
+    /* Third item in each pattern spans the entire row */
+    .layout-1_3-1 > div:nth-child(3n + 3) {
+        grid-column: 1 / -1;
+    }
+
+.layout-1_3-2_3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 1/3 to 2/3 ratio for the grid */
+    grid-auto-rows: auto; /* Row height adjusts to content */
+    gap: 10px; /* Space between grid items */
+}
+
+    /* First object takes up 1/3 of the first row */
+    .layout-1_3-2_3 > div:nth-child(4n + 1) {
+        grid-column: 1 / span 1;
+    }
+
+    /* Second object takes up last 2/3 of the first row */
+    .layout-1_3-2_3 > div:nth-child(4n + 2) {
+        grid-column: 2 / span 2;
+    }
+
+    /* Third object takes up first 2/3 of the second row */
+    .layout-1_3-2_3 > div:nth-child(4n + 3) {
+        grid-column: 1 / span 2;
+    }
+
+    /* Fourth object takes up remaining 1/3 of the row */
+    .layout-1_3-2_3 > div:nth-child(4n + 4) {
+        grid-column: 3 / span 1;
+    }
+
+.layout-2-1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Creates a grid with one column taking 2/3 and the second column taking 1/3 of the available space */
+    gap: 10px; /* Adjust space between grid items */
+}
+
+    /* First item and second spans share row */
+    .layout-2-1 > div:nth-child(3n + 1),
+    .layout-2-1 > div:nth-child(3n + 2) {
+        grid-column: auto;
+    }
+
+    /* Third item fills the second row */
+    .layout-2-1 > div:nth-child(3n + 3) {
+        grid-row: auto;
+        grid-column: 1 / -1; /* Occupy the entire row */
+    }
+
+.layout-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Creates a grid with two equal columns */
+    gap: 10px; /* Adjust space between grid items */
+}
+
+    /* First object and second object in each row share 50% */
+    .layout-2 > div:nth-child(2n - 1),
+    .layout-2 > div:nth-child(2n) {
+        grid-column: auto; /* Let the grid decide the column placement */
+    }
+
+
+.layout-2-3 {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* Creates a grid with six equal columns */
+    gap: 10px; /* Space between grid items */
+}
+
+    /* First and second items take up the first and second halves of the first row, spanning 3 columns each */
+    .layout-2-3 > div:nth-child(5n + 1),
+    .layout-2-3 > div:nth-child(5n + 2) {
+        grid-column: span 3;
+    }
+
+    /* Third, fourth, and fifth items each take up 1/3 of the second row, spanning 2 columns */
+    .layout-2-3 > div:nth-child(5n + 3),
+    .layout-2-3 > div:nth-child(5n + 4),
+    .layout-2-3 > div:nth-child(5n + 5) {
+        grid-column: span 2;
+    }
+
+.layout-2_3-1 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Corrected: Creates a grid with three equal columns */
+    gap: 10px; /* Space between grid items */
+}
+
+    /* First item takes up two-thirds of the first row (spanning 2 out of 3 columns) */
+    .layout-2_3-1 > div:nth-child(3n + 1) {
+        grid-column: 1 / span 2;
+    }
+
+    /* Second item takes up the remaining third of the first row (spanning 1 column) */
+    .layout-2_3-1 > div:nth-child(3n + 2) {
+        grid-column: 3 / span 1;
+    }
+
+    /* Third item takes up the entire width of the second row (spanning all 3 columns) */
+    .layout-2_3-1 > div:nth-child(3n + 3) {
+        grid-column: 1 / -1;
+    }
+
+.layout-2_3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Creates a grid with three equal columns */
+    gap: 10px; /* Space between grid items */
+}
+    /* First item takes up two-thirds of the first row (spanning 2 out of 3 columns) */
+    .layout-2_3 > div:nth-child(2n + 1) {
+        grid-column: 1 / span 2;
+    }
+    /* Second item takes up the remaining third of the first row (spanning 1 column) */
+    .layout-2_3 > div:nth-child(2n + 2) {
+        grid-column: 3 / span 1;
+    }
+
+.layout-3-1 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Creates a grid with three equal columns */
+    gap: 10px; /* Space between grid items */
+}
+    /* First three items each take up one of the three columns */
+    .layout-3-1 > div:nth-child(4n + 1),
+    .layout-3-1 > div:nth-child(4n + 2),
+    .layout-3-1 > div:nth-child(4n + 3) {
+        grid-column: span 1;
+    }
+    /* Fourth item spans all three columns */
+    .layout-3-1 > div:nth-child(4n + 4) {
+        grid-column: 1 / -1;
+    }
+
+.layout-3-2 {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* Creates a grid with six equal columns */
+    gap: 10px; /* Space between grid items */
+}
+    /* Assuming the pattern is three items in the first row, each taking 1/3 of the space */
+    .layout-3-2 > div:nth-child(5n + 1),
+    .layout-3-2 > div:nth-child(5n + 2),
+    .layout-3-2 > div:nth-child(5n + 3) {
+        grid-column: span 2; /* Each of the first three items spans two columns */
+    }
+    /* The next two items in the sequence (4th and 5th) take up half the row each */
+    .layout-3-2 > div:nth-child(5n + 4),
+    .layout-3-2 > div:nth-child(5n + 5) {
+        grid-column: span 3; /* Fourth item takes the first half */
+    }
+
+.layout-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Creates a grid with three equal columns */
+    gap: 10px; /* Space between grid items */
+}
+    /* Each item takes up one-third of the space in the row */
+    .layout-3 > div {
+        grid-column: span 1; /* Each item spans one column */
+    }

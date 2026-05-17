@@ -1,0 +1,17 @@
+.spinner-container {
+    position: fixed; /* Or 'absolute' if you need it relative to a parent container */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.1); /* Semi-transparent black */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensure it covers other content */
+    pointer-events: none; /* Make it non-clickable */
+}
+
+    .spinner-container img {
+        pointer-events: auto; /* Allow the spinner itself to be clickable if needed */
+    }

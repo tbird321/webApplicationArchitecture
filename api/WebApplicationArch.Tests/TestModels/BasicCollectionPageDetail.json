@@ -1,0 +1,33 @@
+{
+  "collection": {
+    "id": 1,
+    "name": "Test Collection",
+    "description": "A test collection for unit testing",
+    "type": "standard",
+    "websiteId": 1
+  },
+  "pages": [
+    {
+      "id": 1,
+      "name": "Test Page 1",
+      "description": "First test page",
+      "topics": ["Test", "Unit"],
+      "keywords": ["test", "unit"],
+      "websiteId": 1,
+      "sequence": 1,
+      "page_id": 1,
+      "collection_page_id": 1
+    },
+    {
+      "id": 2,
+      "name": "Test Page 2",
+      "description": "Second test page",
+      "topics": ["Test", "Integration"],
+      "keywords": ["test", "integration"],
+      "websiteId": 1,
+      "sequence": 2,
+      "page_id": 2,
+      "collection_page_id": 2
+    }
+  ]
+} 

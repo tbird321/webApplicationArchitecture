@@ -1,0 +1,55 @@
+{
+    "id": 1,
+    "name": "page 1",
+    "description": "page Description 1",
+    "topics": [ "sample Page Topic1" ],
+    "keywords": [ "sample Page Keyword 1", "sample Page Keyword 2" ],
+    "style": "Blue Style",
+    "layout": "Standard",
+    "articles": [
+        {
+            "id": 1,
+            "articleId": "SampleID",
+            "name": "SampleName",
+            "description": "SampleDescription",
+            "topics": [ "sampleArticleTopic1" ],
+            "keywords": [],
+            "memeImagePath": "sampleMemePath",
+            "sequence_no": "1",
+            "articlePath": "page1.html"
+        },
+        {
+            "id": 2,
+            "articleId": "SampleID1",
+            "name": "SampleName",
+            "description": "SampleDescription",
+            "topics": [],
+            "keywords": [],
+            "sequence_no": "2",
+            "memeImagePath": "sampleMemePath1",
+            "articlePath": "page2.html"
+        },
+        {
+            "id": 3,
+            "articleId": "SampleID2",
+            "name": "SampleName",
+            "description": "SampleDescription",
+            "topics": [],
+            "keywords": [ "sampleArticleKeyword1" ],
+            "sequence_no": "3",
+            "memeImagePath": "sampleMemePath2",
+            "articlePath": "page3.html"
+        },
+        {
+            "id": 4,
+            "articleId": "SampleID3",
+            "name": "SampleName",
+            "description": "SampleDescription",
+            "topics": [ "sampleArticleTopic2" ],
+            "keywords": [ "sampleArticleKeyword2" ],
+            "sequence_no": "4",
+            "memeImagePath": "sampleMemePath3",
+            "articlePath": "page4.html"
+        }
+    ]
+}

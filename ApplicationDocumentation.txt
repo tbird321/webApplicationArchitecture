@@ -1,0 +1,106 @@
+How to Setup a Website for a website:
+#1 Create the bucket in s3
+    Create two bucks for the website www.{domainname.com} and {domainname.com}
+#2 Enable static website hosting
+#3 Setup bucket policy
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadForGetBucketObjects",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::www.{domainname.com}/*"
+        }
+    ]
+}
+#4 Setup CORS
+[
+    {
+        "AllowedHeaders": [
+            "Authorization"
+        ],
+        "AllowedMethods": [
+            "GET"
+        ],
+        "AllowedOrigins": [
+            "*"
+        ],
+        "ExposeHeaders": [],
+        "MaxAgeSeconds": 3000
+    }
+]
+#5 Adjust the amplify permissions
+IAM -> Roles -> amplify-baseproject-dev-00353-authRole  -> ajust the policy to allow s3 access
+adjust read_policy_084aa063 
+add the following policy to the role
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"s3:GetObject",
+				"s3:PutObject",
+				"s3:ListBucket"
+			],
+			"Resource": [
+				"arn:aws:s3:::www.{domainname.com}/*",
+				"arn:aws:s3:::www.{domainname.com}"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": "s3:ListBucket",
+			"Resource": "arn:aws:s3:::www.{domainname.com}"
+		}
+	]
+}
+#6 Remember that the actual location of storage is in the amplify bucket for all html files 
+www-websitecontent/public/websites/{domainname.com}/
+    articles/* - Site article content html fragments
+
+    header.html
+    Home.html
+www-websitecontent/public/assets/{domainname.com}
+    /images/* - Site images
+    /themes/* - Site themes
+#6 Remember that when deploying the Build no content need be deployd that is stored in the www-websitecontent bucket 
+
+#7 Create Database Entries and adjust config.json
+    add row to website table that matches the value of the siteName in the config.json this should also match the domain name
+        id=websiteId that is used on the other tables
+    add a row to the page table for each page in the site
+        Name = Home description = Root Page layoutid=1 style=theme websiteId=websiteId
+
+    In the config.json file Change "websiteId": to the websit id in the database matching your new site 
+
+#8 Create Godaddy DNS Entries and Cloud Front Distribution for https 
+    Determine the aws bucket name for the website
+        From the Bucket website endpoint URL - you will need this to configure the cloudfront distribution
+        example: www.{domainname.com}.s3-website-us-west-2.amazonaws.com
+
+        Create a Custom SSL Certificate matching the domain name
+        In the AWS Certificate Manager
+        Request a public certificate
+        Add the domain name www.{domainname.com} and {domainname.com}
+            Use DNS validation
+            Once the certificate is requested you will need to add a CNAME record to the DNS settings in Godaddy
+            This will be used for the cloudfront distribution
+            You can check to see if the certificate is issued by going to the certificate manager and checking the status
+            If the CName record is not added the certificate will not be issued but will be in a Pending Validation state
+            
+        Create a cloudfront distribution
+        Origin Domain Name: www.{domainname.com}.s3-website-us-west-2.amazonaws.com
+			Origin Path: / 
+			Viewer Protocol Policy: Redirect HTTP to HTTPS
+			Alternate Domain Names (CNAMEs): www.{domainname.com}
+			SSL Certificate: Custom SSL Certificate (example: *.domainname.com)
+			Default Root Object: index.html
+			Create Distribution
+            Once the distribution is created you will need to update the DNS settings in Godaddy
+            Add a CNAME record for www.{domainname.com} that points to the cloudfront distribution domain name
+            example: d
+            www.{domainname.com} -> d3j3v7j3v7j3v7j3v7j3v7j3v7j3v7j3j3.cloudfront.net
+            Once the DNS settings are updated the site should be available at https://www.{domainname.com}

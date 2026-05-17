@@ -1,0 +1,15 @@
+.ArticleModal{
+    margin: 50px; 
+    padding: 20px;
+  }
+.imageItem img {
+    width: 100%;
+    overflow: auto;
+    display: block; /* Remove extra space below the image */
+}
+
+.scrollableImageList {
+    overflow: auto; /* Vertical scroll */
+}
+  
+  
