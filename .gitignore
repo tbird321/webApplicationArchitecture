@@ -369,3 +369,6 @@ FodyWeavers.xsd
 /api/WebApplicationArch/security/SiteAuth.json
 /api/WebApplicationArch/userData/
 .claude/
+# AWS SAM build output
+.aws-sam/
+api/WebApplicationArch/.aws-sam/
