@@ -2,6 +2,28 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Transform": "AWS::Serverless-2016-10-31",
   "Description": "An AWS Serverless Application with Page and Article Endpoints This template is partially managed by Amazon.Lambda.Annotations (v1.0.0.0).",
+  "Parameters": {
+    "TokenSecret": {
+      "Type": "String"
+    },
+    "TokenIV": {
+      "Type": "String"
+    }
+  },
+  "Globals": {
+    "Function": {
+      "Environment": {
+        "Variables": {
+          "TOKEN_SECRET": {
+            "Ref": "TokenSecret"
+          },
+          "TOKEN_IV": {
+            "Ref": "TokenIV"
+          }
+        }
+      }
+    }
+  },
   "Resources": {
     "WebArchAPI": {
       "Type": "AWS::Serverless::Api",
