@@ -134,6 +134,7 @@ namespace MySQLConnector
             command.Parameters.AddWithValue("_layoutName", page.layout);
             command.Parameters.AddWithValue("_style", page.style);
             command.Parameters.AddWithValue("_websiteId", page.websiteId);
+            command.Parameters.AddWithValue("_status", page.status ?? "draft");
 
             await command.ExecuteNonQueryAsync();
 

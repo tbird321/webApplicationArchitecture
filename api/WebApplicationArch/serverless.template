@@ -483,7 +483,16 @@
         "MemorySize": 256,
         "Timeout": 30,
         "Policies": [
-          "AWSLambdaBasicExecutionRole"
+          "AWSLambdaBasicExecutionRole",
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "secretsmanager:GetSecretValue",
+                "Resource": "arn:aws:secretsmanager:us-west-2:646797148861:secret:prod/websites/webadmin*"
+              }
+            ]
+          }
         ],
         "Events": {
           "PublishPage": {
@@ -533,7 +542,16 @@
         "MemorySize": 256,
         "Timeout": 30,
         "Policies": [
-          "AWSLambdaBasicExecutionRole"
+          "AWSLambdaBasicExecutionRole",
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "secretsmanager:GetSecretValue",
+                "Resource": "arn:aws:secretsmanager:us-west-2:646797148861:secret:prod/websites/webadmin*"
+              }
+            ]
+          }
         ],
         "Events": {
           "PublishArticle": {
