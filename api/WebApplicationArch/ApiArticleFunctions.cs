@@ -19,6 +19,8 @@ namespace WebApplicationArch
 {
     public class ApiArticleFunctions: ApiBaseFunctions
     {
+        public ApiArticleFunctions() : base() { }
+
         public ApiArticleFunctions(IWebsiteProcessing connectionModel) : base()
         {
 
@@ -158,7 +160,8 @@ namespace WebApplicationArch
                 if (!int.TryParse(request.PathParameters["id"], out int articleId))
                     return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.BadRequest, Body = "Invalid article id", Headers = GetHeaders };
 
-                ArticleDAO dao = new(await ConnectionInfoAsync(GetEnvironment(request)));
+                string environment = GetEnvironment(request);
+                ArticleDAO dao = new(await ConnectionInfoAsync(environment));
                 var article = await dao.GetArticleAsync(articleId);
                 if (article == null)
                     return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.NotFound, Body = "Article not found", Headers = GetHeaders };
@@ -168,8 +171,9 @@ namespace WebApplicationArch
 
                 string bucket = Environment.GetEnvironmentVariable("CONTENT_BUCKET") ?? "www-websitecontent";
                 var s3 = new AmazonS3Storage(bucket, "us-west-2");
+                string s3Folder = await GetArticleS3Folder(article.websiteId, environment);
 
-                using var stream = s3.DownloadFile(article.articlePath, "");
+                using var stream = s3.DownloadFile(article.articlePath, s3Folder);
                 using var reader = new StreamReader(stream);
                 string html = await reader.ReadToEndAsync();
 
@@ -206,23 +210,24 @@ namespace WebApplicationArch
 
                 string bucket = Environment.GetEnvironmentVariable("CONTENT_BUCKET") ?? "www-websitecontent";
                 var s3 = new AmazonS3Storage(bucket, "us-west-2");
+                string s3Folder = await GetArticleS3Folder(article.websiteId, environment);
 
-                string path = article.articlePath;
-                if (string.IsNullOrEmpty(path))
+                string filename = article.articlePath;
+                if (string.IsNullOrEmpty(filename))
                 {
-                    path = $"websites/{article.websiteId}/{article.articleId}.html";
-                    article.articlePath = path;
+                    filename = $"{article.name}.html";
+                    article.articlePath = filename;
                     await dao.UpsertArticle(article);
                 }
 
                 byte[] bytes = Encoding.UTF8.GetBytes(body["htmlContent"]);
                 using var stream = new MemoryStream(bytes);
-                await s3.UploadFile(stream, path, "");
+                await s3.UploadFile(stream, filename, s3Folder);
 
                 return new APIGatewayProxyResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Body = JsonConvert.SerializeObject(new { articlePath = path }),
+                    Body = JsonConvert.SerializeObject(new { articlePath = filename }),
                     Headers = PostHeaders
                 };
             }
@@ -231,6 +236,15 @@ namespace WebApplicationArch
                 context.Logger.LogError($"Error setting article content: {ex.Message}");
                 return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.InternalServerError, Body = $"Error: {ex.Message}", Headers = PostHeaders };
             }
+        }
+
+        private async Task<string> GetArticleS3Folder(int websiteId, string environment)
+        {
+            WebsiteDAO websiteDao = new(await ConnectionInfoAsync(environment));
+            var websites = await websiteDao.GetWebsites();
+            var website = websites.FirstOrDefault(w => w.id == websiteId);
+            string websiteName = website?.name ?? websiteId.ToString();
+            return $"public/websites/{websiteName}/articles";
         }
 
     }

@@ -21,6 +21,14 @@ export async function apiGet(path) {
     return text ? JSON.parse(text) : null;
 }
 
+export async function apiGetText(path) {
+    const url = `${BASE}${path}`;
+    const res = await fetch(url, { method: 'GET', headers: headers() });
+    const text = await res.text();
+    if (!res.ok) throw new Error(`GET ${path} ${res.status}: ${text}`);
+    return text;
+}
+
 export async function apiPost(path, body) {
     const url = `${BASE}${path}`;
     const res = await fetch(url, {

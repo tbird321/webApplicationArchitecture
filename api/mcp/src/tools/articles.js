@@ -1,4 +1,4 @@
-import { apiGet, apiPost, websiteId, websiteIdAsNumber } from '../apiClient.js';
+import { apiGet, apiGetText, apiPost, websiteId, websiteIdAsNumber } from '../apiClient.js';
 
 export const articleTools = [
     {
@@ -90,7 +90,7 @@ export const articleTools = [
             properties: { id: { type: 'number', description: 'Article DB id.' } },
             required: ['id']
         },
-        handler: async (args) => apiGet(`/article/${args.id}/content`)
+        handler: async (args) => apiGetText(`/article/${args.id}/content`)
     },
     {
         name: 'set_article_content',
