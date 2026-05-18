@@ -149,6 +149,12 @@ namespace MySQLConnector
             // Retrieve the new or existing ID
             int newOrExistingId = (int)command.Parameters["_id"].Value;
 
+            // If a status was provided, update it separately (status is not part of the UpsertArticle stored proc)
+            if (!string.IsNullOrEmpty(article.status))
+            {
+                await SetArticleStatus(newOrExistingId, article.status, connection);
+            }
+
             if (shouldCloseConnection)
             {
                 await connection.CloseAsync();
