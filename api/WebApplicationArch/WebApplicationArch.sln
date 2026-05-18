@@ -7,10 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplicationArch", "WebAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MySQLConnector", "..\MySQLConnector\MySQLConnector.csproj", "{BF8D7E37-D1AA-4B8E-8586-369116DBE4DA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MySQLConnectorTest", "..\MySQLConnectorTest\MySQLConnectorTest.csproj", "{541A2A73-8056-41A4-BDE9-85C47CF4BFF8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplicationArch.Tests", "..\WebApplicationArch.Tests\WebApplicationArch.Tests.csproj", "{E6A69F9D-FE0C-430D-8B13-300A6A5C3129}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,14 +21,6 @@ Global
 		{BF8D7E37-D1AA-4B8E-8586-369116DBE4DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF8D7E37-D1AA-4B8E-8586-369116DBE4DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF8D7E37-D1AA-4B8E-8586-369116DBE4DA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{541A2A73-8056-41A4-BDE9-85C47CF4BFF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{541A2A73-8056-41A4-BDE9-85C47CF4BFF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{541A2A73-8056-41A4-BDE9-85C47CF4BFF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{541A2A73-8056-41A4-BDE9-85C47CF4BFF8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E6A69F9D-FE0C-430D-8B13-300A6A5C3129}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E6A69F9D-FE0C-430D-8B13-300A6A5C3129}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E6A69F9D-FE0C-430D-8B13-300A6A5C3129}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E6A69F9D-FE0C-430D-8B13-300A6A5C3129}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
