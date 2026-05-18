@@ -112,15 +112,16 @@ $env:LAMBDA_API_BASE_URL = "https://usmczy4mu1.execute-api.us-west-2.amazonaws.c
 
 **Set WEBSITE_ID to the site you want the agent to manage:**
 
+| Site | URL | WEBSITE_ID |
+|------|-----|------------|
+| Faith In Crisis | ldsfaithincrisis.com | 1 |
+| LDS Doctrines | ldsdoctrines.com | 2 |
+| LDS Apologetics | ldsapologetics.com | 5 |
+
 ```powershell
-# ldsfaithincrisis.com = 1
-[System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '1', 'User')
-
-# ldsdoctrines.com = 2
-[System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '2', 'User')
-
-# ldsapologetics.com = 5
-[System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '5', 'User')
+[System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '1', 'User')  # ldsfaithincrisis.com
+[System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '2', 'User')  # ldsdoctrines.com
+[System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '5', 'User')  # ldsapologetics.com
 ```
 
 **Install dependencies (run once after cloning):**
