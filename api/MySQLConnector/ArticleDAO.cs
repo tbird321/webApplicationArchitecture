@@ -143,17 +143,12 @@ namespace MySQLConnector
             command.Parameters.AddWithValue("_sequence_no", article.sequence_no);
             command.Parameters.AddWithValue("_articleId", article.articleId);
             command.Parameters.AddWithValue("_websiteId", article.websiteId);
+            command.Parameters.AddWithValue("_status", article.status ?? "draft");
 
             await command.ExecuteNonQueryAsync();
 
             // Retrieve the new or existing ID
             int newOrExistingId = (int)command.Parameters["_id"].Value;
-
-            // If a status was provided, update it separately (status is not part of the UpsertArticle stored proc)
-            if (!string.IsNullOrEmpty(article.status))
-            {
-                await SetArticleStatus(newOrExistingId, article.status, connection);
-            }
 
             if (shouldCloseConnection)
             {
