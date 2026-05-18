@@ -14,7 +14,7 @@
 
 .bodyStyle {
     margin-left: 10%;
-    margin-right: 10%;
+    margin-right: 10%;  
 }
 
 .question {
@@ -38,3 +38,4 @@
 .parent-menu-button {
     min-width: unset !important;
 }
+
