@@ -94,6 +94,44 @@ The MCP Lambda is included in the normal backend deploy. You need one additional
 aws cloudformation describe-stacks --stack-name webapplicationarch --profile tbirdcontractinggmailcom --region us-west-2 --query "Stacks[0].Outputs[?OutputKey=='ApiURL'].OutputValue" --output text
 ```
 
+### Configure local MCP server for Claude Code
+
+The repo includes a local stdio MCP server at `api/mcp/src/index.js`. Claude Code reads `.mcp.json` at the repo root and launches it automatically when you open Claude Code from this directory.
+
+**One-time setup — set these as persistent user environment variables:**
+
+```powershell
+# The API key and URL are already deployed — retrieve them from the Lambda if needed:
+$env:MCP_API_KEY        = (aws lambda get-function-configuration --function-name webapplicationarch-McpFunction-GqUxt6nmkPsW --profile Admin --region us-west-2 --query "Environment.Variables.MCP_API_KEY" --output text)
+$env:LAMBDA_API_BASE_URL = "https://usmczy4mu1.execute-api.us-west-2.amazonaws.com/Prod"
+
+# Save permanently
+[System.Environment]::SetEnvironmentVariable('MCP_API_KEY',         $env:MCP_API_KEY,         'User')
+[System.Environment]::SetEnvironmentVariable('LAMBDA_API_BASE_URL', $env:LAMBDA_API_BASE_URL, 'User')
+```
+
+**Set WEBSITE_ID to the site you want the agent to manage:**
+
+```powershell
+# ldsfaithincrisis.com = 1
+[System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '1', 'User')
+
+# ldsdoctrines.com = 2
+[System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '2', 'User')
+
+# ldsapologetics.com = 5
+[System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '5', 'User')
+```
+
+**Install dependencies (run once after cloning):**
+
+```powershell
+cd api/mcp
+npm install
+```
+
+Once env vars are set, open Claude Code from the repo root — the `webcms` MCP tools (search_pages, create_page, publish_page, create_article, etc.) will be available automatically.
+
 ### Configure in Claude Code / Claude Desktop
 
 Add to your `claude_desktop_config.json`:
