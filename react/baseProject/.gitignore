@@ -11,6 +11,13 @@
 # production
 /build
 
+# site config (generated from configs/ at build time)
+/public/config.json
+/public/initialRender.html
+/public/favicon.ico
+/public/headerImage.jpg
+/public/BaseStyles.css
+
 # misc
 .DS_Store
 .env.local

@@ -1,0 +1,40 @@
+{
+  "Site": {
+    "siteName": "yoursite.com",
+    "signUpEnabled": "false",
+    "siteType": "BasicSite",
+    "menuConfigFileName": "sitemenu.json",
+    "headerFileName": "header.html",
+    "themeFileName": "theme.css",
+    "initialPage": "Home",
+    "website": "yoursite.com",
+    "websiteId": 0,
+    "appURL": "https://your-s3-bucket.s3.us-west-2.amazonaws.com/",
+    "analyticsTag": "G-XXXXXXXXXX",
+    "appType": "BasicSite",
+    "galleryHeaderEnabled": false,
+    "appLoggingEnabled": false
+  },
+  "AWS": {
+    "Auth": {
+      "region": "us-west-2",
+      "userPoolId": "us-west-2_XXXXXXXXX",
+      "userPoolWebClientId": "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "identityPoolId": "us-west-2:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    },
+    "Storage": {
+      "AWSS3": {
+        "bucket": "your-s3-bucket",
+        "region": "us-west-2"
+      }
+    },
+    "endpoints": [
+      {
+        "name": "webArchApi",
+        "endpoint": "https://xxxxxxxxxx.execute-api.us-west-2.amazonaws.com/prod",
+        "region": "us-west-2",
+        "custom_header": "Access-Control-Allow-Origin"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "Site": {
+    "siteName": "ldsapologetics.com",
+    "signUpEnabled": "false",
+    "siteType": "BasicSite",
+    "menuConfigFileName": "sitemenu.json",
+    "headerFileName": "header.html",
+    "themeFileName": "theme.css",
+    "initialPage": "Home",
+    "website": "ldsapologetics.com",
+    "websiteId": 5,
+    "appURL": "https://www-websitecontent.s3.us-west-2.amazonaws.com/",
+    "analyticsTag": "G-J6H714HFSM"
+  },
+  "AWS": {
+    "Auth": {
+      "region": "us-west-2",
+      "userPoolId": "us-west-2_KRm2nfNtS",
+      "userPoolWebClientId": "aq13k4vl6ufq2q8bu6vsoki37",
+      "identityPoolId": "us-west-2:751469f6-4e2a-4306-8f2a-318e8dae6638"
+    },
+    "Storage": {
+      "AWSS3": {
+        "bucket": "www-websitecontent",
+        "region": "us-west-2"
+      }
+    },
+    "endpoints": [
+      {
+        "name": "webArchApi",
+        "endpoint": "https://usmczy4mu1.execute-api.us-west-2.amazonaws.com/prod",
+        "region": "us-west-2",
+        "custom_header": "Access-Control-Allow-Origin"
+      }
+    ]
+  }
+}
