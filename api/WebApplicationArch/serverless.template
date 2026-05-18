@@ -14,6 +14,10 @@
     },
     "LambdaApiBaseUrl": {
       "Type": "String"
+    },
+    "ContentBucket": {
+      "Type": "String",
+      "Default": "www-websitecontent"
     }
   },
   "Globals": {
@@ -25,6 +29,9 @@
           },
           "TOKEN_IV": {
             "Ref": "TokenIV"
+          },
+          "CONTENT_BUCKET": {
+            "Ref": "ContentBucket"
           }
         }
       }
@@ -36,7 +43,7 @@
       "Properties": {
         "StageName": "prod",
         "Cors": {
-          "AllowMethods": "'GET,POST,OPTIONS'",
+          "AllowMethods": "'GET,POST,PUT,OPTIONS'",
           "AllowHeaders": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
           "AllowOrigin": "'*'"
         }
@@ -558,6 +565,58 @@
             "Type": "Api",
             "Properties": {
               "Path": "/article/{id}/unpublish",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GetArticleContentFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiArticleFunctions::GetArticleContent",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          "AmazonS3ReadOnlyAccess"
+        ],
+        "Events": {
+          "GetArticleContent": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/article/{id}/content",
+              "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "SetArticleContentFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiArticleFunctions::SetArticleContent",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          "AmazonS3FullAccess"
+        ],
+        "Events": {
+          "SetArticleContent": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/article/{id}/content",
               "Method": "post",
               "RestApiId": {
                 "Ref": "WebArchAPI"

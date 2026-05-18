@@ -6,11 +6,13 @@ using MySQLConnector.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
+using WebApplicationArch.content;
 using WebApplicationArch.model.requests;
 
 namespace WebApplicationArch
@@ -148,6 +150,88 @@ namespace WebApplicationArch
             }
         }
 
+
+        public async Task<APIGatewayProxyResponse> GetArticleContent(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            try
+            {
+                if (!int.TryParse(request.PathParameters["id"], out int articleId))
+                    return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.BadRequest, Body = "Invalid article id", Headers = GetHeaders };
+
+                ArticleDAO dao = new(await ConnectionInfoAsync(GetEnvironment(request)));
+                var article = await dao.GetArticleAsync(articleId);
+                if (article == null)
+                    return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.NotFound, Body = "Article not found", Headers = GetHeaders };
+
+                if (string.IsNullOrEmpty(article.articlePath))
+                    return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.NotFound, Body = "Article has no content path", Headers = GetHeaders };
+
+                string bucket = Environment.GetEnvironmentVariable("CONTENT_BUCKET") ?? "www-websitecontent";
+                var s3 = new AmazonS3Storage(bucket, "us-west-2");
+
+                using var stream = s3.DownloadFile(article.articlePath, "");
+                using var reader = new StreamReader(stream);
+                string html = await reader.ReadToEndAsync();
+
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Body = html,
+                    Headers = new Dictionary<string, string> { { "Content-Type", "text/html" }, { "Access-Control-Allow-Origin", "*" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                context.Logger.LogError($"Error getting article content: {ex.Message}");
+                return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.InternalServerError, Body = $"Error: {ex.Message}", Headers = GetHeaders };
+            }
+        }
+
+        public async Task<APIGatewayProxyResponse> SetArticleContent(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            try
+            {
+                if (!int.TryParse(request.PathParameters["id"], out int articleId))
+                    return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.BadRequest, Body = "Invalid article id", Headers = PostHeaders };
+
+                var body = JsonConvert.DeserializeObject<Dictionary<string, string>>(request.Body);
+                if (body == null || !body.ContainsKey("htmlContent"))
+                    return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.BadRequest, Body = "htmlContent is required", Headers = PostHeaders };
+
+                string environment = GetEnvironment(request);
+                ArticleDAO dao = new(await ConnectionInfoAsync(environment));
+                var article = await dao.GetArticleAsync(articleId);
+                if (article == null)
+                    return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.NotFound, Body = "Article not found", Headers = PostHeaders };
+
+                string bucket = Environment.GetEnvironmentVariable("CONTENT_BUCKET") ?? "www-websitecontent";
+                var s3 = new AmazonS3Storage(bucket, "us-west-2");
+
+                string path = article.articlePath;
+                if (string.IsNullOrEmpty(path))
+                {
+                    path = $"websites/{article.websiteId}/{article.articleId}.html";
+                    article.articlePath = path;
+                    await dao.UpsertArticle(article);
+                }
+
+                byte[] bytes = Encoding.UTF8.GetBytes(body["htmlContent"]);
+                using var stream = new MemoryStream(bytes);
+                await s3.UploadFile(stream, path, "");
+
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Body = JsonConvert.SerializeObject(new { articlePath = path }),
+                    Headers = PostHeaders
+                };
+            }
+            catch (Exception ex)
+            {
+                context.Logger.LogError($"Error setting article content: {ex.Message}");
+                return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.InternalServerError, Body = $"Error: {ex.Message}", Headers = PostHeaders };
+            }
+        }
 
     }
 }

@@ -83,6 +83,29 @@ export const articleTools = [
         })
     },
     {
+        name: 'get_article_content',
+        description: 'Retrieve the full HTML content of an article from S3.',
+        inputSchema: {
+            type: 'object',
+            properties: { id: { type: 'number', description: 'Article DB id.' } },
+            required: ['id']
+        },
+        handler: async (args) => apiGet(`/article/${args.id}/content`)
+    },
+    {
+        name: 'set_article_content',
+        description: 'Write HTML content for an article to S3. If the article has no path yet one is auto-generated. Returns the articlePath.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                id: { type: 'number', description: 'Article DB id.' },
+                htmlContent: { type: 'string', description: 'Full HTML content to store.' }
+            },
+            required: ['id', 'htmlContent']
+        },
+        handler: async (args) => apiPost(`/article/${args.id}/content`, { htmlContent: args.htmlContent })
+    },
+    {
         name: 'publish_article',
         description: 'Set an article status to published.',
         inputSchema: {
