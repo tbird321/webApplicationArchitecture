@@ -2,7 +2,10 @@ import fetch from 'node-fetch';
 
 const BASE = (process.env.LAMBDA_API_BASE_URL || '').replace(/\/$/, '');
 const API_KEY = process.env.MCP_API_KEY;
-const WEBSITE_ID = process.env.WEBSITE_ID;
+
+let _websiteId = '';
+
+export function setWebsiteId(id) { _websiteId = String(id); }
 
 const headers = (extra = {}) => ({
     'Content-Type': 'application/json',
@@ -38,11 +41,9 @@ export async function apiDelete(path) {
     return text ? JSON.parse(text) : null;
 }
 
-export function websiteId() {
-    return WEBSITE_ID;
-}
+export function websiteId() { return _websiteId; }
 
 export function websiteIdAsNumber() {
-    const n = Number(WEBSITE_ID);
-    return Number.isFinite(n) ? n : WEBSITE_ID;
+    const n = Number(_websiteId);
+    return Number.isFinite(n) ? n : _websiteId;
 }

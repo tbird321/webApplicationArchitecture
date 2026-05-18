@@ -64,6 +64,20 @@ if ($LASTEXITCODE -ne 0) {
 $tokenSecret = [System.Guid]::NewGuid().ToString().ToUpper()
 $tokenIV = -join ((65..90) + (97..122) | Get-Random -Count 16 | ForEach-Object { [char]$_ })
 
+$mcpApiKey = $env:MCP_API_KEY
+if ([string]::IsNullOrEmpty($mcpApiKey)) { $mcpApiKey = Read-Host 'Enter MCP_API_KEY' }
+if ([string]::IsNullOrEmpty($mcpApiKey)) {
+    Write-Error 'MCP_API_KEY must be provided.'
+    exit 1
+}
+
+$lambdaApiBaseUrl = $env:LAMBDA_API_BASE_URL
+if ([string]::IsNullOrEmpty($lambdaApiBaseUrl)) { $lambdaApiBaseUrl = Read-Host 'Enter LAMBDA_API_BASE_URL (e.g. https://abc123.execute-api.us-west-2.amazonaws.com/prod)' }
+if ([string]::IsNullOrEmpty($lambdaApiBaseUrl)) {
+    Write-Error 'LAMBDA_API_BASE_URL must be provided.'
+    exit 1
+}
+
 Write-Host 'Generated new token values (hidden).' -ForegroundColor Cyan
 Write-Host ''
 Write-Host 'Deploy settings:' -ForegroundColor Cyan
@@ -111,7 +125,7 @@ try {
     }
 
     Write-Host 'Deploying stack...' -ForegroundColor Green
-    & sam deploy --region $Region --template-file $builtTemplatePath @profileArg --stack-name $StackName --s3-bucket $S3Bucket --capabilities CAPABILITY_IAM --parameter-overrides "TokenSecret=$tokenSecret" "TokenIV=$tokenIV"
+    & sam deploy --region $Region --template-file $builtTemplatePath @profileArg --stack-name $StackName --s3-bucket $S3Bucket --capabilities CAPABILITY_IAM --parameter-overrides "TokenSecret=$tokenSecret" "TokenIV=$tokenIV" "McpApiKey=$mcpApiKey" "LambdaApiBaseUrl=$lambdaApiBaseUrl"
     if ($LASTEXITCODE -ne 0) {
         throw "SAM deploy failed with exit code $LASTEXITCODE."
     }

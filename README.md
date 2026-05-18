@@ -10,6 +10,7 @@ This repository contains a full-stack web application platform with:
 
 - `api/`
   - `WebApplicationArch/` - Lambda backend project, AWS SAM template, and Lambda deployment defaults
+  - `mcp/` - MCP Lambda handler (Node.js, deployed as part of the SAM stack)
   - `MySQLConnector/` - data access layer for MySQL, DAO classes, and models
   - `WebApplicationArch.Tests/` - backend unit and integration tests
 
@@ -17,10 +18,6 @@ This repository contains a full-stack web application platform with:
   - `baseProject/` - React application shell, admin UI, site content runtime, and Amplify integration
   - `reactcomponents/` - reusable React components library
   - `WebTemplates/` - legacy site templates and web configuration assets
-
-- `mcp/`
-  - support tooling for the MCP/agent integration
-  - includes a small Node.js server, API client, and example tool wrappers
 
 - `ApplicationDocumentation.txt` - website hosting setup and S3/CloudFront configuration notes
 - `PLAN.md` - project plan, feature progress, and implementation summary
@@ -75,11 +72,59 @@ The component library is in `react/reactcomponents/`.
 
 ## MCP / agent tools
 
-The `mcp/` folder contains tooling for the MCP server and agent integration.
+The MCP server is deployed as a Lambda function (`McpFunction`) in the same SAM stack as the backend API. It exposes tools for pages, articles, collections, and metadata to any MCP-compatible AI agent (Claude Code, Claude Desktop, etc.).
 
-- `mcp/.env.example` shows required environment variables
-- `mcp/src/index.js` bootstraps the local MCP server
-- `mcp/src/apiClient.js` reads environment variables for backend API access
+### Deploy
+
+The MCP Lambda is included in the normal backend deploy. You need one additional parameter:
+
+- `MCP_API_KEY` — a long random string the agent sends as `x-api-key` to call the MCP endpoint. Generate and persist it once using the helper script, then the deploy scripts pick it up automatically.
+
+```powershell
+# Run once — generates the key and saves it to your user environment permanently
+.\scripts\generate-mcp-api-key.ps1
+
+# Then deploy as normal
+.\scripts\deploy-lambda-with-tokens.ps1 -ProfileName tbirdcontractinggmailcom
+```
+
+### Get the API URL after deploy
+
+```powershell
+aws cloudformation describe-stacks --stack-name webapplicationarch --profile tbirdcontractinggmailcom --region us-west-2 --query "Stacks[0].Outputs[?OutputKey=='ApiURL'].OutputValue" --output text
+```
+
+### Configure in Claude Code / Claude Desktop
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "webcms": {
+      "type": "http",
+      "url": "https://<api-id>.execute-api.us-west-2.amazonaws.com/prod/mcp?websiteId=<your-website-id>",
+      "headers": {
+        "x-api-key": "<your-mcp-api-key>"
+      }
+    }
+  }
+}
+```
+
+- Replace `<api-id>` with the value from the stack output above
+- Replace `<your-website-id>` with the numeric ID of the site you want the agent to manage
+- Replace `<your-mcp-api-key>` with the value you set for `MCP_API_KEY` during deploy
+- The `TOKEN_SECRET` is reused as the endpoint key — no extra secret to manage
+
+### Retrieve current token values (if you need to redeploy without rotating)
+
+```powershell
+$env:TOKEN_SECRET = (aws lambda get-function-configuration --function-name webapplicationarch-GetWebsites-Z5171PfQrHCg --profile tbirdcontractinggmailcom --region us-west-2 --query "Environment.Variables.TOKEN_SECRET" --output text)
+$env:TOKEN_IV = (aws lambda get-function-configuration --function-name webapplicationarch-GetWebsites-Z5171PfQrHCg --profile tbirdcontractinggmailcom --region us-west-2 --query "Environment.Variables.TOKEN_IV" --output text)
+```
+
+Then run `deploy-lambda-no-rotate.ps1`.
 
 ## Local development notes
 

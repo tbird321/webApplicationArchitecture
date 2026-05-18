@@ -1,0 +1,11 @@
+{
+  "name": "webcms-mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

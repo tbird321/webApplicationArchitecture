@@ -8,6 +8,12 @@
     },
     "TokenIV": {
       "Type": "String"
+    },
+    "McpApiKey": {
+      "Type": "String"
+    },
+    "LambdaApiBaseUrl": {
+      "Type": "String"
     }
   },
   "Globals": {
@@ -552,6 +558,44 @@
             "Type": "Api",
             "Properties": {
               "Path": "/article/{id}/unpublish",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "McpFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "src/lambda.handler",
+        "Runtime": "nodejs20.x",
+        "CodeUri": "../mcp",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "Environment": {
+          "Variables": {
+            "ENDPOINT_KEY": {
+              "Ref": "TokenSecret"
+            },
+            "MCP_API_KEY": {
+              "Ref": "McpApiKey"
+            },
+            "LAMBDA_API_BASE_URL": {
+              "Ref": "LambdaApiBaseUrl"
+            }
+          }
+        },
+        "Events": {
+          "McpPost": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/mcp",
               "Method": "post",
               "RestApiId": {
                 "Ref": "WebArchAPI"
