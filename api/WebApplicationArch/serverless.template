@@ -40,7 +40,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetPageById",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -65,7 +65,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetPageByName",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -90,7 +90,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::SavePageAndArticles",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -115,7 +115,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::UpsertArticle",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -140,7 +140,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::SearchPages",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -165,7 +165,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::searchCollections",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -190,7 +190,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetArticleById",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -215,7 +215,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetTopics",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -240,7 +240,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetKeywords",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -265,7 +265,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetLayouts",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -290,7 +290,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetWebsites",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -315,7 +315,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::SearchArticles",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -340,7 +340,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::UpsertCollection",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -365,7 +365,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::GetCollectionPageAsync",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -390,7 +390,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::AssociatePagesWithCollection",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -415,7 +415,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::DeleteCollection",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -440,7 +440,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::DeletePageFromCollection",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -465,7 +465,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::PublishPage",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -490,7 +490,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::UnpublishPage",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -515,7 +515,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::PublishArticle",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -540,7 +540,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::UnpublishArticle",
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
