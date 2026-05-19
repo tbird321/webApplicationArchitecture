@@ -129,6 +129,49 @@ namespace WebApplicationArch.content
             }
         }
 
+        /// <summary>
+        /// Downloads a file and returns its content stream together with the S3 ETag.
+        /// Use the ETag with UploadFileIfMatch to implement optimistic concurrency control.
+        /// </summary>
+        public async Task<(Stream stream, string etag)> DownloadFileWithETag(string filename, string path)
+        {
+            string key = GetS3Filename(filename, path);
+            var response = await amazonClient.GetObjectAsync(new GetObjectRequest
+            {
+                BucketName = BucketName,
+                Key = key
+            });
+            return (response.ResponseStream, response.ETag);
+        }
+
+        /// <summary>
+        /// Uploads a file only if the object's current ETag matches the provided value.
+        /// Returns true on success, false if the ETag has changed (another writer beat us).
+        /// Callers should retry the full read-modify-write cycle on false.
+        /// </summary>
+        public async Task<bool> UploadFileIfMatch(Stream filestream, string filename, string path, string etag)
+        {
+            string key = GetS3Filename(filename, path);
+            try
+            {
+                var request = new PutObjectRequest
+                {
+                    InputStream = filestream,
+                    BucketName = BucketName,
+                    Key = key
+                };
+                request.Headers["If-Match"] = etag;
+                await amazonClient.PutObjectAsync(request);
+                return true;
+            }
+            catch (AmazonS3Exception ex) when (
+                ex.StatusCode == System.Net.HttpStatusCode.PreconditionFailed ||
+                ex.ErrorCode == "PreconditionFailed")
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> UploadFile(Stream filestream, string filename, string path)
         {
             string s3Filename = GetS3Filename(filename, path);

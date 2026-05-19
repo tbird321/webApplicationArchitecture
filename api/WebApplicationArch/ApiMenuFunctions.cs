@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WebApplicationArch.content;
 
@@ -18,6 +19,11 @@ namespace WebApplicationArch
     public class ApiMenuFunctions : ApiBaseFunctions
     {
         private const string MENU_FILENAME = "sitemenu.json";
+        private const int MAX_RETRIES = 5;
+
+        // Prevents concurrent menu writes within the same Lambda instance.
+        // ETag optimistic locking (UploadFileIfMatch) covers concurrent Lambda instances.
+        private static readonly SemaphoreSlim _menuLock = new SemaphoreSlim(1, 1);
 
         public ApiMenuFunctions() : base() { }
 
@@ -43,6 +49,45 @@ namespace WebApplicationArch
 
         private static int NextId(List<JObject> items)
             => items.Count == 0 ? 1 : items.Max(i => i["id"]?.Value<int>() ?? 0) + 1;
+
+        /// <summary>
+        /// Reads the menu, applies a mutation function, and writes back using ETag optimistic
+        /// locking. Retries up to MAX_RETRIES times if a concurrent write is detected.
+        /// The SemaphoreSlim prevents concurrent calls within the same Lambda instance.
+        /// </summary>
+        private async Task<T> WithMenuLock<T>(
+            AmazonS3Storage s3, string folder,
+            Func<List<JObject>, (List<JObject> updatedItems, T result)> mutate)
+        {
+            await _menuLock.WaitAsync();
+            try
+            {
+                for (int attempt = 0; attempt < MAX_RETRIES; attempt++)
+                {
+                    var (stream, etag) = await s3.DownloadFileWithETag(MENU_FILENAME, folder);
+                    string json;
+                    using (var reader = new StreamReader(stream))
+                        json = await reader.ReadToEndAsync();
+
+                    var items = ParseMenuItems(json);
+                    var (updatedItems, result) = mutate(items);
+
+                    byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(updatedItems));
+                    using var writeStream = new MemoryStream(bytes);
+                    bool written = await s3.UploadFileIfMatch(writeStream, MENU_FILENAME, folder, etag);
+
+                    if (written) return result;
+
+                    // Another Lambda instance wrote concurrently — back off and retry
+                    await Task.Delay(50 * (attempt + 1));
+                }
+                throw new Exception($"Menu write failed after {MAX_RETRIES} retries due to concurrent modifications.");
+            }
+            finally
+            {
+                _menuLock.Release();
+            }
+        }
 
         // GET /menu/{websiteId}
         public async Task<APIGatewayProxyResponse> GetMenu(APIGatewayProxyRequest request, ILambdaContext context)
@@ -87,33 +132,29 @@ namespace WebApplicationArch
                 string environment = GetEnvironment(request);
                 var (s3, folder) = await GetS3(websiteId, environment);
 
-                using var readStream = s3.DownloadFile(MENU_FILENAME, folder);
-                using var reader = new StreamReader(readStream);
-                var items = ParseMenuItems(await reader.ReadToEndAsync());
-
                 int parentId = Convert.ToInt32(body["parentId"]);
                 string itemTitle = body["itemTitle"].ToString();
                 bool hasPageId = body.ContainsKey("pageId") && body["pageId"] != null;
                 int? pageId = hasPageId ? (int?)Convert.ToInt32(body["pageId"]) : null;
-                string pageName = body.ContainsKey("pageName") ? body["pageName"]?.ToString() : null;
+                string? pageName = body.ContainsKey("pageName") ? body["pageName"]?.ToString() : null;
 
-                var newItem = new JObject
+                var result = await WithMenuLock(s3, folder, items =>
                 {
-                    ["id"] = NextId(items),
-                    ["parent"] = parentId,
-                    ["droppable"] = !hasPageId,
-                    ["text"] = itemTitle
-                };
-                if (pageId.HasValue) newItem["pageId"] = pageId.Value;
-                if (!string.IsNullOrEmpty(pageName)) newItem["pageName"] = pageName;
+                    var newItem = new JObject
+                    {
+                        ["id"] = NextId(items),
+                        ["parent"] = parentId,
+                        ["droppable"] = !hasPageId,
+                        ["text"] = itemTitle
+                    };
+                    if (pageId.HasValue) newItem["pageId"] = pageId.Value;
+                    if (!string.IsNullOrEmpty(pageName)) newItem["pageName"] = pageName;
 
-                items.Add(newItem);
+                    items.Add(newItem);
+                    return (items, new { success = true, addedItem = newItem, totalItems = items.Count });
+                });
 
-                byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(items));
-                using var writeStream = new MemoryStream(bytes);
-                await s3.UploadFile(writeStream, MENU_FILENAME, folder);
-
-                return Ok(JsonConvert.SerializeObject(new { success = true, addedItem = newItem, totalItems = items.Count }));
+                return Ok(JsonConvert.SerializeObject(result));
             }
             catch (Exception ex)
             {
@@ -139,27 +180,29 @@ namespace WebApplicationArch
                 string environment = GetEnvironment(request);
                 var (s3, folder) = await GetS3(websiteId, environment);
 
-                using var readStream = s3.DownloadFile(MENU_FILENAME, folder);
-                using var reader = new StreamReader(readStream);
-                var items = ParseMenuItems(await reader.ReadToEndAsync());
+                var result = await WithMenuLock(s3, folder, items =>
+                {
+                    var item = items.FirstOrDefault(i => i["id"]?.Value<int>() == itemId);
+                    if (item == null)
+                        throw new KeyNotFoundException($"Menu item {itemId} not found");
 
-                var item = items.FirstOrDefault(i => i["id"]?.Value<int>() == itemId);
-                if (item == null) return NotFound($"Menu item {itemId} not found");
+                    if (body.ContainsKey("itemTitle") && body["itemTitle"] != null)
+                        item["text"] = body["itemTitle"].ToString();
+                    if (body.ContainsKey("pageId") && body["pageId"] != null)
+                        item["pageId"] = Convert.ToInt32(body["pageId"]);
+                    if (body.ContainsKey("pageName") && body["pageName"] != null)
+                        item["pageName"] = body["pageName"].ToString();
+                    if (body.ContainsKey("parentId") && body["parentId"] != null)
+                        item["parent"] = Convert.ToInt32(body["parentId"]);
 
-                if (body.ContainsKey("itemTitle") && body["itemTitle"] != null)
-                    item["text"] = body["itemTitle"].ToString();
-                if (body.ContainsKey("pageId") && body["pageId"] != null)
-                    item["pageId"] = Convert.ToInt32(body["pageId"]);
-                if (body.ContainsKey("pageName") && body["pageName"] != null)
-                    item["pageName"] = body["pageName"].ToString();
-                if (body.ContainsKey("parentId") && body["parentId"] != null)
-                    item["parent"] = Convert.ToInt32(body["parentId"]);
+                    return (items, new { success = true, updatedItem = item });
+                });
 
-                byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(items));
-                using var writeStream = new MemoryStream(bytes);
-                await s3.UploadFile(writeStream, MENU_FILENAME, folder);
-
-                return Ok(JsonConvert.SerializeObject(new { success = true, updatedItem = item }));
+                return Ok(JsonConvert.SerializeObject(result));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -182,35 +225,29 @@ namespace WebApplicationArch
                 string environment = GetEnvironment(request);
                 var (s3, folder) = await GetS3(websiteId, environment);
 
-                using var readStream = s3.DownloadFile(MENU_FILENAME, folder);
-                using var reader = new StreamReader(readStream);
-                var items = ParseMenuItems(await reader.ReadToEndAsync());
-
-                // collect item and all descendants
-                var toDelete = new HashSet<int> { itemId };
-                bool changed = true;
-                while (changed)
+                var result = await WithMenuLock(s3, folder, items =>
                 {
-                    changed = false;
-                    foreach (var i in items)
+                    var toDelete = new HashSet<int> { itemId };
+                    bool changed = true;
+                    while (changed)
                     {
-                        int id = i["id"]?.Value<int>() ?? -1;
-                        int parent = i["parent"]?.Value<int>() ?? -1;
-                        if (!toDelete.Contains(id) && toDelete.Contains(parent))
+                        changed = false;
+                        foreach (var i in items)
                         {
-                            toDelete.Add(id);
-                            changed = true;
+                            int id = i["id"]?.Value<int>() ?? -1;
+                            int parent = i["parent"]?.Value<int>() ?? -1;
+                            if (!toDelete.Contains(id) && toDelete.Contains(parent))
+                            {
+                                toDelete.Add(id);
+                                changed = true;
+                            }
                         }
                     }
-                }
+                    var filtered = items.Where(i => !toDelete.Contains(i["id"]?.Value<int>() ?? -1)).ToList();
+                    return (filtered, new { success = true, deletedIds = toDelete, removedCount = toDelete.Count });
+                });
 
-                var filtered = items.Where(i => !toDelete.Contains(i["id"]?.Value<int>() ?? -1)).ToList();
-
-                byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(filtered));
-                using var writeStream = new MemoryStream(bytes);
-                await s3.UploadFile(writeStream, MENU_FILENAME, folder);
-
-                return Ok(JsonConvert.SerializeObject(new { success = true, deletedIds = toDelete, removedCount = toDelete.Count }));
+                return Ok(JsonConvert.SerializeObject(result));
             }
             catch (Exception ex)
             {
