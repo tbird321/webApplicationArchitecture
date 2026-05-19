@@ -205,6 +205,10 @@ git commit --no-verify
 - `api/WebApplicationArch/serverless.template` — SAM function and API definitions
 - `.pre-commit-config.yaml` — pre-commit hook configuration
 
+## TODO
+
+- **Lock down Lambda API endpoints with `X-Api-Key` validation** — the `/mcp` entry point is protected, but the underlying API endpoints (`/page`, `/article`, `/menu`, etc.) currently accept requests without key validation. `ValidateApiKey()` is already implemented in `ApiBaseFunctions` and wired into the new menu functions. To extend it to all existing handlers, the React admin frontend must first be updated to send `X-Api-Key` on every request — otherwise existing sites will break. See `SECURITYISSUES.md` item #6 for full details.
+
 ## Notes
 
 This README is informational and focused on application structure and deployment. For security-specific guidance, see `SECURITYISSUES.md`.

@@ -681,6 +681,146 @@
           }
         }
       }
+    },
+    "GetMenuFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiMenuFunctions::GetMenu",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          "AmazonS3ReadOnlyAccess",
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "secretsmanager:GetSecretValue",
+                "Resource": "arn:aws:secretsmanager:us-west-2:646797148861:secret:prod/websites/webadmin*"
+              }
+            ]
+          }
+        ],
+        "Events": {
+          "GetMenu": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/menu/{websiteId}",
+              "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "AddMenuItemFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiMenuFunctions::AddMenuItem",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          "AmazonS3FullAccess",
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "secretsmanager:GetSecretValue",
+                "Resource": "arn:aws:secretsmanager:us-west-2:646797148861:secret:prod/websites/webadmin*"
+              }
+            ]
+          }
+        ],
+        "Events": {
+          "AddMenuItem": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/menu/{websiteId}/item",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "UpdateMenuItemFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiMenuFunctions::UpdateMenuItem",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          "AmazonS3FullAccess",
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "secretsmanager:GetSecretValue",
+                "Resource": "arn:aws:secretsmanager:us-west-2:646797148861:secret:prod/websites/webadmin*"
+              }
+            ]
+          }
+        ],
+        "Events": {
+          "UpdateMenuItem": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/menu/{websiteId}/item/{id}",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "DeleteMenuItemFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiMenuFunctions::DeleteMenuItem",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          "AmazonS3FullAccess",
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "secretsmanager:GetSecretValue",
+                "Resource": "arn:aws:secretsmanager:us-west-2:646797148861:secret:prod/websites/webadmin*"
+              }
+            ]
+          }
+        ],
+        "Events": {
+          "DeleteMenuItem": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/menu/{websiteId}/item/{id}",
+              "Method": "delete",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "Outputs": {

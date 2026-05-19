@@ -12,7 +12,15 @@ const useConfig = () => {
                 const response = await fetch('/config.json');
                 const newConfig = await response.json();
                 if (!Amplify.configure.done) {
-                    await Amplify.configure(newConfig.AWS);
+                    const awsConfig = { ...newConfig.AWS };
+                    if (newConfig.api_key && awsConfig.endpoints) {
+                        const apiKey = newConfig.api_key;
+                        awsConfig.endpoints = awsConfig.endpoints.map(ep => ({
+                            ...ep,
+                            custom_header: async () => ({ 'X-Api-Key': apiKey })
+                        }));
+                    }
+                    await Amplify.configure(awsConfig);
                     setConfig(newConfig);
                 }
                 setConfigLoaded(true);

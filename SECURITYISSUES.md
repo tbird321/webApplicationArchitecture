@@ -134,6 +134,45 @@ Even though `UserSecurity.cs` was updated to use env vars, the old hardcoded val
 
 ---
 
+### 6. Lambda API endpoints are not validating X-Api-Key
+
+**Status:** CODED — awaiting staged deployment (frontend first, then backend)
+
+#### What has been implemented
+
+**Backend — `ValidateApiKey()` in `ApiBaseFunctions`** ✅
+- `api/WebApplicationArch/ApiBaseFunctions.cs` — `ValidateApiKey()` method added. Checks the `X-Api-Key` request header against `MCP_API_KEY` env var. Returns 401 if wrong; passes through if env var is not set (safe for local dev).
+- All four new menu endpoints already call it: `GetMenu`, `AddMenuItem`, `UpdateMenuItem`, `DeleteMenuItem` in `ApiMenuFunctions.cs`.
+- The ~20 existing handlers in `ApiFunctions.cs` and `ApiArticleFunctions.cs` do **not** call it yet — intentional, see deployment plan below.
+
+**Frontend — `useConfig.js` sends `X-Api-Key` on every API call** ✅
+- `react/baseProject/src/hooks/configuration/useConfig.js` — reads `api_key` from `config.json` and injects it as an Amplify `custom_header` function on all endpoints before calling `Amplify.configure()`. Every `API.get`, `API.post`, and `API.del` call will automatically include `X-Api-Key: <value>`.
+- `react/baseProject/configs/config.example.json` — documents the new `api_key` field.
+- Each deployed site's `config.json` (gitignored) needs `"api_key": "<MCP_API_KEY value>"` added before the site is redeployed.
+
+#### Deployment plan (staged — do in order)
+
+**Step 1 — Deploy frontend for each site** (no backend change yet)
+1. Add `"api_key": "<MCP_API_KEY>"` to `config.json` for the site
+2. Build and deploy the React frontend
+3. Verify the site loads and admin UI still works (backend ignores the header — no risk)
+4. Repeat for all sites
+
+**Step 2 — Deploy backend** (only after ALL frontend sites are updated)
+1. Add `var auth = ValidateApiKey(request); if (auth != null) return auth;` to the top of every handler in:
+   - `api/WebApplicationArch/ApiFunctions.cs` (~20 methods)
+   - `api/WebApplicationArch/ApiArticleFunctions.cs` (~8 methods)
+2. Deploy the Lambda stack: `dotnet lambda deploy-serverless --profile Admin`
+3. Verify all sites still work — admin UI now requires the key; MCP server already sends it
+
+**Why this order is safe:**
+- Frontend sends key → backend ignores it → ✅ nothing breaks
+- Frontend sends key → backend validates it → ✅ works correctly
+- Frontend missing key → backend ignores it → ✅ nothing breaks (Step 1 window)
+- Frontend missing key → backend validates it → ❌ 401 (Step 2 must not happen until all frontends are updated)
+
+---
+
 ### 5. UserData.json — SHA-1 password hashing
 
 **Status:** LOW RISK (file is gitignored, may be unused)

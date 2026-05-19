@@ -3,6 +3,7 @@ using MySQLConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MySQLConnector.Models;
@@ -19,6 +20,30 @@ namespace WebApplicationArch
 
         private static Dictionary<string, ConnectionModel> connectionOptions = new Dictionary<string, ConnectionModel>();
         private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+
+        /// <summary>
+        /// Returns a 401 response if the X-Api-Key header does not match MCP_API_KEY,
+        /// or null if the request is authorized. Call at the top of every handler.
+        /// </summary>
+        protected APIGatewayProxyResponse? ValidateApiKey(APIGatewayProxyRequest request)
+        {
+            string? expected = Environment.GetEnvironmentVariable("MCP_API_KEY");
+            if (string.IsNullOrEmpty(expected)) return null; // not configured — allow through
+
+            request.Headers.TryGetValue("X-Api-Key", out string? provided);
+            if (string.IsNullOrEmpty(provided))
+                request.Headers.TryGetValue("x-api-key", out provided);
+
+            if (provided != expected)
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.Unauthorized,
+                    Body = "Unauthorized",
+                    Headers = new Dictionary<string, string> { { "Content-Type", "application/json" }, { "Access-Control-Allow-Origin", "*" } }
+                };
+
+            return null;
+        }
 
         public string GetEnvironment(APIGatewayProxyRequest request)
         {
