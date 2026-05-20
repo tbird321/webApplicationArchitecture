@@ -236,14 +236,27 @@ Ensure `.claude/settings.json` allow list includes:
 - /blog-revelation-and-dc132 → POL-6 D&C 132
 - /happiness-letter → POL-7
 
-### ▶ RESUME HERE — Next — Book of Abraham / JST / D&C (13 pages, parentId:7)
-- BOA-1: Book-of-Abraham-Part1 (parentId:7)
-- BOA-2: Book-of-Abraham-Part2 (parentId:7)
-- BOA-3: Word-of-Wisdom-Response (parentId:7)
-- BOA-4: DC-Changes-Response (parentId:7)
-- BOA-5: Kinderhook-Plates-Response (parentId:7)
-- BOA-6: Joseph-Smith-Translations-Response (parentId:7)
-- BOA-7: Temple-Endowment-Masonry-Response (parentId:7)
+### Pages Published So Far (continued)
+| Page | ID | Status |
+|------|----|--------|
+| Book of Abraham Part 1 (BOA-1) | 613 | ✅ published |
+| Book of Abraham Part 2 (BOA-2) | 612 | ✅ published |
+| Word of Wisdom (BOA-3) | 611 | ✅ published |
+| D&C Changes (BOA-4) | 610 | ✅ published |
+| Kinderhook Plates (BOA-5) | 602 | ✅ published |
+| JS Translations (BOA-6) | 605 | ✅ published |
+| Temple/Masonry (BOA-7) | 614 | ✅ published |
+
+### Correct URLs Found (BOA series)
+- /abraham-translation → BOA-1
+- /abraham-text → BOA-2
+- /wow → BOA-3
+- (search required) → BOA-4
+- /kinderhook-plates → BOA-5
+- /translations → BOA-6
+- /temple → BOA-7
+
+### ▶ RESUME HERE — Next — Book of Abraham remaining (6 pages, parentId:7)
 - BOA-8: LDS-Essay-Book-of-Abraham (parentId:7)
 - BOA-9: FAIR-Mormon-BOA-CES-Letter (parentId:7)
 - BOA-10: JST-Problems-Response (parentId:7)
