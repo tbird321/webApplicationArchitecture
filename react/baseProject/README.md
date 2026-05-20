@@ -43,6 +43,13 @@ cp configs/faithInCrisis-BaseStyles.css public/BaseStyles.css
 cp configs/faithInCrisis-favicon.ico public/favicon.ico
 cp configs/faithInCrisis-headerImage.jpg public/headerImage.jpg
 
+### LDS Discussions
+cp configs/ldsdiscussions-Prod.json public/config.json
+cp configs/ldsdiscussions-initialRender.html public/initialRender.html
+cp configs/ldsdiscussions-BaseStyles.css public/BaseStyles.css
+cp configs/ldsdiscussions-favicon.ico public/favicon.ico
+cp configs/ldsdiscussions-headerImage.jpg public/headerImage.jpg
+
 
 ### Then run the Build
 npm run build
@@ -57,6 +64,9 @@ aws s3 sync build/ s3://www.ldsdoctrines.com --exclude "sitemenu.json"
 
 ### Faith In Crisis
 aws s3 sync build/ s3://www.ldsfaithincrisis.com --exclude "sitemenu.json"
+
+### LDS Discussions
+aws s3 sync build/ s3://www.ldsdiscussions.info --exclude "sitemenu.json"
 
 
 ## User Management (AWS Cognito)
