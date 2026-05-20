@@ -85,13 +85,13 @@ The MCP Lambda is included in the normal backend deploy. You need one additional
 .\scripts\generate-mcp-api-key.ps1
 
 # Then deploy as normal
-.\scripts\deploy-lambda-with-tokens.ps1 -ProfileName tbirdcontractinggmailcom
+.\scripts\deploy-lambda-with-tokens.ps1 -ProfileName <your-aws-profile>
 ```
 
 ### Get the API URL after deploy
 
 ```powershell
-aws cloudformation describe-stacks --stack-name webapplicationarch --profile tbirdcontractinggmailcom --region us-west-2 --query "Stacks[0].Outputs[?OutputKey=='ApiURL'].OutputValue" --output text
+aws cloudformation describe-stacks --stack-name webapplicationarch --profile <your-aws-profile> --region us-west-2 --query "Stacks[0].Outputs[?OutputKey=='ApiURL'].OutputValue" --output text
 ```
 
 ### Configure local MCP server for Claude Code
@@ -101,13 +101,18 @@ The repo includes a local stdio MCP server at `api/mcp/src/index.js`. Claude Cod
 **One-time setup — set these as persistent user environment variables:**
 
 ```powershell
-# The API key and URL are already deployed — retrieve them from the Lambda if needed:
-$env:MCP_API_KEY        = (aws lambda get-function-configuration --function-name webapplicationarch-McpFunction-GqUxt6nmkPsW --profile Admin --region us-west-2 --query "Environment.Variables.MCP_API_KEY" --output text)
-$env:LAMBDA_API_BASE_URL = "https://usmczy4mu1.execute-api.us-west-2.amazonaws.com/Prod"
+$profile = '<your-aws-profile>'
 
-# Save permanently
-[System.Environment]::SetEnvironmentVariable('MCP_API_KEY',         $env:MCP_API_KEY,         'User')
-[System.Environment]::SetEnvironmentVariable('LAMBDA_API_BASE_URL', $env:LAMBDA_API_BASE_URL, 'User')
+# Retrieve MCP_API_KEY from the deployed Lambda
+$mcpFn  = (aws cloudformation list-stack-resources --stack-name webapplicationarch --profile $profile --region us-west-2 --query "StackResourceSummaries[?LogicalResourceId=='McpFunction'].PhysicalResourceId" --output text)
+$mcpKey = (aws lambda get-function-configuration --function-name $mcpFn --profile $profile --region us-west-2 --query "Environment.Variables.MCP_API_KEY" --output text)
+[System.Environment]::SetEnvironmentVariable('MCP_API_KEY', $mcpKey, 'User')
+$env:MCP_API_KEY = $mcpKey
+
+# Retrieve the API base URL — fix casing (/Prod -> /prod)
+$url = (aws cloudformation describe-stacks --stack-name webapplicationarch --profile $profile --region us-west-2 --query "Stacks[0].Outputs[?OutputKey=='ApiURL'].OutputValue" --output text).TrimEnd('/') -replace '/Prod$', '/prod'
+[System.Environment]::SetEnvironmentVariable('LAMBDA_API_BASE_URL', $url, 'User')
+$env:LAMBDA_API_BASE_URL = $url
 ```
 
 **Set WEBSITE_ID to the site you want the agent to manage:**
@@ -159,8 +164,10 @@ Add to your `claude_desktop_config.json`:
 ### Retrieve current token values (if you need to redeploy without rotating)
 
 ```powershell
-$env:TOKEN_SECRET = (aws lambda get-function-configuration --function-name webapplicationarch-GetWebsites-Z5171PfQrHCg --profile tbirdcontractinggmailcom --region us-west-2 --query "Environment.Variables.TOKEN_SECRET" --output text)
-$env:TOKEN_IV = (aws lambda get-function-configuration --function-name webapplicationarch-GetWebsites-Z5171PfQrHCg --profile tbirdcontractinggmailcom --region us-west-2 --query "Environment.Variables.TOKEN_IV" --output text)
+$profile = '<your-aws-profile>'
+$fn = (aws cloudformation list-stack-resources --stack-name webapplicationarch --profile $profile --region us-west-2 --query "StackResourceSummaries[?LogicalResourceId=='GetWebsites'].PhysicalResourceId" --output text)
+$env:TOKEN_SECRET = (aws lambda get-function-configuration --function-name $fn --profile $profile --region us-west-2 --query "Environment.Variables.TOKEN_SECRET" --output text)
+$env:TOKEN_IV     = (aws lambda get-function-configuration --function-name $fn --profile $profile --region us-west-2 --query "Environment.Variables.TOKEN_IV" --output text)
 ```
 
 Then run `deploy-lambda-no-rotate.ps1`.

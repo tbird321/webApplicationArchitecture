@@ -100,6 +100,41 @@ Use `margin: 0 0 28px 0` on the last paragraph before a new section to add extra
 
 ---
 
+## MCP Server Setup (run once after cloning)
+
+The `webcms` MCP server is a local Node.js stdio process that Claude Code launches automatically via `.mcp.json`. It calls the deployed Lambda API using environment variables.
+
+**1. Install dependencies:**
+```powershell
+cd api/mcp
+npm install
+```
+
+**2. Set required environment variables (persist permanently):**
+```powershell
+# Set your AWS profile name
+$profile = 'your-aws-profile-name'
+
+# Retrieve MCP_API_KEY from the deployed Lambda (it was set at deploy time)
+$mcpFn  = (aws cloudformation list-stack-resources --stack-name webapplicationarch --profile $profile --region us-west-2 --query "StackResourceSummaries[?LogicalResourceId=='McpFunction'].PhysicalResourceId" --output text)
+$mcpKey = (aws lambda get-function-configuration --function-name $mcpFn --profile $profile --region us-west-2 --query "Environment.Variables.MCP_API_KEY" --output text)
+[System.Environment]::SetEnvironmentVariable('MCP_API_KEY', $mcpKey, 'User')
+$env:MCP_API_KEY = $mcpKey
+
+# Retrieve the API base URL from the stack output — fix casing (/Prod -> /prod)
+$url = (aws cloudformation describe-stacks --stack-name webapplicationarch --profile $profile --region us-west-2 --query "Stacks[0].Outputs[?OutputKey=='ApiURL'].OutputValue" --output text).TrimEnd('/') -replace '/Prod$', '/prod'
+[System.Environment]::SetEnvironmentVariable('LAMBDA_API_BASE_URL', $url, 'User')
+$env:LAMBDA_API_BASE_URL = $url
+
+# Set the site to manage (see table below)
+[System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '2', 'User')
+$env:WEBSITE_ID = '2'
+```
+
+**3. Restart VS Code** — Claude Code reads `.mcp.json` at the repo root and starts the `webcms` server automatically. No further configuration needed.
+
+---
+
 ## MCP Server
 
 The `webcms` MCP server manages content for multiple sites. The active site is controlled by `WEBSITE_ID`:

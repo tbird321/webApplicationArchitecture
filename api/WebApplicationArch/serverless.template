@@ -827,7 +827,7 @@
     "ApiURL": {
       "Description": "API endpoint URL for Prod environment",
       "Value": {
-        "Fn::Sub": "https://${WebArchAPI}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+        "Fn::Sub": "https://${WebArchAPI}.execute-api.${AWS::Region}.amazonaws.com/prod"
       }
     }
   }
