@@ -66,7 +66,7 @@ aws s3 sync build/ s3://www.ldsdoctrines.com --exclude "sitemenu.json" --profile
 aws s3 sync build/ s3://www.ldsfaithincrisis.com --exclude "sitemenu.json" --profile tbird321
 
 ### LDS Discussions
-aws s3 sync build/ s3://www.ldsdiscussions.info --exclude "sitemenu.json" --profile tbird321
+aws s3 sync build/ s3://www.ldsdiscussions.info --exclude "sitemenu.json" --profile tbirdcontractinggmailcom
 
 
 ## User Management (AWS Cognito)
