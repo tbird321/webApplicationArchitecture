@@ -166,10 +166,25 @@ Church History
 
 ## CURRENT STATUS (last updated 2026-05-20)
 
-### CRITICAL: ldsdiscussions.com BLOCKS WebFetch from agents
-All agents that try to WebFetch ldsdiscussions.com will hang for ~7 hours then timeout.
-**Fix:** Remove WebFetch of ldsdiscussions.com from agent prompts entirely.
-Agents should write from training knowledge + only fetch FAIR/Interpreter/BYU sources.
+### ⚠️ CRITICAL: ldsdiscussions.com BLOCKS WebFetch from agents
+All agents that try to `WebFetch https://www.ldsdiscussions.com/*` will hang for ~7 hours then timeout with "Stream idle timeout". This happened to every single agent in the BOM-10 through BS-7 batch (11 pages, all failed). The site appears to rate-limit or block non-browser HTTP requests after a few successful fetches.
+
+**What worked:** The first 9 BOM pages succeeded because those agents fetched ldsdiscussions.com early in the session before the block kicked in.
+
+**What failed:** All subsequent agents that tried to fetch ldsdiscussions.com timed out — even after retries with different models and smaller prompts.
+
+**Fix — MANDATORY for all future agents:**
+- Do NOT use `WebFetch https://www.ldsdiscussions.com/*` directly in agent prompts
+- Instead use the `fetch_source_page` MCP tool (mcp__webcms__fetch_source_page)
+- This tool queues agents through a semaphore with a 4-second delay between requests
+- Agents may wait their turn — that is expected and correct behaviour
+- Agents may still use WebFetch freely for: FAIR Mormon, Interpreter Foundation, BYU Studies, Book of Mormon Central, churchofjesuschrist.org — those are not blocked
+
+**Agent prompt pattern:**
+```
+To read the source argument: call mcp__webcms__fetch_source_page with url="https://www.ldsdiscussions.com/[page]"
+For apologetic sources: use WebSearch + WebFetch normally
+```
 
 ### Pages Published So Far
 | Page | ID | Status |

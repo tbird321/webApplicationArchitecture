@@ -8,10 +8,11 @@ import { navigationTools } from './tools/navigation.js';
 import { collectionTools } from './tools/collections.js';
 import { metadataTools } from './tools/metadata.js';
 import { compositeTools } from './tools/composite.js';
+import { sourceFetchTools } from './tools/sourceFetch.js';
 
 setWebsiteId(process.env.WEBSITE_ID || '');
 
-const allTools = [...compositeTools, ...pageTools, ...articleTools, ...navigationTools, ...collectionTools, ...metadataTools];
+const allTools = [...compositeTools, ...sourceFetchTools, ...pageTools, ...articleTools, ...navigationTools, ...collectionTools, ...metadataTools];
 const toolMap = new Map(allTools.map(t => [t.name, t]));
 
 const server = new Server(
