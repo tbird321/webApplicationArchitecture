@@ -1,6 +1,7 @@
 {
   "Site": {
     "siteName": "ldsfaithincrisis.com",
+    "siteTitle": "LDS Faith In Crisis",
     "signUpEnabled": "false",
     "siteType": "BasicSite",
     "menuConfigFileName": "sitemenu.json",

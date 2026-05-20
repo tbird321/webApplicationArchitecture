@@ -1,6 +1,7 @@
 {
   "Site": {
     "siteName": "ldsdiscussions.info",
+    "siteTitle": "LDS Discussions — Done the Right Way",
     "signUpEnabled": "false",
     "siteType": "BasicSite",
     "menuConfigFileName": "sitemenu.json",

@@ -1,6 +1,7 @@
 {
   "Site": {
     "siteName": "ldsapologetics.com",
+    "siteTitle": "LDS Apologetics",
     "signUpEnabled": "false",
     "siteType": "BasicSite",
     "menuConfigFileName": "sitemenu.json",

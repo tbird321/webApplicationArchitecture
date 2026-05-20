@@ -167,24 +167,17 @@ Church History
 ## CURRENT STATUS (last updated 2026-05-20)
 
 ### ⚠️ CRITICAL: ldsdiscussions.com BLOCKS WebFetch from agents
-All agents that try to `WebFetch https://www.ldsdiscussions.com/*` will hang for ~7 hours then timeout with "Stream idle timeout". This happened to every single agent in the BOM-10 through BS-7 batch (11 pages, all failed). The site appears to rate-limit or block non-browser HTTP requests after a few successful fetches.
+Use `mcp__webcms__fetch_source_page` for all ldsdiscussions.com URLs. WebFetch for all other sources (FAIR, Interpreter, BYU Studies, etc.) works fine.
 
-**What worked:** The first 9 BOM pages succeeded because those agents fetched ldsdiscussions.com early in the session before the block kicked in.
+### ⚠️ KNOWN ISSUE: create_page_with_article 500 errors
+The first failed batch (permissions-blocked) left orphaned stub pages in the DB. If `create_page_with_article` returns a 500 error, agents should fall back to individual tools: `create_article` → `set_article_content` → `create_page` → `update_page` → `publish_article` → `publish_page`. This pattern worked reliably.
 
-**What failed:** All subsequent agents that tried to fetch ldsdiscussions.com timed out — even after retries with different models and smaller prompts.
-
-**Fix — MANDATORY for all future agents:**
-- Do NOT use `WebFetch https://www.ldsdiscussions.com/*` directly in agent prompts
-- Instead use the `fetch_source_page` MCP tool (mcp__webcms__fetch_source_page)
-- This tool queues agents through a semaphore with a 4-second delay between requests
-- Agents may wait their turn — that is expected and correct behaviour
-- Agents may still use WebFetch freely for: FAIR Mormon, Interpreter Foundation, BYU Studies, Book of Mormon Central, churchofjesuschrist.org — those are not blocked
-
-**Agent prompt pattern:**
-```
-To read the source argument: call mcp__webcms__fetch_source_page with url="https://www.ldsdiscussions.com/[page]"
-For apologetic sources: use WebSearch + WebFetch normally
-```
+### ⚠️ PERMISSIONS REQUIRED
+Ensure `.claude/settings.json` allow list includes:
+- `mcp__webcms__fetch_source_page`
+- `mcp__webcms__create_page_with_article`
+- `WebSearch`
+- `WebFetch`
 
 ### Pages Published So Far
 | Page | ID | Status |
@@ -199,6 +192,17 @@ For apologetic sources: use WebSearch + WebFetch normally
 | Anachronisms | 522 | ✅ published |
 | Tight vs Loose | 521 | ✅ published |
 | BOM Authorship | 510 | ✅ published |
+| LDS Essay Translation (BOM-10) | 536 | ✅ published |
+| LDS Essay DNA (BOM-11) | 557 | ✅ published |
+| BOM Geography (BOM-12) | 552 | ✅ published |
+| Faith Promoting Stories (BOM-13) | 574 | ✅ published |
+| Adam and Eve / BOM (BS-1) | 580 | ✅ published |
+| Global Flood (BS-2) | 572 | ✅ published |
+| Tower of Babel (BS-3) | 553 | ✅ published |
+| KJV and BOM (BS-4) | 578 | ✅ published |
+| Sermon on the Mount (BS-5) | 586 | ✅ published |
+| Long Ending of Mark (BS-6) | 577 | ✅ published |
+| Deutero-Isaiah (BS-7) | 583 | ✅ published |
 
 ### Menu IDs
 | Section | ID |
@@ -212,18 +216,40 @@ For apologetic sources: use WebSearch + WebFetch normally
 | Book of Abraham / JST / D&C | 7 |
 | Church History | 8 |
 
-### Next — spawn WITHOUT ldsdiscussions.com WebFetch:
-- BOM-10: LDS-Essay-Translation-Response (parentId:4)
-- BOM-11: LDS-Essay-DNA-Response (parentId:4)
-- BOM-12: BOM-Geography-Response (parentId:4)
-- BOM-13: Faith-Promoting-Stories-Response (parentId:4)
-- BS-1: Adam-Eve-BOM-Response (parentId:5)
-- BS-2: Global-Flood-Response (parentId:5)
-- BS-3: Tower-Babel-Response (parentId:5)
-- BS-4: KJV-BOM-Response (parentId:5)
-- BS-5: Sermon-Mount-Response (parentId:5)
-- BS-6: Long-Ending-Mark-Response (parentId:5)
-- BS-7: Deutero-Isaiah-Response (parentId:5)
+### Pages Published So Far (continued)
+| Page | ID | Status |
+|------|----|--------|
+| Polygamy Part 1 (POL-1) | 599 | ✅ published |
+| Polygamy Part 2 (POL-2) | 600 | ✅ published |
+| Polygamy Part 3 (POL-3) | 592 | ✅ published |
+| LDS Essay Polygamy Kirtland/Nauvoo (POL-4) | 595 | ✅ published |
+| LDS Essay Polygamy Utah (POL-5) | 598 | ✅ published |
+| D&C 132 Revelation (POL-6) | 591 | ✅ published |
+| Happiness Letter (POL-7) | 590 | ✅ published |
+
+### Correct URLs Found (update agent prompts accordingly)
+- /polygamy → POL-1 overview
+- /polygamy-proposals → POL-2 proposals
+- /polygamy-final → POL-3 spiritual wifery
+- /polygamy-nauvoo → POL-4 Kirtland/Nauvoo essay
+- /polygamy-utah → POL-5 Utah essay
+- /blog-revelation-and-dc132 → POL-6 D&C 132
+- /happiness-letter → POL-7
+
+### ▶ RESUME HERE — Next — Book of Abraham / JST / D&C (13 pages, parentId:7)
+- BOA-1: Book-of-Abraham-Part1 (parentId:7)
+- BOA-2: Book-of-Abraham-Part2 (parentId:7)
+- BOA-3: Word-of-Wisdom-Response (parentId:7)
+- BOA-4: DC-Changes-Response (parentId:7)
+- BOA-5: Kinderhook-Plates-Response (parentId:7)
+- BOA-6: Joseph-Smith-Translations-Response (parentId:7)
+- BOA-7: Temple-Endowment-Masonry-Response (parentId:7)
+- BOA-8: LDS-Essay-Book-of-Abraham (parentId:7)
+- BOA-9: FAIR-Mormon-BOA-CES-Letter (parentId:7)
+- BOA-10: JST-Problems-Response (parentId:7)
+- BOA-11: Saints-Standard-Truth-Review (parentId:7)
+- BOA-12: Masonry-Temple-Video-Response (parentId:7)
+- BOA-13: Cannot-Read-Sealed-Book (parentId:7)
 
 ---
 

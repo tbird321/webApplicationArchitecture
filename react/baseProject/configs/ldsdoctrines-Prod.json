@@ -1,6 +1,7 @@
 {
   "Site": {
     "siteName": "ldsdoctrines.com",
+    "siteTitle": "LDS Doctrines",
     "signUpEnabled": "false",
     "siteType": "BasicSite",
     "menuConfigFileName": "sitemenu.json",
