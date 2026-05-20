@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useAppStateContext } from '../hooks/appState/useAppStateContext';
 import PageContainer from './content/PageContainer';
 import UserStatus from './UserStatus';
@@ -15,6 +15,7 @@ function SiteContainer({ onPageNameChange, pageName, articleName, config }) {
     const [images, setImages] = useState([]);
     const [initialHtml, setInitialHtml] = useState('<div></div>');
     const [analyticsInit, setAnalyticsInit] = useState(false);
+    const skipPageNameEffect = useRef(false);
     useEffect(() => {
         const fetchInitialHtml = async () => {
             try {
@@ -38,6 +39,10 @@ function SiteContainer({ onPageNameChange, pageName, articleName, config }) {
     }, []);
 
     useEffect(() => {
+        if (skipPageNameEffect.current) {
+            skipPageNameEffect.current = false;
+            return;
+        }
         const fetchPageModel = async () => {
             if (pageName) {
                 try {
@@ -114,6 +119,7 @@ function SiteContainer({ onPageNameChange, pageName, articleName, config }) {
                 });
             } else if (page.pageId) {
                 const tempPageModel = await DatabaseProcessing.getPageById(page.pageId, config?.Site?.websiteId);
+                skipPageNameEffect.current = true;
                 setPageModel(tempPageModel);
                 onPageNameChange(tempPageModel.name);
                 if (!analyticsInit && config?.Site?.analyticsTag) {
