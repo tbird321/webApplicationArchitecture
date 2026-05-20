@@ -10,7 +10,7 @@
     "website": "ldsdiscussions.info",
     "websiteId": 6,
     "appURL": "https://www-websitecontent.s3.us-west-2.amazonaws.com/",
-    "analyticsTag": ""
+    "analyticsTag": "G-XXXXXXXXXX"
   },
   "AWS": {
     "Auth": {

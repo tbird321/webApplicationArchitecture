@@ -20,7 +20,7 @@ function SiteContainer({ onPageNameChange, pageName, articleName, config }) {
             try {
                 const response = await fetch('/initialRender.html');
                 setInitialHtml(await response.text());
-                if (!analyticsInit) {
+                if (!analyticsInit && config?.Site?.analyticsTag) {
                     ReactGA.initialize(config?.Site?.analyticsTag);
                     setAnalyticsInit(true);
                 }
@@ -103,7 +103,7 @@ function SiteContainer({ onPageNameChange, pageName, articleName, config }) {
         try {
             if (page == null) {
                 onPageNameChange('Home');
-                if (!analyticsInit) {
+                if (!analyticsInit && config?.Site?.analyticsTag) {
                     ReactGA.initialize(config?.Site?.analyticsTag);
                     setAnalyticsInit(true);
                 }
@@ -116,7 +116,7 @@ function SiteContainer({ onPageNameChange, pageName, articleName, config }) {
                 const tempPageModel = await DatabaseProcessing.getPageById(page.pageId, config?.Site?.websiteId);
                 setPageModel(tempPageModel);
                 onPageNameChange(tempPageModel.name);
-                if (!analyticsInit) {
+                if (!analyticsInit && config?.Site?.analyticsTag) {
                     ReactGA.initialize(config?.Site?.analyticsTag);
                     setAnalyticsInit(true);
                 }
@@ -126,7 +126,7 @@ function SiteContainer({ onPageNameChange, pageName, articleName, config }) {
                     title: tempPageModel.name,
                 });
             } else {
-                if (!analyticsInit) {
+                if (!analyticsInit && config?.Site?.analyticsTag) {
                     ReactGA.initialize(config?.Site?.analyticsTag);
                     setAnalyticsInit(true);
                 }

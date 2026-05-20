@@ -57,16 +57,16 @@ npm run build
 ### Then Sync the build folder to the S3 bucket
 
 ### LDS Apologetics
-aws s3 sync build/ s3://www.ldsapologetics.com --exclude "sitemenu.json"
+aws s3 sync build/ s3://www.ldsapologetics.com --exclude "sitemenu.json" --profile tbird321
 
 ### LDS Doctrines
-aws s3 sync build/ s3://www.ldsdoctrines.com --exclude "sitemenu.json"
+aws s3 sync build/ s3://www.ldsdoctrines.com --exclude "sitemenu.json" --profile tbird321
 
 ### Faith In Crisis
-aws s3 sync build/ s3://www.ldsfaithincrisis.com --exclude "sitemenu.json"
+aws s3 sync build/ s3://www.ldsfaithincrisis.com --exclude "sitemenu.json" --profile tbird321
 
 ### LDS Discussions
-aws s3 sync build/ s3://www.ldsdiscussions.info --exclude "sitemenu.json"
+aws s3 sync build/ s3://www.ldsdiscussions.info --exclude "sitemenu.json" --profile tbird321
 
 
 ## User Management (AWS Cognito)
@@ -124,6 +124,53 @@ The local public/sitemenu.json is only used for local development.
 5. Add configs/{siteName}-headerImage.jpg (binary - provide the actual image)
 6. Add cp commands to README under "copy the proper configuration"
 7. Add aws s3 sync command to README under "Sync the build folder"
+
+## Initial Deploy — S3 Content Files
+
+The `aws s3 sync` only deploys the React app. On a brand new site, these content files in
+`www-websitecontent` must also be created manually before the site will render correctly.
+Missing any of these produces 403/404 errors in the browser console.
+
+### 1. Theme CSS
+```powershell
+aws s3 cp path/to/theme.css s3://www-websitecontent/public/assets/{siteName}/themes/theme.css --profile tbird321 --content-type "text/css"
+```
+Minimal starting point — just sets body font/background. The app loads this as a stylesheet on every page.
+
+### 2. Header image (asset copy — separate from the build headerImage.jpg)
+```powershell
+aws s3 cp configs/{siteName}-headerImage.jpg s3://www-websitecontent/public/assets/{siteName}/images/headerImage.jpg --profile tbird321
+```
+This is what `header.html` references. The `headerImage.jpg` in the build bucket is only used
+as the local fallback — the S3 assets copy is what the live site loads.
+
+### 3. Header HTML
+```powershell
+aws s3 cp path/to/header.html s3://www-websitecontent/public/websites/{siteName}/header.html --profile tbird321 --content-type "text/html"
+```
+Contains the `<img>` tag pointing at the assets headerImage. Minimal starting point:
+```html
+<div style="text-align: center; cursor: pointer;">
+  <img style="display: block; margin-left: auto; margin-right: auto;"
+       src="https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/{siteName}/images/headerImage.jpg"
+       alt="{siteName}" height="120">
+</div>
+```
+
+### 4. Site menu
+```powershell
+aws s3 cp path/to/sitemenu.json s3://www-websitecontent/public/websites/{siteName}/sitemenu.json --profile tbird321 --content-type "application/json"
+```
+Minimal starting point (Home page only — replace pageId with the actual DB id for the Home page):
+```json
+[{"id":1,"parent":0,"droppable":false,"text":"Home","pageId":0,"pageName":"Home"}]
+```
+
+### Check what already exists for a site
+```powershell
+aws s3 ls s3://www-websitecontent/public/websites/{siteName}/ --profile tbird321
+aws s3 ls s3://www-websitecontent/public/assets/{siteName}/ --recursive --profile tbird321
+```
 
 ## AWS Authentication
 Ensure AWS credentials are active before running any aws commands:

@@ -1,64 +1,51 @@
 /* ============================================================
    ldsdiscussions.info — Base Styles
-   Mirrors the clean scholarly layout of ldsdiscussions.com
-   with a faithful LDS blue/gold palette.
+   Clean white academic layout mirroring ldsdiscussions.com
    ============================================================ */
 
-/* --- Page background --- */
 body {
     background-color: #ffffff;
-    color: #1a1f2e;
+    color: #1a1a1a;
 }
 
-/* --- Header --- */
+/* --- Header — no background, let the image show --- */
 .headerContents {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: #1e3a5f;
-    color: #ffffff;
-    padding: 20px 0 10px 0;
-    border-bottom: 4px solid #c8a84b;
+    background-color: #ffffff;
     width: 100%;
+    padding: 0;
 }
 
-.headerContents h1,
-.headerContents h2,
-.headerContents h3,
-.headerContents p {
-    color: #ffffff;
-    margin: 0;
-    font-family: Georgia, 'Times New Roman', serif;
-}
-
-/* --- Navigation --- */
+/* --- Navigation — light gray bar like ldsdiscussions.com --- */
 .menuContents {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: row;
     flex-wrap: wrap;
-    background-color: #162d4a;
+    background-color: #f5f5f5;
     width: 100%;
-    padding: 0;
-    border-bottom: 2px solid #c8a84b;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .parent-menu-button {
     min-width: unset !important;
-    color: #e8e8e8 !important;
+    color: #333333 !important;
     font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 0.92em !important;
+    font-size: 0.9em !important;
     text-transform: none !important;
-    letter-spacing: 0.03em;
-    padding: 10px 14px !important;
+    padding: 10px 16px !important;
     border-radius: 0 !important;
+    font-weight: normal !important;
 }
 
 .parent-menu-button:hover {
-    background-color: #c8a84b !important;
-    color: #1a1f2e !important;
+    background-color: #e8e8e8 !important;
+    color: #1e3a5f !important;
 }
 
 /* --- Body / content area --- */
@@ -66,11 +53,10 @@ body {
     margin-left: 8%;
     margin-right: 8%;
     max-width: 960px;
-    margin-top: 0;
     font-size: 1em;
     font-family: Georgia, 'Times New Roman', serif;
     line-height: 1.75;
-    color: #1a1f2e;
+    color: #1a1a1a;
 }
 
 /* --- Main content wrapper --- */
@@ -83,12 +69,9 @@ body {
 .question {
     font-weight: bold;
     font-size: 1.4em;
-    text-align: center;
-    padding-bottom: 20px;
-    color: #1e3a5f;
+    padding-bottom: 16px;
+    color: #1a1a1a;
     font-family: Georgia, 'Times New Roman', serif;
-    border-bottom: 2px solid #c8a84b;
-    margin-bottom: 24px;
 }
 
 /* --- Links --- */
@@ -101,13 +84,13 @@ a:hover {
     color: #c8a84b;
 }
 
-/* --- Blockquotes (ldsdiscussions.com uses them heavily) --- */
+/* --- Blockquotes --- */
 blockquote {
-    border-left: 4px solid #c8a84b;
-    background: #f5f7fa;
+    border-left: 3px solid #c8a84b;
+    background: #fafafa;
     margin: 20px 0;
-    padding: 14px 20px;
-    color: #3a4460;
+    padding: 12px 20px;
+    color: #444444;
     font-style: italic;
     font-size: 0.97em;
 }
@@ -118,7 +101,7 @@ blockquote {
     font-size: 2.5em;
     font-weight: bolder;
     font-family: Georgia, serif;
-    color: #1e3a5f;
+    color: #333333;
     padding: 60px 0;
 }
 
