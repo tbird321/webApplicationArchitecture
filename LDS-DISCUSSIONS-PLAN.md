@@ -256,13 +256,122 @@ Ensure `.claude/settings.json` allow list includes:
 - /translations → BOA-6
 - /temple → BOA-7
 
-### ▶ RESUME HERE — Next — Book of Abraham remaining (6 pages, parentId:7)
-- BOA-8: LDS-Essay-Book-of-Abraham (parentId:7)
-- BOA-9: FAIR-Mormon-BOA-CES-Letter (parentId:7)
-- BOA-10: JST-Problems-Response (parentId:7)
-- BOA-11: Saints-Standard-Truth-Review (parentId:7)
-- BOA-12: Masonry-Temple-Video-Response (parentId:7)
-- BOA-13: Cannot-Read-Sealed-Book (parentId:7)
+### Pages Published So Far (continued)
+| Page | ID | Status |
+|------|----|--------|
+| LDS Essay BOA (BOA-8) | 626 | ✅ published |
+| FAIR/CES Letter BOA (BOA-9) | 621 | ✅ published |
+| JST Problems (BOA-10) | 622 | ✅ published |
+| Saints Standard of Truth (BOA-11) | 623 | ✅ published |
+| Masonry Temple Video (BOA-12) | 619 | ✅ published |
+| Cannot Read Sealed Book (BOA-13) | 625 | ✅ published |
+
+### Church History — COMPLETE (22 pages, parentId:8)
+| Page | ID | Menu ID |
+|------|----|---------|
+| First Vision Overview (CH-1) | 636 | 53 |
+| Priesthood Restoration (CH-2) | 633 | 51 |
+| Race Mormon Scriptures (CH-3) | 642 | 60 |
+| Spiritual Witnesses (CH-4) | 632 | 52 |
+| Church Handles Doubt (CH-5) | 634 | 54 |
+| Backdating Prophecy (CH-6) | 641 | 58 |
+| JS Revelations (CH-7) | 650 | 62 |
+| Revelation After JS (CH-8) | 658 | 68 |
+| Personal Revelation (CH-9) | 635 | 56 |
+| Transfiguration BY (CH-10) | 649 | 61 |
+| Nelson Miracles (CH-11) | 645 | 59 |
+| Apologetics Overview (CH-12) | 638 | 55 |
+| If Joseph Got It Right (CH-13) | 646 | 57 |
+| Final Summary (CH-14) | 654 | 65 |
+| LDS Essay First Vision (CH-15) | 652 | 63 |
+| First Vision Video (CH-16) | 659 | 64 |
+| First Vision Church News (CH-17) | 666 | 70 |
+| LDS Essay Race Priesthood (CH-18) | 663 | 67 |
+| LDS Scriptures Race Today (CH-19) | 662 | 69 |
+| Come Follow Me Dark Skin (CH-20) | 669 | 72 |
+| Priesthood Ban Timeline (CH-21) | 667 | 71 |
+| Skin Doesn't Mean Skin (CH-22) | 656 | 66 |
+
+### ▶ RESUME HERE — Next — Blog (19 pages, parentId:3)
+### Blog — COMPLETE (19 pages)
+| Page | ID | Menu ID |
+|------|----|---------|
+| Please Don't Look Under the Hood (BLOG-1) | 695 | 82 |
+| The Prophet's New Clothes (BLOG-2) | 682 | 76 |
+| Navigating Doubts Through Fear (BLOG-3) | 684 | 79 |
+| Rasband Devotional (BLOG-4) | 681 | 75 |
+| FAIR Mormon Homewreckers (BLOG-5) | 679 | 73 |
+| Rebranding Revelation (BLOG-6) | 694 | 81 |
+| Church LGBT Reversal (BLOG-7) | 685 | 77 |
+| Not Blind Faith Big Faith (BLOG-8) | 698 | 83 |
+| Joseph Smith Now You Know Video (BLOG-9) | 713 | 89 |
+| Ensign Peak Tithing (BLOG-10) | 708 | 88 |
+| Follow the Footnotes (BLOG-11) | 699 | 84 |
+| It's OK To Let Go (BLOG-12) | 692 | 80 |
+| Doubts Not Dangerous (BLOG-13) | 691 | 78 |
+| Thank You Nelson LGBT (BLOG-14) | 707 | 87 |
+| Am I True BYU Idaho (BLOG-15) | 712 | 91 |
+| Favorite Podcasts (BLOG-16) | 693 | 74 |
+| Church Does Not Take Position (BLOG-17) | 703 | 85 |
+| Tad Callister Strawman (BLOG-18) | 704 | 86 |
+| Faith Crisis Report (BLOG-19) | 710 | 90 |
+
+### ✅ ALL PAGES COMPLETE — Full Build Done
+
+| Remaining pages | ID | Status |
+|------|----|--------|
+| Seer Stone Video (BOM-14) | 722 | ✅ published |
+| FAIR Seer Stones (BOM-15) | 720 | ✅ published |
+| Gold Plates Video (BOM-16) | 725 | ✅ published |
+| Overview Project | 723 | ✅ published |
+| Church Historical Topics Summary | 715 | ✅ published |
+| Book of Mormon Study Guide | 718 | ✅ published |
+
+### Menu Reordering — COMPLETE
+All 83 leaf items deleted and re-added in correct ldsdiscussions.com order.
+Total menu items: 95 (12 preserved + 83 leaf items in correct sequence).
+
+- BLOG-1: Please-Dont-Look-Under-Hood (parentId:3)
+- BLOG-2: Prophets-New-Clothes (parentId:3)
+- BLOG-3: Navigating-Doubts-Fear (parentId:3)
+- BLOG-4: Rasband-Doubts-Suicide (parentId:3)
+- BLOG-5: FAIR-Mormon-Homewreckers (parentId:3)
+- BLOG-6: Rebranding-Revelation (parentId:3)
+- BLOG-7: Church-LGBT-Reversal (parentId:3)
+- BLOG-8: Not-Blind-Faith-Big-Faith (parentId:3)
+- ✅ BLOG-9: Joseph-Smith-Now-You-Know (parentId:3) — pageId:713, articleId:814, menuId:89
+- BLOG-10: Ensign-Peak-Tithing (parentId:3)
+- BLOG-11: Follow-The-Footnotes (parentId:3)
+- BLOG-12: Its-OK-To-Let-Go (parentId:3)
+- BLOG-13: Doubts-Not-Dangerous (parentId:3)
+- BLOG-14: Thank-You-Nelson-LGBT (parentId:3)
+- BLOG-15: Am-I-True-BYU-Idaho (parentId:3)
+- BLOG-16: Favorite-Podcasts-Mormonism (parentId:3)
+- BLOG-17: Church-Does-Not-Take-Position (parentId:3)
+- BLOG-18: Tad-Callister-Strawman (parentId:3)
+- BLOG-19: Faith-Crisis-Mormon-Report (parentId:3)
+- CH-1: First-Vision-Overview (parentId:8)
+- CH-2: Priesthood-Restoration-Overview (parentId:8)
+- CH-3: Race-Mormon-Scriptures (parentId:8)
+- CH-4: Spiritual-Witnesses-Testimonies (parentId:8)
+- CH-5: Church-Handles-Doubt (parentId:8)
+- CH-6: Revelation-Backdating-Prophecy (parentId:8)
+- CH-7: Revelation-Joseph-Smith (parentId:8)
+- CH-8: Revelation-After-Joseph-Smith (parentId:8)
+- CH-9: Revelation-Personal (parentId:8)
+- CH-10: Transfiguration-Brigham-Young (parentId:8)
+- CH-11: Nelson-Miracle-Stories (parentId:8)
+- CH-12: Apologetics-Overview (parentId:8)
+- CH-13: If-Joseph-Got-It-Right (parentId:8)
+- CH-14: Final-Summary-Mormonism (parentId:8)
+- CH-15: LDS-Essay-First-Vision (parentId:8)
+- CH-16: First-Vision-Video-Response (parentId:8)
+- CH-17: First-Vision-Church-News (parentId:8)
+- CH-18: LDS-Essay-Race-Priesthood (parentId:8)
+- CH-19: LDS-Scriptures-Race-Today (parentId:8)
+- CH-20: Come-Follow-Me-Curse-Dark-Skin (parentId:8)
+- CH-21: Priesthood-Ban-Timeline (parentId:8)
+- CH-22: Skin-Doesnt-Mean-Skin (parentId:8)
 
 ---
 
