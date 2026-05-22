@@ -4,6 +4,89 @@
 
 The styling below applies **only to ldsdoctrines.com (WEBSITE_ID=2) and ldsapologetics.com (WEBSITE_ID=5)**. Other sites managed by the `webcms` MCP server use different styling — do not apply this guide to them unless explicitly instructed.
 
+---
+
+## CES Letter Site Styling Guide (WEBSITE_ID=8 — cesletter.info only)
+
+Mirrors the visual design of **read.cesletter.org** — white background, red accent, Open Sans font. Apply this styling to all article HTML on cesletter.info.
+
+### Color Palette
+
+| Role | Value |
+|------|-------|
+| Brand red (headings, accents, borders) | `#f93724` |
+| Body text | `#2c3e50` |
+| Border / divider | `#eaecef` |
+| Link blue | `#377dff` |
+| Background | `#ffffff` |
+| Blockquote background | `#fff8f7` |
+| Table stripe | `#f6f8fa` |
+| Table border | `#dfe2e5` |
+
+### Element Styles
+
+**H1:**
+```html
+<h1 style="font-size:2.2rem; font-weight:600; color:#2c3e50; line-height:1.25; margin:0 0 0.5rem 0; font-family:'Open Sans',sans-serif;">Title</h1>
+```
+
+**H2** (red underline):
+```html
+<h2 style="font-size:1.65rem; font-weight:600; color:#2c3e50; border-bottom:1px solid #eaecef; padding-bottom:0.3rem; margin:2rem 0 1rem 0; font-family:'Open Sans',sans-serif;">Section</h2>
+```
+
+**H3:**
+```html
+<h3 style="font-size:1.35rem; font-weight:600; color:#2c3e50; margin:1.5rem 0 0.75rem 0; font-family:'Open Sans',sans-serif;">Sub-section</h3>
+```
+
+**Body paragraph:**
+```html
+<p style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 1rem 0; font-family:'Open Sans',sans-serif;">Text</p>
+```
+
+**Lede / italic:**
+```html
+<p style="font-size:1.05rem; font-style:italic; color:#2c3e50; margin:0 0 1.5rem 0; font-family:'Open Sans',sans-serif;">Lede text</p>
+```
+
+**Blockquote** (red left border — quoting the CES Letter being refuted):
+```html
+<blockquote style="border-left:4px solid #f93724; background:#fff8f7; margin:20px 0; padding:12px 20px; color:#2c3e50; font-style:italic; font-size:1rem; line-height:1.7;">
+  Quote text
+</blockquote>
+```
+
+**Red section title bar** (for chapter headings):
+```html
+<div style="background:#f93724; color:#ffffff; padding:1rem 1.5rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; font-family:'Open Sans',sans-serif; margin:0 0 1.5rem 0;">Chapter Title</div>
+```
+
+**Table** (red header):
+```html
+<table style="border-collapse:collapse; width:100%; margin:1rem 0 1.5rem 0; font-size:0.9rem; font-family:'Open Sans',sans-serif;">
+  <tbody>
+    <tr>
+      <th style="background:#f93724; color:#ffffff; font-weight:600; padding:0.6em 1em; border:1px solid #dfe2e5; text-align:left;">Column</th>
+    </tr>
+    <tr>
+      <td style="padding:0.6em 1em; border:1px solid #dfe2e5; color:#2c3e50; vertical-align:top;">Cell</td>
+    </tr>
+    <tr style="background:#f6f8fa;">
+      <td style="padding:0.6em 1em; border:1px solid #dfe2e5; color:#2c3e50; vertical-align:top;">Stripe row</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+### General Rules
+
+- Font: `'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`
+- All scripture links: `https://www.churchofjesuschrist.org/study/scriptures/...` with `target="_blank" rel="noopener"` and `style="color:#377dff"`
+- No raw `<hr>` tags — use margin spacing
+- Use `&ldquo;` / `&rdquo;` for curly quotes, `&mdash;` for em dashes
+- CES Letter quotes being refuted always use the red-border blockquote style
+
 ### Color Palette
 
 | Role | Value |
