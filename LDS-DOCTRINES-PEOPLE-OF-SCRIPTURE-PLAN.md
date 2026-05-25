@@ -11,6 +11,63 @@ Cross-referenced against:
 
 ---
 
+## SESSION HANDOFF — RESUME HERE AFTER `git pull`
+
+**Last session ended:** 2026-05-24. Plan finalized (decisions applied, alphabetized, menu strategy set). **Zero People-of-Scripture pages have been built yet.** Session pivoted to a different workstation because the live MCP server was bound to `WEBSITE_ID=5` (apologetics), and the ldsdoctrines build needs `WEBSITE_ID=2`.
+
+### Status checklist
+- ✅ All 7 user decisions resolved (see USER DECISIONS APPLIED below)
+- ✅ Tables alphabetized by name within each canon
+- ✅ Menu strategy defined (single top-level **People** entry with 4 canonical sub-sections)
+- ✅ Pre-drafted material in `E:\Apologetics\OrganizedReligion\` inventoried — those pages build first
+- ⏳ **Next: build pages on ldsdoctrines.com (WEBSITE_ID=2), 10 at a time, checkpoint after each round**
+
+### Environment setup on the new box (DO BEFORE SAYING "GO")
+1. Confirm `WEBSITE_ID=2` is set permanently:
+   ```powershell
+   [System.Environment]::SetEnvironmentVariable('WEBSITE_ID', '2', 'User')
+   ```
+2. **Fully close and reopen VS Code** (reload window is NOT sufficient — the `webcms` MCP server reads `WEBSITE_ID` once at startup).
+3. Verify `$env:WEBSITE_ID` shows `2` and `get_menu` returns the ldsdoctrines menu structure (not apologetics).
+4. Verify the following local paths exist on the new box. If either is missing, builds still work but with reduced research signal:
+   - `E:\Apologetics\OrganizedReligion\` — drafted Word docs and reference corpus
+   - `E:\FacebookDownload\facebook-TheronBird-2025-04-11-jkcNtL2U\...\group_posts_and_comments.html` — voice-signal source
+
+### Literal resume prompt for the new session
+> "Pick up from `LDS-DOCTRINES-PEOPLE-OF-SCRIPTURE-PLAN.md` SESSION HANDOFF. WEBSITE_ID is 2, VS Code has been restarted. Begin Round 1: build the People menu scaffold per the plan, then report back before starting Round 2."
+
+### Execution plan (10 at a time, with checkpoint after each round)
+
+| Round | Scope | Agent strategy |
+|---|---|---|
+| **1** | **People menu scaffold.** Create top-level "People" (parentId=0, droppable=true), then 4 sub-section headers under People: `Old Testament`, `New Testament`, `Book of Mormon`, `Restoration & D&C`. Record all 5 new parentIds. | Single agent, 5 menu calls. Fast. |
+| **2** | **10 HIGH-priority pages with OR drafts** (voice/research already in hand): Balaam, David Whitmer, Elisha, Isaiah, Jeremiah, Job, John the Baptist, Joseph Smith Jr., Matthew, Oliver Cowdery | 4 parallel agents × 2–3 pages each, wired under People → matching sub-section |
+| **3** | **10 HIGH-priority T4 reservations:** Abraham, Alma the Younger, Ammon, Brother of Jared, Captain Moroni, Daniel, Deborah, Enoch, Ezekiel, Hannah | 4 parallel agents × 2–3 pages |
+| **4** | **10 more HIGH (T4 + new):** Joseph of Egypt, King Benjamin, Lehi, Moses (absorbs `MosesLastWords` then deprecate it), Nephi (son of Lehi), Noah, Paul, Peter, Ruth, Samuel the Lamanite | 4 parallel agents × 2–3 pages |
+| **5** | **10 HIGH new (BoM + NT):** Amulek, Cornelius, David, Enos, Jacob/Israel, Jacob (son of Lehi), James (the Lord's brother), Jonah, Joshua, Lazarus | 4 parallel agents × 2–3 pages |
+| **6** | **10 HIGH new (NT + BoM):** Lamoni's father, Malachi, Mary (mother of Jesus), Mary Magdalene, Mary of Bethany, Melchizedek, Mormon, Moroni (son of Mormon), Nephi (son of Helaman), Nephi the disciple | 4 parallel agents × 2–3 pages |
+| **7** | **Final HIGH wave (NT + BoM + Restoration):** Nicodemus, Samaritan woman at the well, Samuel, Solomon, Stephen, Stripling Warriors and Their Mothers, Three Nephites, Thomas, Woman taken in adultery, plus Restoration HIGHs (Eliza R. Snow, Emma Smith, Hyrum Smith, Joseph F. Smith, Lucy Mack Smith, Martin Harris, Three Witnesses joint) — may overflow to Round 8 | 4 parallel agents × 2–3 pages |
+| **8+** | **MEDIUM tier**, then **LOW tier**, batched 10 at a time | Same pattern |
+
+After each round: report pageIds, articleIds, menuIds, word counts, sources quoted. Stop and confirm before next round.
+
+### Existing-page review notes (insert between rounds when convenient)
+- `Eve`, `Elijah`, `TheOldTestament` — flagged for depth review in `LDS-DOCTRINES-EXISTING-PAGE-IMPROVEMENTS.md`
+- `MosesLastWords` — merge target; deprecate after Moses (T4-05) is built
+- `Aaron` — **kept as-is** per user decision; do not modify
+
+### Prior-session context (for awareness only — no action on ldsdoctrines)
+The prior session ran on **WEBSITE_ID=5 (ldsapologetics)** and produced:
+- Update to `Revelation-Pattern` (article 585) — added James 1:6–8 + extended D&C 9 quote to v.9
+- New `BOM-Kitchen-Sink` page (pageId 818, articleId 922) — Gish Gallop response to a kitchen-sink BOM critique with cross-links to deep-dive pages
+- New `Laban-Sword-Steel` page (pageId 819, articleId 923) — Mt. Adir sword + Vered Jericho pick vindicate the Book of Mormon's metallurgy
+None of this affects the ldsdoctrines build — listed only so the diff in `LDS-APOLOGETICS-PLAN.md` makes sense if reviewed.
+
+### Voice reminder
+The People-of-Scripture pages follow `LDS-DOCTRINES-AGENT-TEMPLATE.md` voice — direct, scripture-anchored, confident, pastoral landing. **NOT combative.** The apologetics-mode voice from the prior session does not transfer to this site.
+
+---
+
 ## USER DECISIONS APPLIED (2026-05-24)
 
 1. **Aaron** — Keep the existing `Aaron` page **as-is**. No new character page, no rewrite. Removed from the proposed-new-pages table.
