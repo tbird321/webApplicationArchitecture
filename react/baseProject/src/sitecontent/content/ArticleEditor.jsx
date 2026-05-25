@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useAppStateContext } from '../../hooks/appState/useAppStateContext'; // Adjust the import path accordingly
 import HtmlContentRenderer from './HtmlContentRenderer'; // Adjust the import path accordingly
 import { HtmlEditor } from '@tbirdcomponents/reactcomponents'; // Adjust the import path accordingly
@@ -7,6 +7,12 @@ function ArticleEditor({ article, siteInfo, editMode, images, onImageUploaded, c
     const [curArticle, setCurArticle] = useState(article);
     const { FileProcessing } = useAppStateContext();
     const [articleEdit, setArticleEdit] = useState(false);
+
+    useEffect(() => {
+        if (!articleEdit) {
+            setCurArticle(article);
+        }
+    }, [article, articleEdit]);
     const { WebSiteState } = useAppStateContext();
     // Use useCallback to memoize the function and prevent unnecessary re-renders
     const handleSaveArticleHtml = useCallback(async (htmlContent) => {
