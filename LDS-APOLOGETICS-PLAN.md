@@ -669,6 +669,5 @@ Note: `Spirit-Prison-Gospel` was removed here — it duplicates the page in 5-B2
 | Article S3 Path | public/websites/ldsapologetics.com/articles/ |
 | Deploy Profile | Admin |
 | Agent template | `e:\dev\webApplicationArchitecture\LDS-APOLOGETICS-AGENT-TEMPLATE.md` |
-| Agent prompt (legacy) | E:\Apologetics\OrganizedReligion\ldsapologetics-agent-prompt.md |
 | Source Facebook data | `E:\FacebookDownload\facebook-TheronBird-2025-04-11-jkcNtL2U\your_facebook_activity\groups\group_posts_and_comments.html` |
 | Menu backup | E:\Apologetics\OrganizedReligion\sitemenu-backup-pre-test-2026-05-19.json |
