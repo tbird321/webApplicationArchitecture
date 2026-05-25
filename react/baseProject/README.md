@@ -15,14 +15,20 @@ npm install
 CMD:
 set GENERATE_SOURCEMAP=false
 set NODE_ENV=production
+set REACT_APP_SITE_TITLE={siteTitle}
 
 PowerShell:
 $env:GENERATE_SOURCEMAP="false"
 $env:NODE_ENV="production"
+$env:REACT_APP_SITE_TITLE="{siteTitle}"
+
+NOTE: REACT_APP_SITE_TITLE must be set before npm run build — it is baked into index.html
+at build time. If omitted, the browser tab will show "%REACT_APP_SITE_TITLE%" literally.
 
 ### copy the proper configuration to the location
 
 ### LDS Apologetics
+$env:REACT_APP_SITE_TITLE="LDS Apologetics"
 cp configs/ldsapologetics-Prod.json public/config.json
 cp configs/ldsapologetics-initialRender.html public/initialRender.html
 cp configs/ldsapologetics-BaseStyles.css public/BaseStyles.css
@@ -30,6 +36,7 @@ cp configs/ldsapologetics-favicon.ico public/favicon.ico
 cp configs/ldsapologetics-headerImage.jpg public/headerImage.jpg
 
 ### LDS Doctrines
+$env:REACT_APP_SITE_TITLE="LDS Doctrines"
 cp configs/ldsdoctrines-Prod.json public/config.json
 cp configs/ldsdoctrines-initialRender.html public/initialRender.html
 cp configs/ldsdoctrines-BaseStyles.css public/BaseStyles.css
@@ -37,6 +44,7 @@ cp configs/ldsdoctrines-favicon.ico public/favicon.ico
 cp configs/ldsdoctrines-headerImage.jpg public/headerImage.jpg
 
 ### Faith In Crisis
+$env:REACT_APP_SITE_TITLE="LDS Faith In Crisis"
 cp configs/faithInCrisis-Prod.json public/config.json
 cp configs/faithInCrisis-initialRender.html public/initialRender.html
 cp configs/faithInCrisis-BaseStyles.css public/BaseStyles.css
@@ -44,11 +52,20 @@ cp configs/faithInCrisis-favicon.ico public/favicon.ico
 cp configs/faithInCrisis-headerImage.jpg public/headerImage.jpg
 
 ### LDS Discussions
+$env:REACT_APP_SITE_TITLE="LDS Discussions — Done the Right Way"
 cp configs/ldsdiscussions-Prod.json public/config.json
 cp configs/ldsdiscussions-initialRender.html public/initialRender.html
 cp configs/ldsdiscussions-BaseStyles.css public/BaseStyles.css
 cp configs/ldsdiscussions-favicon.ico public/favicon.ico
 cp configs/ldsdiscussions-headerImage.jpg public/headerImage.jpg
+
+### CES Letter
+$env:REACT_APP_SITE_TITLE="CES Letter — The Response"
+cp configs/cesletter-Prod.json public/config.json
+cp configs/cesletter-initialRender.html public/initialRender.html
+cp configs/cesletter-BaseStyles.css public/BaseStyles.css
+cp configs/cesletter-favicon.ico public/favicon.ico
+cp configs/cesletter-headerImage.jpg public/headerImage.jpg
 
 
 ### Then run the Build
