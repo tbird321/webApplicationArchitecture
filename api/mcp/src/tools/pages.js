@@ -1,4 +1,4 @@
-import { apiGet, apiPost, websiteId, websiteIdAsNumber } from '../apiClient.js';
+import { apiGet, apiPost, apiDelete, websiteId, websiteIdAsNumber } from '../apiClient.js';
 
 export const pageTools = [
     {
@@ -148,5 +148,45 @@ export const pageTools = [
             required: ['id']
         },
         handler: async (args) => apiPost(`/page/${args.id}/unpublish`, {})
+    },
+    {
+        name: 'delete_empty_page',
+        description: 'Safely delete an EMPTY page. Refuses unless: (1) page status is draft, (2) page has zero linked articles, and (3) no menu item references it. Intended for orphan cleanup only — will not delete pages with content. To delete a populated page, first unpublish, detach articles, and remove menu items.',
+        inputSchema: {
+            type: 'object',
+            properties: { id: { type: 'number', description: 'Page ID to delete.' } },
+            required: ['id']
+        },
+        handler: async (args) => {
+            const id = args.id;
+
+            // Guard 1: page must exist, be draft, and have no linked articles
+            const page = await apiGet(`/page/${id}/${websiteId()}`);
+            if (!page || page.id == null) {
+                throw new Error(`delete_empty_page refused: page ${id} not found.`);
+            }
+            if (page.status && page.status !== 'draft') {
+                throw new Error(`delete_empty_page refused: page ${id} has status '${page.status}'. Unpublish it first.`);
+            }
+            if (Array.isArray(page.articles) && page.articles.length > 0) {
+                throw new Error(`delete_empty_page refused: page ${id} has ${page.articles.length} linked article(s). Detach or delete them first.`);
+            }
+
+            // Guard 2: no menu item may reference this page
+            let menu;
+            try {
+                menu = await apiGet(`/menu/${websiteId()}`);
+            } catch (e) {
+                throw new Error(`delete_empty_page refused: could not fetch menu to verify references (${e.message}). Aborting for safety.`);
+            }
+            const referencing = (Array.isArray(menu) ? menu : []).filter(m => m && m.pageId === id);
+            if (referencing.length > 0) {
+                const items = referencing.map(m => `id=${m.id} ("${m.text}")`).join(', ');
+                throw new Error(`delete_empty_page refused: page ${id} is referenced by ${referencing.length} menu item(s): ${items}. Remove menu items first via delete_menu_item.`);
+            }
+
+            // All guards passed — proceed with the delete. The Lambda re-checks server-side.
+            return apiDelete(`/page/${id}?websiteId=${websiteId()}`);
+        }
     }
 ];

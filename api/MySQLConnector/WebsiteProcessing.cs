@@ -104,6 +104,11 @@ namespace MySQLConnector
             await pageDAO.DeletePageAndAllofItsArticlesAndAssociations(pageId,connection);
         }
 
+        public async Task DeletePage(int pageId)
+        {
+            await pageDAO.DeletePage(pageId);
+        }
+
         public async Task<List<string>> GetKeywords()
         {
             return await keywordDAO.GetKeywords();

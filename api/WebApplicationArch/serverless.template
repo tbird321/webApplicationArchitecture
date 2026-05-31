@@ -787,6 +787,40 @@
         }
       }
     },
+    "DeletePageFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::DeletePage",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "secretsmanager:GetSecretValue",
+                "Resource": "arn:aws:secretsmanager:us-west-2:646797148861:secret:prod/websites/webadmin*"
+              }
+            ]
+          }
+        ],
+        "Events": {
+          "DeletePage": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/page/{id}",
+              "Method": "DELETE",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
     "DeleteMenuItemFunction": {
       "Type": "AWS::Serverless::Function",
       "Properties": {

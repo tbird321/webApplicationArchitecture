@@ -1026,6 +1026,107 @@ public class ApiFunctions
     public Task<APIGatewayProxyResponse> UnpublishArticle(APIGatewayProxyRequest request, ILambdaContext context)
         => SetArticleStatusInternal(request, context, "draft");
 
+    // Deletes a single page row by id ONLY when the page is safe to delete:
+    //   - status is draft (never delete a published page through this endpoint)
+    //   - articles list is empty (no linked articles)
+    // Caller is responsible for removing menu items / collection associations BEFORE calling.
+    // For pages with articles/content, use the stored-procedure cascade path (separate endpoint, not exposed yet).
+    public async Task<APIGatewayProxyResponse> DeletePage(APIGatewayProxyRequest request, ILambdaContext context)
+    {
+        try
+        {
+            if (!request.PathParameters.ContainsKey("id") || !int.TryParse(request.PathParameters["id"], out int pageId))
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Body = "Invalid page id",
+                    Headers = postHeaders
+                };
+            }
+
+            // websiteId is required as a query parameter so we can look up the page record for the safety check.
+            if (request.QueryStringParameters == null
+                || !request.QueryStringParameters.ContainsKey("websiteId")
+                || !int.TryParse(request.QueryStringParameters["websiteId"], out int websiteId))
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Body = "Missing or invalid 'websiteId' query parameter (required for the safety pre-check).",
+                    Headers = postHeaders
+                };
+            }
+
+            string environment = GetEnvironment(request);
+            IWebsiteProcessing websiteProcessing = await GetProcessorAsync(environment);
+
+            // Safety pre-check: fetch the page, refuse to delete anything that has content or is published.
+            var page = await websiteProcessing.GetPageAsync(pageId, websiteId);
+            if (page == null || page.id == null)
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.NotFound,
+                    Body = JsonConvert.SerializeObject(new { error = "page_not_found", message = $"Page {pageId} not found on websiteId {websiteId}.", pageId, websiteId }),
+                    Headers = postHeaders
+                };
+            }
+
+            if (page.articles != null && page.articles.Count > 0)
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.Conflict,
+                    Body = JsonConvert.SerializeObject(new
+                    {
+                        error = "page_has_articles",
+                        message = $"Refusing to delete: page {pageId} has {page.articles.Count} linked article(s). Detach or delete the articles first.",
+                        pageId,
+                        articleCount = page.articles.Count
+                    }),
+                    Headers = postHeaders
+                };
+            }
+
+            if (!string.IsNullOrEmpty(page.status) && page.status != "draft")
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.Conflict,
+                    Body = JsonConvert.SerializeObject(new
+                    {
+                        error = "page_is_published",
+                        message = $"Refusing to delete: page {pageId} has status '{page.status}'. Unpublish it first.",
+                        pageId,
+                        status = page.status
+                    }),
+                    Headers = postHeaders
+                };
+            }
+
+            await websiteProcessing.DeletePage(pageId);
+
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Body = JsonConvert.SerializeObject(new { id = pageId, deleted = true }),
+                Headers = postHeaders
+            };
+        }
+        catch (Exception ex)
+        {
+            context.Logger.LogError($"Error deleting page: {ex.Message}");
+            context.Logger.LogError($"Error Trace: {ex.StackTrace}");
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.InternalServerError,
+                Body = $"Error occurred: {ex.Message}",
+                Headers = postHeaders
+            };
+        }
+    }
+
     public async Task<APIGatewayProxyResponse> DeletePageFromCollection(APIGatewayProxyRequest request, ILambdaContext context)
     {
         try
