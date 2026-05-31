@@ -620,7 +620,7 @@ namespace MySQLConnector
             TopicDAO topicProcessing = new TopicDAO(CurrentConnectionInfo);
             KeywordDAO keywordProcessing= new KeywordDAO(CurrentConnectionInfo);
 
-            foreach (var keywordString in keywords)
+            foreach (var keywordString in keywords ?? [])
             {
                 if (!keywordCache.TryGetValue(keywordString, out var keywordId))
                 {
@@ -629,7 +629,7 @@ namespace MySQLConnector
                 }
             }
 
-            foreach (var topicString in topics)
+            foreach (var topicString in topics ?? [])
             {
                 if (!topicCache.TryGetValue(topicString, out var topicId))
                 {
@@ -744,13 +744,13 @@ namespace MySQLConnector
                         await DeleteAllAssociationsForPage(pageModel.id.Value, connection);
 
                         //connect page keywords
-                        foreach (var keywordString in pageModel.keywords)
+                        foreach (var keywordString in pageModel.keywords ?? [])
                         {
                             await AssociateWithKeyword(pageModel.id.Value, keywordCache[keywordString], connection);
                         }
 
                         //connect page topics
-                        foreach (var topicString in pageModel.topics)
+                        foreach (var topicString in pageModel.topics ?? [])
                         {
                             await AssociateWithTopic(pageModel.id.Value, topicCache[topicString], connection);
                         }
@@ -759,16 +759,16 @@ namespace MySQLConnector
                         {
                             await CacheKeywordsAndTopics(article.topics, article.keywords, keywordCache, topicCache, connection);
 
-                            article.id = await articleDAO.UpsertArticle(article);
+                            article.id = await articleDAO.UpsertArticle(article, connection);
                             await AssociateWithArticle(pageModel.id.Value,article.id.Value, connection);
                             //connect article keywords
-                            foreach (var keywordString in article.keywords)
+                            foreach (var keywordString in article.keywords ?? [])
                             {
                                 await articleDAO.AssociateWithKeyword(article.id.Value, keywordCache[keywordString], connection);
                             }
 
                             //connect article topics
-                            foreach (var topicString in article.topics)
+                            foreach (var topicString in article.topics ?? [])
                             {
                                 await articleDAO.AssociateWithTopic(article.id.Value, topicCache[topicString], connection);
                             }
