@@ -24,6 +24,7 @@ namespace MySQLConnector.Interfaces
         Task InsertWebsitePage(int websiteId, int pageId, MySqlConnection? connection = null);
         Task DeletePageAndAllofItsArticlesAndAssociations(int pageId, MySqlConnection connection);
         Task DeletePage(int pageId);
+        Task DeleteArticle(int articleId);
         Task<PageModel> GetPageAsync(int pageId,int websiteID);
         Task<PageModel> GetPageAsyncByName(string pageName,String? websiteID);
         Task <PageModel> SavePageAndArticlesAsync(PageModel pageName);

@@ -247,5 +247,85 @@ namespace WebApplicationArch
             return $"public/websites/{websiteName}/articles";
         }
 
+        // Deletes the article DB row AND its S3 HTML file. Caller is responsible for ensuring no page
+        // still references the article (detach via update_page with the article omitted from the articles
+        // array) — this endpoint does NOT check for parent-page references, so a stale junction may
+        // remain if the caller skips that step. Status is intentionally NOT checked: delete is a strict
+        // superset of unpublish. S3 cleanup is best-effort; if it fails, the DB row is still gone and the
+        // S3 path is surfaced in the response so it can be manually cleaned up.
+        public async Task<APIGatewayProxyResponse> DeleteArticle(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            try
+            {
+                if (!request.PathParameters.ContainsKey("id") || !int.TryParse(request.PathParameters["id"], out int articleId))
+                {
+                    return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.BadRequest, Body = "Invalid article id", Headers = PostHeaders };
+                }
+
+                string environment = GetEnvironment(request);
+                ArticleDAO dao = new(await ConnectionInfoAsync(environment));
+
+                // Fetch the article so we can capture its S3 path BEFORE deleting the DB row.
+                var article = await dao.GetArticleAsync(articleId);
+                if (article == null || article.id == null || article.id == 0)
+                {
+                    return new APIGatewayProxyResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Body = JsonConvert.SerializeObject(new { error = "article_not_found", articleId }),
+                        Headers = PostHeaders
+                    };
+                }
+
+                string? articlePath = article.articlePath;
+                int websiteIdForS3 = article.websiteId;
+
+                // Delete the DB row first. If this fails, S3 is left alone (consistent — DB still points at a real file).
+                await dao.DeleteArticle(articleId);
+
+                // Now best-effort S3 cleanup. A failure here leaves the S3 file as orphan storage but does
+                // NOT roll back the DB delete — the article is correctly gone from a user perspective.
+                bool s3Attempted = false;
+                bool s3Deleted = false;
+                string? s3Error = null;
+                if (!string.IsNullOrEmpty(articlePath))
+                {
+                    s3Attempted = true;
+                    try
+                    {
+                        string bucket = Environment.GetEnvironmentVariable("CONTENT_BUCKET") ?? "www-websitecontent";
+                        var s3 = new AmazonS3Storage(bucket, "us-west-2");
+                        string s3Folder = await GetArticleS3Folder(websiteIdForS3, environment);
+                        s3Deleted = await s3.DeleteFile(articlePath, s3Folder);
+                    }
+                    catch (Exception s3ex)
+                    {
+                        s3Error = s3ex.Message;
+                        context.Logger.LogError($"S3 cleanup failed for article {articleId} ({articlePath}): {s3ex.Message}");
+                    }
+                }
+
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Body = JsonConvert.SerializeObject(new
+                    {
+                        id = articleId,
+                        deleted = true,
+                        s3Path = articlePath,
+                        s3Attempted,
+                        s3Deleted,
+                        s3Error
+                    }),
+                    Headers = PostHeaders
+                };
+            }
+            catch (Exception ex)
+            {
+                context.Logger.LogError($"Error deleting article: {ex.Message}");
+                return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.InternalServerError, Body = $"Error: {ex.Message}", Headers = PostHeaders };
+            }
+        }
+
     }
 }

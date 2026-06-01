@@ -1073,6 +1073,8 @@ public class ApiFunctions
                 };
             }
 
+            // The articles guard still applies: refuse to silently orphan child articles.
+            // Callers must detach articles first (update_page with articles: []) before deleting the page.
             if (page.articles != null && page.articles.Count > 0)
             {
                 return new APIGatewayProxyResponse
@@ -1089,21 +1091,9 @@ public class ApiFunctions
                 };
             }
 
-            if (!string.IsNullOrEmpty(page.status) && page.status != "draft")
-            {
-                return new APIGatewayProxyResponse
-                {
-                    StatusCode = (int)HttpStatusCode.Conflict,
-                    Body = JsonConvert.SerializeObject(new
-                    {
-                        error = "page_is_published",
-                        message = $"Refusing to delete: page {pageId} has status '{page.status}'. Unpublish it first.",
-                        pageId,
-                        status = page.status
-                    }),
-                    Headers = postHeaders
-                };
-            }
+            // Note: status is intentionally NOT checked here. Deleting a page is a strict superset of
+            // unpublishing it; requiring an explicit unpublish first is redundant and would block callers
+            // from cleaning up published-but-orphan pages.
 
             await websiteProcessing.DeletePage(pageId);
 

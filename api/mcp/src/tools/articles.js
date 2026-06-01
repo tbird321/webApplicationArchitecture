@@ -1,4 +1,4 @@
-import { apiGet, apiGetText, apiPost, websiteId, websiteIdAsNumber } from '../apiClient.js';
+import { apiGet, apiGetText, apiPost, apiDelete, websiteId, websiteIdAsNumber } from '../apiClient.js';
 
 export const articleTools = [
     {
@@ -124,5 +124,25 @@ export const articleTools = [
             required: ['id']
         },
         handler: async (args) => apiPost(`/article/${args.id}/unpublish`, {})
+    },
+    {
+        name: 'delete_empty_article',
+        description: 'Delete an article record by id. Deleting subsumes unpublishing. The CALLER is responsible for first detaching the article from any page (via update_page with an articles array that omits this id). If a page still references the article, the delete may succeed but leave a stale page→article junction row, or fail with a FK constraint error.',
+        inputSchema: {
+            type: 'object',
+            properties: { id: { type: 'number', description: 'Article DB id to delete.' } },
+            required: ['id']
+        },
+        handler: async (args) => {
+            const id = args.id;
+
+            // Sanity check: article must exist. (Server re-checks and returns 404 if missing.)
+            const article = await apiGet(`/article/${id}`);
+            if (!article || article.id == null || article.id === 0) {
+                throw new Error(`delete_empty_article refused: article ${id} not found.`);
+            }
+
+            return apiDelete(`/article/${id}`);
+        }
     }
 ];

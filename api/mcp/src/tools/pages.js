@@ -151,7 +151,7 @@ export const pageTools = [
     },
     {
         name: 'delete_empty_page',
-        description: 'Safely delete an EMPTY page. Refuses unless: (1) page status is draft, (2) page has zero linked articles, and (3) no menu item references it. Intended for orphan cleanup only — will not delete pages with content. To delete a populated page, first unpublish, detach articles, and remove menu items.',
+        description: 'Safely delete an EMPTY page. Refuses unless: (1) page has zero linked articles, and (2) no menu item references it. Deleting subsumes unpublishing, so published pages may also be deleted. Intended for orphan cleanup — will not delete pages with linked content. To delete a populated page, detach articles first via update_page, then call this.',
         inputSchema: {
             type: 'object',
             properties: { id: { type: 'number', description: 'Page ID to delete.' } },
@@ -160,13 +160,11 @@ export const pageTools = [
         handler: async (args) => {
             const id = args.id;
 
-            // Guard 1: page must exist, be draft, and have no linked articles
+            // Guard 1: page must exist and have no linked articles.
+            // Status is intentionally NOT checked — delete is a strict superset of unpublish.
             const page = await apiGet(`/page/${id}/${websiteId()}`);
             if (!page || page.id == null) {
                 throw new Error(`delete_empty_page refused: page ${id} not found.`);
-            }
-            if (page.status && page.status !== 'draft') {
-                throw new Error(`delete_empty_page refused: page ${id} has status '${page.status}'. Unpublish it first.`);
             }
             if (Array.isArray(page.articles) && page.articles.length > 0) {
                 throw new Error(`delete_empty_page refused: page ${id} has ${page.articles.length} linked article(s). Detach or delete them first.`);
