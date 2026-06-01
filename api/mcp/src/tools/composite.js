@@ -53,8 +53,10 @@ export const compositeTools = [
                 status: 'draft'
             });
 
-            // 4. Link article to page — build payload directly, no re-fetch needed
-            // (re-fetching immediately after creation causes a null reference on the server)
+            // 4. Link article to page — spread the full article object so no fields are null.
+            // Passing a minimal article object (omitting description, memeImagePath, etc.) causes
+            // MySQL Connector/NET 8.2.0 to throw NullReferenceException when inferring the MySQL
+            // type for a null AddWithValue call inside UpsertArticle.
             await apiPost('/page', {
                 id: page.id,
                 name: args.pageName,
@@ -62,7 +64,7 @@ export const compositeTools = [
                 layout,
                 keywords: args.keywords || [],
                 topics: args.topics || [],
-                articles: [{ id: article.id, sequence_no: 5, articleId: args.pageName, name: args.articleName, articlePath: `${args.pageName}.html`, websiteId: wid }],
+                articles: [{ ...article, sequence_no: 5 }],
                 style: '',
                 layoutid: page.layoutid ?? null,
                 websiteId: wid,
