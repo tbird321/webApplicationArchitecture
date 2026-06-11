@@ -805,6 +805,49 @@
         }
       }
     },
+    "RegenerateSitemapFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiArticleFunctions::RegenerateSitemap",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 60,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          "AmazonS3FullAccess",
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "secretsmanager:GetSecretValue",
+                "Resource": "arn:aws:secretsmanager:us-west-2:646797148861:secret:prod/websites/webadmin*"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "cloudfront:ListDistributions",
+                  "cloudfront:CreateInvalidation"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        ],
+        "Events": {
+          "RegenerateSitemap": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/sitemap/regenerate",
+              "Method": "POST",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
     "DeleteArticleFunction": {
       "Type": "AWS::Serverless::Function",
       "Properties": {

@@ -22,6 +22,7 @@
     <PackageReference Include="AWSSDK.CognitoIdentity" Version="3.7.300.25" />
     <PackageReference Include="AWSSDK.RDSDataService" Version="3.7.301.1" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.305" />
+    <PackageReference Include="AWSSDK.CloudFront" Version="3.7.305" />
     <PackageReference Include="AWSSDK.SecretsManager" Version="3.7.302" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.57" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />

@@ -55,7 +55,12 @@ if ([string]::IsNullOrEmpty($ProfileName)) {
 }
 
 Write-Host "Verifying AWS profile: $ProfileName" -ForegroundColor Yellow
-& aws sts get-caller-identity --profile $ProfileName | Out-Null
+# Set region env vars BEFORE the sts call so profiles that don't carry a default region still validate.
+if (-not [string]::IsNullOrEmpty($Region)) {
+    $env:AWS_REGION = $Region
+    $env:AWS_DEFAULT_REGION = $Region
+}
+& aws sts get-caller-identity --profile $ProfileName --region $Region | Out-Null
 if ($LASTEXITCODE -ne 0) {
     Write-Error "AWS profile validation failed for profile '$ProfileName'. Check your credentials and try again."
     exit $LASTEXITCODE

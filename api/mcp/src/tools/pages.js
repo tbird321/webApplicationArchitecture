@@ -150,6 +150,12 @@ export const pageTools = [
         handler: async (args) => apiPost(`/page/${args.id}/unpublish`, {})
     },
     {
+        name: 'regenerate_sitemap',
+        description: 'Rebuild sitemap.xml for the current site (from every served page in the CMS) and upload it to the site\'s S3 root. Run after publishing a batch of new content. No parameters — uses the current WEBSITE_ID.',
+        inputSchema: { type: 'object', properties: {} },
+        handler: async () => apiPost(`/sitemap/regenerate?websiteId=${websiteId()}`, {})
+    },
+    {
         name: 'delete_empty_page',
         description: 'Safely delete an EMPTY page. Refuses unless: (1) page has zero linked articles, and (2) no menu item references it. Deleting subsumes unpublishing, so published pages may also be deleted. Intended for orphan cleanup — will not delete pages with linked content. To delete a populated page, detach articles first via update_page, then call this.',
         inputSchema: {

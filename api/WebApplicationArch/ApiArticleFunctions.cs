@@ -1,4 +1,6 @@
-﻿using Amazon.Lambda.APIGatewayEvents;
+﻿using Amazon.CloudFront;
+using Amazon.CloudFront.Model;
+using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using MySQLConnector;
 using MySQLConnector.Interfaces;
@@ -245,6 +247,185 @@ namespace WebApplicationArch
             var website = websites.FirstOrDefault(w => w.id == websiteId);
             string websiteName = website?.name ?? websiteId.ToString();
             return $"public/websites/{websiteName}/articles";
+        }
+
+        // Builds a sitemap.xml from every served page for the given website and uploads it to the site's
+        // S3 root at public/websites/{websiteName}/sitemap.xml. Run this whenever a content batch has been
+        // published. Served = status "published" OR null (legacy pages that still resolve).
+        public async Task<APIGatewayProxyResponse> RegenerateSitemap(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            try
+            {
+                if (request.QueryStringParameters == null
+                    || !request.QueryStringParameters.ContainsKey("websiteId")
+                    || !int.TryParse(request.QueryStringParameters["websiteId"], out int websiteId))
+                {
+                    return new APIGatewayProxyResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Body = "Missing or invalid 'websiteId' query parameter.",
+                        Headers = PostHeaders
+                    };
+                }
+
+                string environment = GetEnvironment(request);
+                IWebsiteProcessing processor = new WebsiteProcessing(await ConnectionInfoAsync(environment));
+
+                // Resolve the website's name (used both as the public domain and as the S3 folder).
+                WebsiteDAO websiteDao = new(await ConnectionInfoAsync(environment));
+                var websites = await websiteDao.GetWebsites();
+                var site = websites.FirstOrDefault(w => w.id == websiteId);
+                if (site == null || string.IsNullOrWhiteSpace(site.name))
+                {
+                    return new APIGatewayProxyResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Body = JsonConvert.SerializeObject(new { error = "website_not_found", websiteId }),
+                        Headers = PostHeaders
+                    };
+                }
+                string siteName = site.name;
+
+                // Query every page for this website, then keep only those that are served.
+                var allPages = await processor.SearchPages(new List<string>(), new List<string>(), null, null, websiteId.ToString());
+                var servedPages = (allPages ?? new List<PageModel>())
+                    .Where(p => !string.IsNullOrWhiteSpace(p.name)
+                                && (string.IsNullOrEmpty(p.status) || p.status == "published"))
+                    .ToList();
+
+                // Build the XML.
+                string today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                var sb = new StringBuilder();
+                sb.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                sb.AppendLine("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+                sb.AppendLine("  <url>");
+                sb.AppendLine($"    <loc>https://www.{siteName}/</loc>");
+                sb.AppendLine($"    <lastmod>{today}</lastmod>");
+                sb.AppendLine("    <changefreq>weekly</changefreq>");
+                sb.AppendLine("    <priority>1.0</priority>");
+                sb.AppendLine("  </url>");
+                foreach (var p in servedPages)
+                {
+                    string encoded = Uri.EscapeDataString(p.name!);
+                    sb.AppendLine("  <url>");
+                    sb.AppendLine($"    <loc>https://www.{siteName}/?page={encoded}</loc>");
+                    sb.AppendLine($"    <lastmod>{today}</lastmod>");
+                    sb.AppendLine("    <changefreq>monthly</changefreq>");
+                    sb.AppendLine("    <priority>0.7</priority>");
+                    sb.AppendLine("  </url>");
+                }
+                sb.AppendLine("</urlset>");
+
+                // Upload to the PUBLIC web hosting bucket (not the CMS content store).
+                // Bucket convention: www.{domain}, files at bucket root so they serve at
+                // https://www.{domain}/sitemap.xml and https://www.{domain}/robots.txt directly.
+                string bucket = $"www.{siteName}";
+                var s3 = new AmazonS3Storage(bucket, "us-west-2");
+
+                // 1) sitemap.xml
+                byte[] sitemapBytes = Encoding.UTF8.GetBytes(sb.ToString());
+                using (var sitemapStream = new MemoryStream(sitemapBytes))
+                {
+                    await s3.UploadFile(sitemapStream, "sitemap.xml", string.Empty);
+                }
+
+                // 2) robots.txt — allow all crawlers, point them at the sitemap.
+                var robots = new StringBuilder();
+                robots.AppendLine("User-agent: *");
+                robots.AppendLine("Allow: /");
+                robots.AppendLine();
+                robots.AppendLine($"Sitemap: https://www.{siteName}/sitemap.xml");
+                byte[] robotsBytes = Encoding.UTF8.GetBytes(robots.ToString());
+                using (var robotsStream = new MemoryStream(robotsBytes))
+                {
+                    await s3.UploadFile(robotsStream, "robots.txt", string.Empty);
+                }
+
+                // 3) Best-effort CloudFront invalidation so the updated robots.txt / sitemap.xml are
+                //    served immediately instead of waiting for the CDN's TTL to expire. If the
+                //    distribution can't be found or the call fails, the S3 write has already
+                //    succeeded — we just surface the invalidation status in the response.
+                bool invalidationAttempted = false;
+                bool invalidationSucceeded = false;
+                string? invalidationDistributionId = null;
+                string? invalidationId = null;
+                string? invalidationError = null;
+                try
+                {
+                    invalidationAttempted = true;
+                    using var cf = new AmazonCloudFrontClient();
+                    string aliasWww = $"www.{siteName}";
+                    string aliasBare = siteName;
+                    var distros = await cf.ListDistributionsAsync(new ListDistributionsRequest());
+                    var match = distros.DistributionList?.Items?.FirstOrDefault(d =>
+                        d.Aliases?.Items != null &&
+                        d.Aliases.Items.Any(a => a == aliasWww || a == aliasBare));
+                    if (match != null)
+                    {
+                        invalidationDistributionId = match.Id;
+                        var invReq = new CreateInvalidationRequest
+                        {
+                            DistributionId = match.Id,
+                            InvalidationBatch = new InvalidationBatch
+                            {
+                                CallerReference = $"sitemap-{siteName}-{DateTime.UtcNow.Ticks}",
+                                Paths = new Paths
+                                {
+                                    Quantity = 2,
+                                    Items = new List<string> { "/sitemap.xml", "/robots.txt" }
+                                }
+                            }
+                        };
+                        var invResp = await cf.CreateInvalidationAsync(invReq);
+                        invalidationId = invResp?.Invalidation?.Id;
+                        invalidationSucceeded = true;
+                    }
+                    else
+                    {
+                        invalidationError = $"No CloudFront distribution found with alias '{aliasWww}' or '{aliasBare}'.";
+                    }
+                }
+                catch (Exception cfEx)
+                {
+                    invalidationError = cfEx.Message;
+                    context.Logger.LogError($"CloudFront invalidation failed for {siteName}: {cfEx.Message}");
+                }
+
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Body = JsonConvert.SerializeObject(new
+                    {
+                        websiteId,
+                        site = siteName,
+                        pages = servedPages.Count,
+                        sitemap = new
+                        {
+                            s3Path = $"s3://{bucket}/sitemap.xml",
+                            publicUrl = $"https://www.{siteName}/sitemap.xml"
+                        },
+                        robots = new
+                        {
+                            s3Path = $"s3://{bucket}/robots.txt",
+                            publicUrl = $"https://www.{siteName}/robots.txt"
+                        },
+                        cloudFrontInvalidation = new
+                        {
+                            attempted = invalidationAttempted,
+                            succeeded = invalidationSucceeded,
+                            distributionId = invalidationDistributionId,
+                            invalidationId,
+                            error = invalidationError
+                        }
+                    }),
+                    Headers = PostHeaders
+                };
+            }
+            catch (Exception ex)
+            {
+                context.Logger.LogError($"Error regenerating sitemap: {ex.Message}");
+                return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.InternalServerError, Body = $"Error: {ex.Message}", Headers = PostHeaders };
+            }
         }
 
         // Deletes the article DB row AND its S3 HTML file. Caller is responsible for ensuring no page
