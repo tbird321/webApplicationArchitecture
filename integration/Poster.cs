@@ -200,6 +200,13 @@ public sealed class Poster
         foreach (var g in others)
         {
             bool ok = await TickGroupAsync(page, search, g.Name);
+            if (!ok)
+            {
+                // Facebook's picker search intermittently returns nothing for a group you're
+                // really in — a known FB bug. Retry once; it usually surfaces the 2nd time.
+                await page.WaitForTimeoutAsync(700);
+                ok = await TickGroupAsync(page, search, g.Name);
+            }
             if (ok)
             {
                 Console.WriteLine($"      ✓ selected: {g.Name}");
@@ -240,54 +247,159 @@ public sealed class Poster
     /// </summary>
     private static async Task<bool> TickGroupAsync(IPage page, ILocator? search, string name)
     {
-        // Filter the (virtualized) list down to this group so its row exists in the DOM.
-        if (search is not null)
+        var target = NormName(name);
+
+        // No picker search box: just match among whatever rows are currently rendered.
+        if (search is null)
+        {
+            var visible = await PollCandidatesAsync(page);
+            int i0 = ExactIndex(visible, target);
+            return i0 >= 0 && await TickByIndexAsync(page, i0);
+        }
+
+        // Type the name ONE WORD AT A TIME, checking after each word. As soon as the list
+        // narrows to a single row (or an exact-name row appears), tick it. This is far more
+        // robust than typing the whole name: distinctive early words usually narrow to one
+        // hit, and we never depend on Facebook's search liking a long, punctuated string.
+        var words = name.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        try { await search.ClickAsync(); await search.FillAsync(""); } catch { }
+
+        var prev = new List<(int Idx, string Name)>();
+        for (int i = 0; i < words.Length; i++)
         {
             try
             {
-                await search.ClickAsync();
-                await search.FillAsync("");
-                await search.PressSequentiallyAsync(name, new() { Delay = 12 });
-                await page.WaitForTimeoutAsync(1200);
+                if (i > 0) await search.PressSequentiallyAsync(" ", new() { Delay = 8 });
+                await search.PressSequentiallyAsync(words[i], new() { Delay = 12 });
             }
-            catch { /* if search misbehaves, fall through and try the visible rows */ }
+            catch { }
+
+            var cands = await PollCandidatesAsync(page);
+
+            int exact = ExactIndex(cands, target);
+            if (exact >= 0) return await TickByIndexAsync(page, exact);
+            if (cands.Count == 1) return await TickByIndexAsync(page, cands[0].Idx);
+            if (cands.Count == 0)
+            {
+                // This word over-filtered (the plan name diverges from Facebook's past here).
+                // Fall back to the results we had BEFORE adding it.
+                int pe = ExactIndex(prev, target);
+                if (pe >= 0) return await TickByIndexAsync(page, pe);
+                if (prev.Count == 1) return await TickByIndexAsync(page, prev[0].Idx);
+                return false;
+            }
+            prev = cands;
         }
 
-        // Re-resolve the list dialog each time — it's the picker dialog that contains the
-        // group checkboxes (identified by having a checkbox, not by volatile header text).
-        var dialog = page.GetByRole(AriaRole.Dialog)
-                         .Filter(new() { Has = page.Locator("input[type='checkbox']") }).Last;
+        // Ran out of words with more than one candidate and no exact match — ambiguous, so
+        // leave it for manual ticking rather than risk selecting the wrong group.
+        return false;
+    }
 
-        // Exact leaf match so "Christianity Vs Mormonism" doesn't also hit
-        // "Christianity Vs Mormonism Discussion".
-        var nameSpan = dialog.GetByText(name, new() { Exact = true }).First;
-        try { await nameSpan.ScrollIntoViewIfNeededAsync(new() { Timeout = 3000 }); }
-        catch { return false; }
+    private static int ExactIndex(List<(int Idx, string Name)> cands, string target)
+    {
+        foreach (var c in cands)
+            if (NormName(c.Name) == target) return c.Idx;
+        return -1;
+    }
 
-        // Each row's toggle is a real <input type="checkbox"> (visually hidden, so Force).
-        var checkbox = nameSpan
-            .Locator("xpath=ancestor::div[.//input[@type='checkbox']][1]//input[@type='checkbox']")
-            .First;
+    /// <summary>Tick a checkbox by its document-order index (matches the JS enumeration).</summary>
+    private static async Task<bool> TickByIndexAsync(IPage page, int idx)
+    {
+        var checkbox = page.Locator("input[type='checkbox']").Nth(idx);
         try
         {
-            if (await checkbox.CountAsync() > 0)
-            {
-                if (await IsCheckedNow(checkbox)) return true;
-                await checkbox.CheckAsync(new() { Force = true });
-                if (await IsCheckedNow(checkbox)) return true;
-            }
+            if (await IsCheckedNow(checkbox)) return true;
+            await checkbox.CheckAsync(new() { Force = true });
+            if (await IsCheckedNow(checkbox)) return true;
         }
         catch { /* fall through to row click */ }
 
-        // Fallback: click the whole row container.
         try
         {
-            var row = nameSpan.Locator("xpath=ancestor::div[.//input[@type='checkbox']][1]").First;
+            var row = checkbox.Locator("xpath=ancestor::div[.//*[local-name()='image' or local-name()='img']][1]").First;
             await row.ClickAsync(new() { Timeout = 3000, Force = true });
             return await IsCheckedNow(checkbox);
         }
         catch { return false; }
     }
+
+    /// <summary>
+    /// Read the currently-rendered group rows as (document-order checkbox index, name).
+    /// Polls briefly because search results render a beat after typing.
+    /// </summary>
+    private static async Task<List<(int Idx, string Name)>> PollCandidatesAsync(IPage page)
+    {
+        var list = new List<(int, string)>();
+        for (int t = 0; t < 4; t++)
+        {
+            await page.WaitForTimeoutAsync(t == 0 ? 500 : 300);
+            try
+            {
+                var raw = await page.EvaluateAsync<string[]>(CandidatesJs);
+                list = ParseCandidates(raw);
+            }
+            catch { list = new(); }
+            if (list.Count > 0) return list;
+        }
+        return list;
+    }
+
+    private static List<(int Idx, string Name)> ParseCandidates(string[] raw)
+    {
+        var list = new List<(int, string)>();
+        foreach (var r in raw)
+        {
+            var bar = r.IndexOf('|');
+            if (bar > 0 && int.TryParse(r[..bar], out var idx))
+                list.Add((idx, r[(bar + 1)..]));
+        }
+        return list;
+    }
+
+    /// <summary>Normalize a group name for tolerant comparison: lowercase, collapse
+    /// whitespace, drop trailing punctuation.</summary>
+    private static string NormName(string s)
+    {
+        if (string.IsNullOrWhiteSpace(s)) return "";
+        var collapsed = string.Join(' ', s.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        return collapsed.TrimEnd('.', ',', ';', ':', '!', ' ').ToLowerInvariant();
+    }
+
+    // Returns the document-order index (among all page checkboxes) of the group row whose
+    // name matches, or -1. Match is normalized: lowercased, whitespace collapsed, trailing
+    // punctuation dropped. The row is the nearest ancestor of the checkbox that holds an
+    // avatar image (so the composer's lone "anonymous" toggle never matches a group name).
+    private const string MatchCheckboxJs = @"(name) => {
+        const norm = s => (s || '').toLowerCase().replace(/[\s ]+/g, ' ').replace(/[.,;:!]+$/, '').trim();
+        const target = norm(name);
+        const all = [...document.querySelectorAll(""input[type=checkbox]"")];
+        for (let i = 0; i < all.length; i++) {
+            let row = all[i];
+            while (row && !(row.querySelector && (row.querySelector('image') || row.querySelector('img')))) row = row.parentElement;
+            if (!row) continue;
+            const line = (row.innerText || '').split('\n').map(s => s.trim()).filter(Boolean)[0] || '';
+            if (norm(line) === target) return i;
+        }
+        return -1;
+    }";
+
+    // Lists rendered group rows as "index|name": index is the checkbox's position among ALL
+    // page checkboxes (document order), so Playwright's Nth(index) selects the same element.
+    // The row is the nearest ancestor of the checkbox holding an avatar image, so the
+    // composer's lone "anonymous" toggle never shows up as a group.
+    private const string CandidatesJs = @"() => {
+        const all = [...document.querySelectorAll(""input[type=checkbox]"")];
+        const out = [];
+        for (let i = 0; i < all.length; i++) {
+            let row = all[i];
+            while (row && !(row.querySelector && (row.querySelector('image') || row.querySelector('img')))) row = row.parentElement;
+            if (!row) continue;
+            const line = (row.innerText || '').split('\n').map(s => s.trim()).filter(Boolean)[0] || '';
+            if (line) out.push(i + '|' + line);
+        }
+        return out;
+    }";
 
     /// <summary>True if the given checkbox input reads as checked.</summary>
     private static async Task<bool> IsCheckedNow(ILocator checkbox)

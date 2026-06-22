@@ -21,10 +21,6 @@
       "Url": "https://www.facebook.com/groups/919998614693457"
     },
     {
-      "Name": "Biblical Christianity vs Mormonism",
-      "Url": "https://www.facebook.com/groups/reformedmissionary"
-    },
-    {
       "Name": "Biblical Discussion and Dialogue",
       "Url": "https://www.facebook.com/groups/BiblicalDiscussionandDebate"
     },
@@ -35,10 +31,6 @@
     {
       "Name": "Christian Apologetics",
       "Url": "https://www.facebook.com/groups/1493330220801352"
-    },
-    {
-      "Name": "Christianity verse Mormonism.",
-      "Url": "https://www.facebook.com/groups/499321361827413"
     },
     {
       "Name": "Christianity Vs Mormonism Discussion",
@@ -69,18 +61,6 @@
       "Url": "https://www.facebook.com/groups/327054714437979"
     },
     {
-      "Name": "Help Thou My Unbelief: Resolving Doubts About the LDS Church",
-      "Url": "https://www.facebook.com/groups/272446059626616"
-    },
-    {
-      "Name": "UnreadSydney Wangsgard requires approval to join Just say you don\u2019t understand Latter Day Saint beliefs and move along.",
-      "Url": "https://www.facebook.com/groups/967586527211105"
-    },
-    {
-      "Name": "Latter Day Restoration \u0026 Deeper Doctrines Of Christ",
-      "Url": "https://www.facebook.com/groups/1079806252054093"
-    },
-    {
       "Name": "LDS and Christian conversation,searching for the truth.",
       "Url": "https://www.facebook.com/groups/232959981306447"
     },
@@ -101,10 +81,6 @@
       "Url": "https://www.facebook.com/groups/1307897462893835"
     },
     {
-      "Name": "UnreadDarren Andrews commented on a photo you\u0027re following in Thoughtful Saints.",
-      "Url": "https://www.facebook.com/groups/2402010603200201"
-    },
-    {
       "Name": "Uncensored LDS Church Experiences and Doctrines",
       "Url": "https://www.facebook.com/groups/2278314212194665"
     },
@@ -115,9 +91,17 @@
     {
       "Name": "Utah Interfaith Forum",
       "Url": "https://www.facebook.com/groups/utah.interfaith.forum"
+    },
+    {
+      "Name": "Just say you don't understand Latter Day Saint beliefs and move along",
+      "Url": "https://www.facebook.com/groups/967586527211105"
+    },
+    {
+      "Name": "Thoughtful Saints",
+      "Url": "https://www.facebook.com/groups/2402010603200201"
     }
   ],
-  "GroupsPerPost": 8,
+  "GroupsPerPost": 10,
   "Articles": [
     {
       "Id": "WhyIsAn-Atonement-Necessary",
