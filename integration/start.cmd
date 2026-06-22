@@ -50,19 +50,19 @@ echo Invalid choice.
 goto menu
 
 :login
-dotnet run -c Release -- login
+dotnet run -- login
 goto done
 
 :semi
-dotnet run -c Release -- %PLANARG%
+dotnet run -- %PLANARG%
 goto done
 
 :dry
-dotnet run -c Release -- --dry-run %PLANARG%
+dotnet run -- --dry-run %PLANARG%
 goto done
 
 :auto
-dotnet run -c Release -- --auto %PLANARG%
+dotnet run -- --auto %PLANARG%
 goto done
 
 :edit

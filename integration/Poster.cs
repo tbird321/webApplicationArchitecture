@@ -41,8 +41,14 @@ public sealed class Poster
     private static readonly string[] PhotoButtons =
     {
         "div[role='dialog'] [aria-label='Photo/video']",
+        "div[role='dialog'] [aria-label='Photo/Video']",
+        "div[role='dialog'] [aria-label='Photos/videos']",
+        "div[role='dialog'] [aria-label*='hoto']",
+        "div[role='dialog'] div[role='button']:has-text('Photo')",
         "[aria-label='Photo/video']",
+        "[aria-label*='hoto']",
         "text=Photo/video",
+        "text=Photo",
     };
 
     private static readonly string[] MoreGroupsButtons =
@@ -112,15 +118,16 @@ public sealed class Poster
             return false;
         }
 
-        // Hook the batch's other groups FIRST. Facebook hides the "Add groups" control
-        // as soon as the composer has text (unless an image is attached), so groups must
-        // be added before we type anything.
-        if (batch.Count > 1)
-            await TryHookMoreGroups(page, article, batch.Skip(1).ToList());
-
-        // Attach the image (if any) next — also keeps "Add groups" available — then type.
+        // Attach the image first — Facebook removes the Photo/video button once groups are
+        // hooked onto the post, but keeps "Add groups" available when an image is attached.
+        // Order: image → groups → text.
         if (!string.IsNullOrWhiteSpace(article.ImagePath))
             await AttachImage(page, article);
+
+        // Hook the batch's other groups AFTER the image (if any). Facebook hides the
+        // "Add groups" control as soon as the composer has text (unless an image is attached).
+        if (batch.Count > 1)
+            await TryHookMoreGroups(page, article, batch.Skip(1).ToList());
 
         if (!await FillComposerAsync(page, textbox, BuildBody(body, article.Link)))
         {
@@ -257,21 +264,50 @@ public sealed class Poster
 
     private async Task AttachImage(IPage page, Article article)
     {
-        if (!File.Exists(article.ImagePath))
+        var imagePath = article.ImagePath!;
+
+        // If it's a URL, download it to a temp file first.
+        if (imagePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            imagePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"  ! Image not found: {article.ImagePath} (skipping attachment).");
+            Console.WriteLine($"  · downloading image from URL…");
+            var ext = Path.GetExtension(new Uri(imagePath).AbsolutePath);
+            if (string.IsNullOrEmpty(ext)) ext = ".jpg";
+            var tmp = Path.Combine(Path.GetTempPath(), $"fb-img-{Guid.NewGuid():N}{ext}");
+            try
+            {
+                using var http = new System.Net.Http.HttpClient();
+                var bytes = await http.GetByteArrayAsync(imagePath);
+                await File.WriteAllBytesAsync(tmp, bytes);
+                imagePath = tmp;
+                Console.WriteLine($"  · saved to {tmp}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ! Failed to download image: {ex.Message} (skipping attachment).");
+                return;
+            }
+        }
+        else if (!File.Exists(imagePath))
+        {
+            Console.WriteLine($"  ! Image not found: {imagePath} (skipping attachment).");
             return;
         }
+
+        // Give the composer a moment to settle after group picker closes.
+        await page.WaitForTimeoutAsync(1500);
+        await Screenshot(page, article, "before-photo-btn");
 
         var photoBtn = await FirstVisible(page, PhotoButtons);
         if (photoBtn is null)
         {
             Console.WriteLine("  ! Photo/video button not found (skipping attachment).");
+            await Screenshot(page, article, "photo-btn-fail");
             return;
         }
 
         var chooser = await page.RunAndWaitForFileChooserAsync(async () => await photoBtn.ClickAsync());
-        await chooser.SetFilesAsync(article.ImagePath!);
+        await chooser.SetFilesAsync(imagePath);
         await page.WaitForTimeoutAsync(2500);
     }
 
