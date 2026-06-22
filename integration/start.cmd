@@ -9,12 +9,33 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo Which list?  (blank = default posts.json; e.g. "apologetics" -> posts.apologetics.json)
-set "PLANNAME="
-set /p PLANNAME="List name: "
-set "PLANARG="
-if not "%PLANNAME%"=="" set "PLANARG=--plan %PLANNAME%"
+:sitemenu
+echo(
+echo ===================================================
+echo   Choose a site:
+echo ===================================================
+echo   1. LDS Apologetics   (posts.json)
+echo   2. LDS Doctrines     (doctrinepost.json)
+echo ===================================================
+set "SITECHOICE="
+set /p SITECHOICE="Choose [1-2]: "
 
+if "%SITECHOICE%"=="1" (
+  set "PLANNAME="
+  set "PLANARG="
+  set "PLANLABEL=LDS Apologetics  ^(posts.json^)"
+  goto menuready
+)
+if "%SITECHOICE%"=="2" (
+  set "PLANNAME=doctrinepost.json"
+  set "PLANARG=--plan doctrinepost.json"
+  set "PLANLABEL=LDS Doctrines  ^(doctrinepost.json^)"
+  goto menuready
+)
+echo Invalid choice.
+goto sitemenu
+
+:menuready
 if "%PLANNAME%"=="" if not exist posts.json (
   if exist posts.example.json (
     echo No posts.json found - creating one from posts.example.json ...
@@ -28,7 +49,7 @@ if "%PLANNAME%"=="" if not exist posts.json (
 echo(
 echo ===================================================
 echo   Facebook Group Publishing Assistant
-echo   List: %PLANNAME% (blank = posts.json)
+echo   Site: %PLANLABEL%
 echo ===================================================
 echo   1. Log in            (one-time session setup)
 echo   2. Run - semi-auto   (you click Post)   ^<- normal
@@ -72,7 +93,7 @@ dotnet run -- scrape-groups
 goto done
 
 :edit
-if "%PLANNAME%"=="" (notepad posts.json) else (notepad "posts.%PLANNAME%.json")
+if "%PLANNAME%"=="" (notepad posts.json) else (notepad "%PLANNAME%")
 goto menu
 
 :done
