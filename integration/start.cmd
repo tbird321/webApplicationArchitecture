@@ -52,9 +52,9 @@ echo   Facebook Group Publishing Assistant
 echo   Site: %PLANLABEL%
 echo ===================================================
 echo   1. Log in            (one-time session setup)
-echo   2. Run - semi-auto   (you click Post)   ^<- normal
-echo   3. Run - dry run      (fill only, never post)
-echo   4. Run - FULL AUTO    (script clicks Post; higher risk)
+echo   2. Validate groups   (pre-flight: check names ^& membership)
+echo   3. Run - semi-auto   (you click Post)   ^<- normal
+echo   4. Run - dry run      (fill only, never post)
 echo   5. Scrape my groups   (list all joined groups as JSON)
 echo   6. Edit list file
 echo   7. Exit
@@ -63,9 +63,9 @@ set "choice="
 set /p choice="Choose [1-7]: "
 
 if "%choice%"=="1" goto login
-if "%choice%"=="2" goto semi
-if "%choice%"=="3" goto dry
-if "%choice%"=="4" goto auto
+if "%choice%"=="2" goto validate
+if "%choice%"=="3" goto semi
+if "%choice%"=="4" goto dry
 if "%choice%"=="5" goto scrape
 if "%choice%"=="6" goto edit
 if "%choice%"=="7" exit /b 0
@@ -76,16 +76,16 @@ goto menu
 dotnet run -- login
 goto done
 
+:validate
+dotnet run -- validate %PLANARG%
+goto done
+
 :semi
 dotnet run -- %PLANARG%
 goto done
 
 :dry
 dotnet run -- --dry-run %PLANARG%
-goto done
-
-:auto
-dotnet run -- --auto %PLANARG%
 goto done
 
 :scrape

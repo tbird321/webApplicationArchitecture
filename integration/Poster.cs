@@ -19,6 +19,24 @@ public sealed class Poster
 
     public Poster(Config cfg) => _cfg = cfg;
 
+    /// <summary>Where groups that couldn't be auto-selected get recorded for review.</summary>
+    private string FailLogPath => Path.Combine(Path.GetDirectoryName(_cfg.QueueFile) ?? ".", "failed-groups.log");
+
+    /// <summary>Append each un-selectable group (with the article and reason) to the fail log.</summary>
+    private void LogFailedGroups(Article article, IEnumerable<Group> groups, string reason)
+    {
+        try
+        {
+            var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            var lines = groups.Select(g => $"{stamp}\t[{article.Id}]\t{reason}\t{g.Name}\t{g.Url}");
+            File.AppendAllLines(FailLogPath, lines);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  (couldn't write fail log: {ex.Message})");
+        }
+    }
+
     private static readonly string[] ComposerTriggers =
     {
         "div[role='button']:has-text('Write something')",
@@ -60,24 +78,22 @@ public sealed class Poster
         "[aria-label*='more groups']",
     };
 
+    // The picker's OWN search box — scoped to a dialog and to "groups" so it can never
+    // match Facebook's global top "Search Facebook" bar (typing there navigates the page).
     private static readonly string[] GroupSearchBoxes =
     {
-        "input[placeholder*='Search']",
-        "[aria-label*='Search'] input",
-        "[aria-label='Search']",
+        "div[role='dialog'] input[aria-label='Search groups']",
+        "div[role='dialog'] input[placeholder='Search groups']",
+        "div[role='dialog'] input[aria-label*='Search groups']",
+        "div[role='dialog'] input[placeholder*='Search groups']",
+        "div[role='dialog'] input[type='search']",
+        "div[role='dialog'] input[aria-label*='Search']",
     };
 
     private static readonly string[] ConfirmButtons =
     {
         "div[role='dialog'] [aria-label='Done']",
         "div[role='dialog'] div[role='button']:has-text('Done')",
-    };
-
-    private static readonly string[] PostButtons =
-    {
-        "div[role='dialog'] [aria-label='Post']",
-        "div[role='dialog'] div[role='button']:has-text('Post')",
-        "[aria-label='Post']",
     };
 
     /// <summary>
@@ -118,16 +134,24 @@ public sealed class Poster
             return false;
         }
 
+        await StepPause(page);
+
         // Attach the image first — Facebook removes the Photo/video button once groups are
         // hooked onto the post, but keeps "Add groups" available when an image is attached.
         // Order: image → groups → text.
         if (!string.IsNullOrWhiteSpace(article.ImagePath))
+        {
             await AttachImage(page, article);
+            await StepPause(page);
+        }
 
         // Hook the batch's other groups AFTER the image (if any). Facebook hides the
         // "Add groups" control as soon as the composer has text (unless an image is attached).
         if (batch.Count > 1)
+        {
             await TryHookMoreGroups(page, article, batch.Skip(1).ToList());
+            await StepPause(page);
+        }
 
         if (!await FillComposerAsync(page, textbox, BuildBody(body, article.Link)))
         {
@@ -135,6 +159,7 @@ public sealed class Poster
             await Screenshot(page, article, "empty-textbox");
             return false;
         }
+        await StepPause(page);
 
         if (!string.IsNullOrWhiteSpace(article.Link))
         {
@@ -147,23 +172,6 @@ public sealed class Poster
         return true;
     }
 
-    /// <summary>Full-auto only (opt-in). Clicks Post for you.</summary>
-    public async Task<bool> SubmitAsync(IPage page, Article article, string groupUrl)
-    {
-        _ = groupUrl;
-        var post = await FirstVisible(page, PostButtons);
-        if (post is null)
-        {
-            Console.WriteLine("  ! Post button not found.");
-            await Screenshot(page, article, "no-post-button");
-            return false;
-        }
-        await post.ClickAsync();
-        await page.WaitForTimeoutAsync(3000);
-        await Screenshot(page, article, "submitted");
-        return true;
-    }
-
     /// <summary>Best-effort: open "Post to more groups" and tick the batch's other groups by name.</summary>
     private async Task TryHookMoreGroups(IPage page, Article article, IReadOnlyList<Group> others)
     {
@@ -172,6 +180,7 @@ public sealed class Poster
         {
             Console.WriteLine("  (couldn't find 'Post to more groups' — add these manually before posting:)");
             foreach (var g in others) Console.WriteLine($"      • {g.Name}");
+            LogFailedGroups(article, others, "picker-not-found");
             return;
         }
         await moreBtn.ClickAsync();
@@ -180,19 +189,31 @@ public sealed class Poster
         // Capture the picker the instant it opens, before touching anything.
         await Screenshot(page, article, "group-picker");
 
-        // The picker is split across two dialogs: a header bar ("Add groups") and the
-        // scrollable LIST that actually holds the group rows + checkboxes. Target the list
-        // (identified by its "Select groups" text) — NOT the header that .Last would grab.
-        var dialog = page.GetByRole(AriaRole.Dialog).Filter(new() { HasText = "Select groups" }).First;
-        try { await dialog.WaitForAsync(new() { Timeout = 5000 }); }
-        catch { dialog = page.Locator("div[role='dialog']").Last; }
+        // The picker's group list is virtualized — with many groups, a given row isn't in
+        // the DOM until you filter to it via the picker's search box. So grab that search
+        // box once and type each group's name before ticking it.
+        var search = await FirstVisible(page, GroupSearchBoxes, 4000);
+        if (search is null)
+            Console.WriteLine("  (no picker search box found — only currently-visible groups can be ticked)");
 
+        var failed = new List<Group>();
         foreach (var g in others)
         {
-            bool ok = await TickGroupAsync(dialog, g.Name);
-            Console.WriteLine(ok
-                ? $"      ✓ selected: {g.Name}"
-                : $"      ! couldn't auto-select '{g.Name}' — tick it manually in the picker.");
+            bool ok = await TickGroupAsync(page, search, g.Name);
+            if (ok)
+            {
+                Console.WriteLine($"      ✓ selected: {g.Name}");
+            }
+            else
+            {
+                Console.WriteLine($"      ! couldn't auto-select '{g.Name}' — tick it manually in the picker.");
+                failed.Add(g);
+            }
+        }
+        if (failed.Count > 0)
+        {
+            LogFailedGroups(article, failed, "not-selected");
+            Console.WriteLine($"  ! {failed.Count}/{others.Count} group(s) in this batch couldn't be auto-selected — logged to {FailLogPath}");
         }
 
         await Screenshot(page, article, "group-picker-selected");
@@ -217,8 +238,26 @@ public sealed class Poster
     /// so we walk up from the name to the nearest interactive ancestor and click that,
     /// then verify the row's checkbox actually flipped to checked.
     /// </summary>
-    private static async Task<bool> TickGroupAsync(ILocator dialog, string name)
+    private static async Task<bool> TickGroupAsync(IPage page, ILocator? search, string name)
     {
+        // Filter the (virtualized) list down to this group so its row exists in the DOM.
+        if (search is not null)
+        {
+            try
+            {
+                await search.ClickAsync();
+                await search.FillAsync("");
+                await search.PressSequentiallyAsync(name, new() { Delay = 12 });
+                await page.WaitForTimeoutAsync(1200);
+            }
+            catch { /* if search misbehaves, fall through and try the visible rows */ }
+        }
+
+        // Re-resolve the list dialog each time — it's the picker dialog that contains the
+        // group checkboxes (identified by having a checkbox, not by volatile header text).
+        var dialog = page.GetByRole(AriaRole.Dialog)
+                         .Filter(new() { Has = page.Locator("input[type='checkbox']") }).Last;
+
         // Exact leaf match so "Christianity Vs Mormonism" doesn't also hit
         // "Christianity Vs Mormonism Discussion".
         var nameSpan = dialog.GetByText(name, new() { Exact = true }).First;
@@ -400,6 +439,12 @@ public sealed class Poster
     {
         var ms = _rng.Next(_cfg.MinDelayMs, Math.Max(_cfg.MinDelayMs + 1, _cfg.MaxDelayMs));
         await page.WaitForTimeoutAsync(ms);
+    }
+
+    /// <summary>A short, watchable pause between composer steps so each stage is visible.</summary>
+    private async Task StepPause(IPage page)
+    {
+        if (_cfg.StepDelayMs > 0) await page.WaitForTimeoutAsync(_cfg.StepDelayMs);
     }
 
     private async Task Screenshot(IPage page, Article article, string tag)

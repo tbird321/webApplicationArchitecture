@@ -1,34 +1,121 @@
 {
   "Groups": [
-    { "Name": "*sigh* THAT again? No, that's NOT what we believe. Ask us, don't tell us.", "Url": "https://www.facebook.com/groups/683129447058963" },
-    { "Name": "Apologia of The Church of Jesus Christ of Latter-day Saints", "Url": "https://www.facebook.com/groups/148883335559201" },
-    { "Name": "Approaching Midnight: LDS Apologetics in the 21st Century", "Url": "https://www.facebook.com/groups/404868953229478" },
-    { "Name": "Arizona Ex-Mormon Conversations", "Url": "https://www.facebook.com/groups/1275791433314524" },
-    { "Name": "Atheism vs Christianity : The Grand Debate", "Url": "https://www.facebook.com/groups/919998614693457" },
-    { "Name": "Biblical Christianity vs Mormonism", "Url": "https://www.facebook.com/groups/reformedmissionary" },
-    { "Name": "Biblical Discussion and Dialogue", "Url": "https://www.facebook.com/groups/BiblicalDiscussionandDebate" },
-    { "Name": "Christian and Mormon Discussions", "Url": "https://www.facebook.com/groups/676236935781675" },
-    { "Name": "Christian Apologetics", "Url": "https://www.facebook.com/groups/1493330220801352" },
-    { "Name": "Christianity verse Mormonism.", "Url": "https://www.facebook.com/groups/499321361827413" },
-    { "Name": "Christianity Vs Mormonism Discussion", "Url": "https://www.facebook.com/groups/146779858821366" },
-    { "Name": "Christians v LDS v Atheists", "Url": "https://www.facebook.com/groups/cvldsva" },
-    { "Name": "Discussions on Doctrines of The Church of Jesus Christ of Latter-day Saints", "Url": "https://www.facebook.com/groups/LdsDoc" },
-    { "Name": "Doctrines and Questions of the restored Church of Jesus Christ", "Url": "https://www.facebook.com/groups/919568231465558" },
-    { "Name": "Evangelicals and Latter-day Saints", "Url": "https://www.facebook.com/groups/411419142330282" },
-    { "Name": "Fair & Balanced Debates - LDS & Creedal Christianity.", "Url": "https://www.facebook.com/groups/143813417022213" },
-    { "Name": "God vs Atheism. (Theism, Deism And Atheism Discussion)", "Url": "https://www.facebook.com/groups/327054714437979" },
-    { "Name": "Help Thou My Unbelief: Resolving Doubts About the LDS Church", "Url": "https://www.facebook.com/groups/272446059626616" },
-    { "Name": "Just say you don't understand Latter Day Saint beliefs and move along", "Url": "https://www.facebook.com/groups/967586527211105" },
-    { "Name": "Latter Day Restoration & Deeper Doctrines Of Christ", "Url": "https://www.facebook.com/groups/1079806252054093" },
-    { "Name": "LDS and Christian conversation, searching for the truth.", "Url": "https://www.facebook.com/groups/232959981306447" },
-    { "Name": "LDS Apologetics", "Url": "https://www.facebook.com/groups/627836143104618" },
-    { "Name": "LDS Apologetics LTD", "Url": "https://www.facebook.com/groups/517355585378643" },
-    { "Name": "LDS Apologists, Trolls and Memes", "Url": "https://www.facebook.com/groups/2077217306124568" },
-    { "Name": "MORMONISM LIVE", "Url": "https://www.facebook.com/groups/1307897462893835" },
-    { "Name": "Thoughtful Saints", "Url": "https://www.facebook.com/groups/2402010603200201" },
-    { "Name": "Uncensored LDS Church Experiences and Doctrines", "Url": "https://www.facebook.com/groups/2278314212194665" },
-    { "Name": "Uncensored LDS/Mormon Topics", "Url": "https://www.facebook.com/groups/467594753360945" },
-    { "Name": "Utah Interfaith Forum", "Url": "https://www.facebook.com/groups/utah.interfaith.forum" }
+    {
+      "Name": "*sigh* THAT again? No, that\u0027s NOT what we believe. Ask us, don\u0027t tell us.",
+      "Url": "https://www.facebook.com/groups/683129447058963"
+    },
+    {
+      "Name": "Apologia of The Church of Jesus Christ of Latter-day Saints",
+      "Url": "https://www.facebook.com/groups/148883335559201"
+    },
+    {
+      "Name": "Approaching Midnight: LDS Apologetics in the 21st Century",
+      "Url": "https://www.facebook.com/groups/404868953229478"
+    },
+    {
+      "Name": "Arizona Ex-Mormon Conversations",
+      "Url": "https://www.facebook.com/groups/1275791433314524"
+    },
+    {
+      "Name": "Atheism vs Christianity : The Grand Debate",
+      "Url": "https://www.facebook.com/groups/919998614693457"
+    },
+    {
+      "Name": "Biblical Christianity vs Mormonism",
+      "Url": "https://www.facebook.com/groups/reformedmissionary"
+    },
+    {
+      "Name": "Biblical Discussion and Dialogue",
+      "Url": "https://www.facebook.com/groups/BiblicalDiscussionandDebate"
+    },
+    {
+      "Name": "Christian and Mormon Discussions",
+      "Url": "https://www.facebook.com/groups/676236935781675"
+    },
+    {
+      "Name": "Christian Apologetics",
+      "Url": "https://www.facebook.com/groups/1493330220801352"
+    },
+    {
+      "Name": "Christianity verse Mormonism.",
+      "Url": "https://www.facebook.com/groups/499321361827413"
+    },
+    {
+      "Name": "Christianity Vs Mormonism Discussion",
+      "Url": "https://www.facebook.com/groups/146779858821366"
+    },
+    {
+      "Name": "Christians v LDS v Atheists",
+      "Url": "https://www.facebook.com/groups/cvldsva"
+    },
+    {
+      "Name": "Discussions on Doctrines of The Church of Jesus Christ of Latter-day Saints",
+      "Url": "https://www.facebook.com/groups/LdsDoc"
+    },
+    {
+      "Name": "Doctrines and Questions of the restored Church of Jesus Christ",
+      "Url": "https://www.facebook.com/groups/919568231465558"
+    },
+    {
+      "Name": "Evangelicals and Latter-day Saints",
+      "Url": "https://www.facebook.com/groups/411419142330282"
+    },
+    {
+      "Name": "Fair \u0026 Balanced Debates - LDS \u0026 Creedal Christianity.",
+      "Url": "https://www.facebook.com/groups/143813417022213"
+    },
+    {
+      "Name": "God vs Atheism. (Theism, Deism And Atheism Discussion)",
+      "Url": "https://www.facebook.com/groups/327054714437979"
+    },
+    {
+      "Name": "Help Thou My Unbelief: Resolving Doubts About the LDS Church",
+      "Url": "https://www.facebook.com/groups/272446059626616"
+    },
+    {
+      "Name": "UnreadSydney Wangsgard requires approval to join Just say you don\u2019t understand Latter Day Saint beliefs and move along.",
+      "Url": "https://www.facebook.com/groups/967586527211105"
+    },
+    {
+      "Name": "Latter Day Restoration \u0026 Deeper Doctrines Of Christ",
+      "Url": "https://www.facebook.com/groups/1079806252054093"
+    },
+    {
+      "Name": "LDS and Christian conversation,searching for the truth.",
+      "Url": "https://www.facebook.com/groups/232959981306447"
+    },
+    {
+      "Name": "LDS Apologetics",
+      "Url": "https://www.facebook.com/groups/627836143104618"
+    },
+    {
+      "Name": "LDS Apologetics LTD",
+      "Url": "https://www.facebook.com/groups/517355585378643"
+    },
+    {
+      "Name": "LDS Apologists, Trolls and Memes",
+      "Url": "https://www.facebook.com/groups/2077217306124568"
+    },
+    {
+      "Name": "MORMONISM LIVE",
+      "Url": "https://www.facebook.com/groups/1307897462893835"
+    },
+    {
+      "Name": "UnreadDarren Andrews commented on a photo you\u0027re following in Thoughtful Saints.",
+      "Url": "https://www.facebook.com/groups/2402010603200201"
+    },
+    {
+      "Name": "Uncensored LDS Church Experiences and Doctrines",
+      "Url": "https://www.facebook.com/groups/2278314212194665"
+    },
+    {
+      "Name": "Uncensored LDS/Mormon Topics",
+      "Url": "https://www.facebook.com/groups/467594753360945"
+    },
+    {
+      "Name": "Utah Interfaith Forum",
+      "Url": "https://www.facebook.com/groups/utah.interfaith.forum"
+    }
   ],
   "GroupsPerPost": 8,
   "Articles": [
@@ -36,882 +123,756 @@
       "Id": "WhyIsAn-Atonement-Necessary",
       "Link": "https://www.ldsapologetics.com/?page=WhyIsAn-Atonement-Necessary",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "AbrahamsTest",
       "Link": "https://www.ldsapologetics.com/?page=AbrahamsTest",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/AbrahamsTest.jpg",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "God-Sovereign",
       "Link": "https://www.ldsapologetics.com/?page=God-Sovereign",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BookofMormon-RacistDoc",
       "Link": "https://www.ldsapologetics.com/?page=BookofMormon-RacistDoc",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_83389041711736573309529.jpg",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "God-Type",
       "Link": "https://www.ldsapologetics.com/?page=God-Type",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Abrahams-Seed",
       "Link": "https://www.ldsapologetics.com/?page=Abrahams-Seed",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_39595015421736574208721.jpg",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Protestant-Slavers",
       "Link": "https://www.ldsapologetics.com/?page=Protestant-Slavers",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_75059683811736714735441.avif",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Jesus-Lucifer-Brother",
       "Link": "https://www.ldsapologetics.com/?page=Jesus-Lucifer-Brother",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Evolution",
       "Link": "https://www.ldsapologetics.com/?page=Evolution",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_26861805011737437279355.jpg",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Logical-Fallacies",
       "Link": "https://www.ldsapologetics.com/?page=Logical-Fallacies",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Priesthood-Topics",
       "Link": "https://www.ldsapologetics.com/?page=Priesthood-Topics",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/Blacks and Priesthood.jpg",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "ChurchTrue-Or-Not",
       "Link": "https://www.ldsapologetics.com/?page=ChurchTrue-Or-Not",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "LDS-Feelings",
       "Link": "https://www.ldsapologetics.com/?page=LDS-Feelings",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_92315918911739468244946.jpg",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Profile-Pastors",
       "Link": "https://www.ldsapologetics.com/?page=Profile-Pastors",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Profile-Innocent",
       "Link": "https://www.ldsapologetics.com/?page=Profile-Innocent",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Profile-Jews",
       "Link": "https://www.ldsapologetics.com/?page=Profile-Jews",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Profile-Indigenous",
       "Link": "https://www.ldsapologetics.com/?page=Profile-Indigenous",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Profile-Obedient",
       "Link": "https://www.ldsapologetics.com/?page=Profile-Obedient",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_79488982711740724918859.jpg",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Bible-Math5",
       "Link": "https://www.ldsapologetics.com/?page=Bible-Math5",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Should-Debate",
       "Link": "https://www.ldsapologetics.com/?page=Should-Debate",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "DNA-Evidence",
       "Link": "https://www.ldsapologetics.com/?page=DNA-Evidence",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BofM-Isaiah",
       "Link": "https://www.ldsapologetics.com/?page=BofM-Isaiah",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Apostasy-Why",
       "Link": "https://www.ldsapologetics.com/?page=Apostasy-Why",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_65935444411749101225942.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "God-Did-It",
       "Link": "https://www.ldsapologetics.com/?page=God-Did-It",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_43094952411749791065938.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "GodExists",
       "Link": "https://www.ldsapologetics.com/?page=GodExists",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/GodExists.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Biblical-Slavery",
       "Link": "https://www.ldsapologetics.com/?page=Biblical-Slavery",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_59806283611751230737117.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Sola-Fide-False",
       "Link": "https://www.ldsapologetics.com/?page=Sola-Fide-False",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_55481092211751519085366.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Sola-Scriptura",
       "Link": "https://www.ldsapologetics.com/?page=Sola-Scriptura",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_90324873621752215947475.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Sola-Christus",
       "Link": "https://www.ldsapologetics.com/?page=Sola-Christus",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_70980630911753136035339.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Sola-Gracia",
       "Link": "https://www.ldsapologetics.com/?page=Sola-Gracia",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_98158616211753136334613.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Sola-Gloria",
       "Link": "https://www.ldsapologetics.com/?page=Sola-Gloria",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_95323854621753136573096.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Five-Solas",
       "Link": "https://www.ldsapologetics.com/?page=Five-Solas",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Polygamy",
       "Link": "https://www.ldsapologetics.com/?page=Polygamy",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Prophetic-Perfection",
       "Link": "https://www.ldsapologetics.com/?page=Prophetic-Perfection",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_23325714811756180406240.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Joseph-Fanny",
       "Link": "https://www.ldsapologetics.com/?page=Joseph-Fanny",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Horses",
       "Link": "https://www.ldsapologetics.com/?page=Horses",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Disciple",
       "Link": "https://www.ldsapologetics.com/?page=Disciple",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Stylometry",
       "Link": "https://www.ldsapologetics.com/?page=Stylometry",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_95285703211760801867054.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "JesusBirth",
       "Link": "https://www.ldsapologetics.com/?page=JesusBirth",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/Bethlahem.jpg",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "AdamGod",
       "Link": "https://www.ldsapologetics.com/?page=AdamGod",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BookofMormonWeight",
       "Link": "https://www.ldsapologetics.com/?page=BookofMormonWeight",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "LDSChristians",
       "Link": "https://www.ldsapologetics.com/?page=LDSChristians",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_46123819911776011147549.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Priesthood-lds",
       "Link": "https://www.ldsapologetics.com/?page=Priesthood-lds",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Simon-Magician",
       "Link": "https://www.ldsapologetics.com/?page=Simon-Magician",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Gates-Of-Hell",
       "Link": "https://www.ldsapologetics.com/?page=Gates-Of-Hell",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Trial-Of-Faith",
       "Link": "https://www.ldsapologetics.com/?page=Trial-Of-Faith",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_46515221811779636107076.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Protestant-Collapse",
       "Link": "https://www.ldsapologetics.com/?page=Protestant-Collapse",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Revelation-Pattern",
       "Link": "https://www.ldsapologetics.com/?page=Revelation-Pattern",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "PreExistence-Bible",
       "Link": "https://www.ldsapologetics.com/?page=PreExistence-Bible",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Why-Mediator",
       "Link": "https://www.ldsapologetics.com/?page=Why-Mediator",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Biblical-Communalism",
       "Link": "https://www.ldsapologetics.com/?page=Biblical-Communalism",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Why-Resurrection",
       "Link": "https://www.ldsapologetics.com/?page=Why-Resurrection",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Godhead-vs-Trinity",
       "Link": "https://www.ldsapologetics.com/?page=Godhead-vs-Trinity",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Heavenly-Mother",
       "Link": "https://www.ldsapologetics.com/?page=Heavenly-Mother",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Creation-Ex-Nihilo",
       "Link": "https://www.ldsapologetics.com/?page=Creation-Ex-Nihilo",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Resurrection-Power",
       "Link": "https://www.ldsapologetics.com/?page=Resurrection-Power",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Abrahams-Seed-Answer",
       "Link": "https://www.ldsapologetics.com/?page=Abrahams-Seed-Answer",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "God-Is-Our-Father",
       "Link": "https://www.ldsapologetics.com/?page=God-Is-Our-Father",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Agency-Requires-Preexistence",
       "Link": "https://www.ldsapologetics.com/?page=Agency-Requires-Preexistence",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Gender-Eternal",
       "Link": "https://www.ldsapologetics.com/?page=Gender-Eternal",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Trinity-Math",
       "Link": "https://www.ldsapologetics.com/?page=Trinity-Math",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Harrowing-Hell-Restored",
       "Link": "https://www.ldsapologetics.com/?page=Harrowing-Hell-Restored",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Who-Is-Holy-Ghost",
       "Link": "https://www.ldsapologetics.com/?page=Who-Is-Holy-Ghost",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "NT-Church-Offices",
       "Link": "https://www.ldsapologetics.com/?page=NT-Church-Offices",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Salvation-Process",
       "Link": "https://www.ldsapologetics.com/?page=Salvation-Process",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Jesus-Is-Jehovah",
       "Link": "https://www.ldsapologetics.com/?page=Jesus-Is-Jehovah",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Path-Of-Apostasy",
       "Link": "https://www.ldsapologetics.com/?page=Path-Of-Apostasy",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Filthy-Rags",
       "Link": "https://www.ldsapologetics.com/?page=Filthy-Rags",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BOM-Archaeology",
       "Link": "https://www.ldsapologetics.com/?page=BOM-Archaeology",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Spirit-Prison-Gospel",
       "Link": "https://www.ldsapologetics.com/?page=Spirit-Prison-Gospel",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Isaiah-Reason-Together",
       "Link": "https://www.ldsapologetics.com/?page=Isaiah-Reason-Together",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BOM-Self-Limiting",
       "Link": "https://www.ldsapologetics.com/?page=BOM-Self-Limiting",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Repentance-Real",
       "Link": "https://www.ldsapologetics.com/?page=Repentance-Real",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Organized-Religion-Matters",
       "Link": "https://www.ldsapologetics.com/?page=Organized-Religion-Matters",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Baptism-Four-Reasons",
       "Link": "https://www.ldsapologetics.com/?page=Baptism-Four-Reasons",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BOM-Linguistic",
       "Link": "https://www.ldsapologetics.com/?page=BOM-Linguistic",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Carnal-Christian",
       "Link": "https://www.ldsapologetics.com/?page=Carnal-Christian",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_63948395511782086784735.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Handcart-Not-Negligence",
       "Link": "https://www.ldsapologetics.com/?page=Handcart-Not-Negligence",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BOM-Not-Racist-Full",
       "Link": "https://www.ldsapologetics.com/?page=BOM-Not-Racist-Full",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Baptism-Dead-Chiasmus",
       "Link": "https://www.ldsapologetics.com/?page=Baptism-Dead-Chiasmus",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "TULIP-Refuted",
       "Link": "https://www.ldsapologetics.com/?page=TULIP-Refuted",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BOM-Challenge",
       "Link": "https://www.ldsapologetics.com/?page=BOM-Challenge",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Hell-Has-End",
       "Link": "https://www.ldsapologetics.com/?page=Hell-Has-End",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Joseph-Smith-Abolitionist",
       "Link": "https://www.ldsapologetics.com/?page=Joseph-Smith-Abolitionist",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Three-Kingdoms",
       "Link": "https://www.ldsapologetics.com/?page=Three-Kingdoms",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Nephi-Kills-Laban",
       "Link": "https://www.ldsapologetics.com/?page=Nephi-Kills-Laban",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Angels-Are-People",
       "Link": "https://www.ldsapologetics.com/?page=Angels-Are-People",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Joseph-Polygamy-Context",
       "Link": "https://www.ldsapologetics.com/?page=Joseph-Polygamy-Context",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Spirit-Matter",
       "Link": "https://www.ldsapologetics.com/?page=Spirit-Matter",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Luther-Antisemitism",
       "Link": "https://www.ldsapologetics.com/?page=Luther-Antisemitism",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Abraham-Relativity",
       "Link": "https://www.ldsapologetics.com/?page=Abraham-Relativity",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Evangelical-Immorality",
       "Link": "https://www.ldsapologetics.com/?page=Evangelical-Immorality",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Abraham-Facsimiles",
       "Link": "https://www.ldsapologetics.com/?page=Abraham-Facsimiles",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Family-Under-Attack",
       "Link": "https://www.ldsapologetics.com/?page=Family-Under-Attack",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Melchizedek-Priesthood-Hebrews",
       "Link": "https://www.ldsapologetics.com/?page=Melchizedek-Priesthood-Hebrews",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "First-Vision-Accounts",
       "Link": "https://www.ldsapologetics.com/?page=First-Vision-Accounts",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Joseph-Methodist",
       "Link": "https://www.ldsapologetics.com/?page=Joseph-Methodist",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "False-Prophecies",
       "Link": "https://www.ldsapologetics.com/?page=False-Prophecies",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Joseph-Criminal-Record",
       "Link": "https://www.ldsapologetics.com/?page=Joseph-Criminal-Record",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BOM-Population-Math",
       "Link": "https://www.ldsapologetics.com/?page=BOM-Population-Math",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BOM-Missing-Jewish-Elements",
       "Link": "https://www.ldsapologetics.com/?page=BOM-Missing-Jewish-Elements",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Church-Growth-Statistics",
       "Link": "https://www.ldsapologetics.com/?page=Church-Growth-Statistics",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Polygamy-Coercion",
       "Link": "https://www.ldsapologetics.com/?page=Polygamy-Coercion",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BOM-Textual-Changes",
       "Link": "https://www.ldsapologetics.com/?page=BOM-Textual-Changes",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Hinckley-God-Man",
       "Link": "https://www.ldsapologetics.com/?page=Hinckley-God-Man",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Women-Mormon-History",
       "Link": "https://www.ldsapologetics.com/?page=Women-Mormon-History",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Mountain-Meadows",
       "Link": "https://www.ldsapologetics.com/?page=Mountain-Meadows",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Word-Of-Wisdom",
       "Link": "https://www.ldsapologetics.com/?page=Word-Of-Wisdom",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Treasure-Digging-Folk-Magic",
       "Link": "https://www.ldsapologetics.com/?page=Treasure-Digging-Folk-Magic",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Council-Of-Fifty",
       "Link": "https://www.ldsapologetics.com/?page=Council-Of-Fifty",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Blood-Atonement",
       "Link": "https://www.ldsapologetics.com/?page=Blood-Atonement",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Joseph-Smith-Translation-Bible",
       "Link": "https://www.ldsapologetics.com/?page=Joseph-Smith-Translation-Bible",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "DC-Retroactive-Changes",
       "Link": "https://www.ldsapologetics.com/?page=DC-Retroactive-Changes",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Truth-Seeking-Suppression",
       "Link": "https://www.ldsapologetics.com/?page=Truth-Seeking-Suppression",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Evolving-Nature-Of-God",
       "Link": "https://www.ldsapologetics.com/?page=Evolving-Nature-Of-God",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Hill-Cumorah",
       "Link": "https://www.ldsapologetics.com/?page=Hill-Cumorah",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Charles-Anthon-Script",
       "Link": "https://www.ldsapologetics.com/?page=Charles-Anthon-Script",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BOM-Printing-Harris",
       "Link": "https://www.ldsapologetics.com/?page=BOM-Printing-Harris",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "BOM-Kitchen-Sink",
       "Link": "https://www.ldsapologetics.com/?page=BOM-Kitchen-Sink",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Laban-Sword-Steel",
       "Link": "https://www.ldsapologetics.com/?page=Laban-Sword-Steel",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Covenants-Restored",
       "Link": "https://www.ldsapologetics.com/?page=Covenants-Restored",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Agency-Or-Decree",
       "Link": "https://www.ldsapologetics.com/?page=Agency-Or-Decree",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Plates-Purpose",
       "Link": "https://www.ldsapologetics.com/?page=Plates-Purpose",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "LDS-Jesus-Biblical",
       "Link": "https://www.ldsapologetics.com/?page=LDS-Jesus-Biblical",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_26419401311781301577763.png",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Legal-Versus-Righteous",
       "Link": "https://www.ldsapologetics.com/?page=Legal-Versus-Righteous",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     },
     {
       "Id": "Gods-In-Regression",
       "Link": "https://www.ldsapologetics.com/?page=Gods-In-Regression",
       "ImagePath": "",
-      "PostedAtUtc": null,
       "PostedGroups": []
     }
   ]

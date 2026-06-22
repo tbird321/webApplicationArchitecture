@@ -10,23 +10,24 @@ using Microsoft.Playwright;
 //   verify and click Post. When every group is done the article is marked and the
 //   run stops. Schedule it (e.g. daily) to advance one article at a time.
 //
-//   The tool NEVER clicks Post for you in the normal flow. You do.
+//   The tool NEVER clicks Post — that's always you. There is no auto-post mode.
 //
 //   Modes:
 //     (default)    Semi-auto: prepare each batch; you click Post.
 //     login        Open Chrome at Facebook to establish the session, then exit.
-//     --dry-run     Prepare composers but never mark posted.
-//     --auto        Opt-in full-auto: the script clicks Post itself (higher ToS risk).
+//     validate     Pre-flight: check group names/membership, then exit.
+//     --dry-run    Prepare composers but never mark posted.
 // ──────────────────────────────────────────────────────────────────────────────
 
 var argv = Environment.GetCommandLineArgs().Skip(1).ToArray();
 bool loginOnly = argv.Contains("login", StringComparer.OrdinalIgnoreCase);
 bool scrapeGroups = argv.Contains("scrape-groups", StringComparer.OrdinalIgnoreCase);
-bool forceAuto = argv.Contains("--auto", StringComparer.OrdinalIgnoreCase);
+bool validate = argv.Contains("validate", StringComparer.OrdinalIgnoreCase);
 bool dryRun = argv.Contains("--dry-run", StringComparer.OrdinalIgnoreCase);
+bool keepArtifacts = argv.Contains("--keep-artifacts", StringComparer.OrdinalIgnoreCase);
 
 var cfg = Config.Load(Path.GetFullPath("appsettings.json"));
-bool semiAuto = cfg.SemiAuto && !forceAuto;
+bool cleanArtifacts = cfg.CleanArtifacts && !keepArtifacts;
 
 // Pick which plan/list to run, e.g. `--plan apologetics` -> posts.apologetics.json,
 // or `--plan posts.ldsdoctrines.json`. Defaults to appsettings' QueueFile (posts.json).
@@ -60,6 +61,13 @@ if (plan.Groups.Count == 0)
     return;
 }
 
+// Pre-flight: validate the plan's groups (membership + live name) before any posting.
+if (validate)
+{
+    await GroupValidator.RunAsync(page, plan, cfg.QueueFile);
+    return;
+}
+
 var article = plan.Articles.FirstOrDefault(a => !a.IsComplete);
 if (article is null)
 {
@@ -75,7 +83,7 @@ int postCount = (int)Math.Ceiling(remaining.Count / (double)per);
 Console.WriteLine($"\nNext article: [{article.Id}]");
 Console.WriteLine($"  {article.PostedGroups.Count}/{plan.Groups.Count} groups already done; {remaining.Count} remaining.");
 Console.WriteLine($"  {per} group(s) per post → {postCount} post(s) this run. " +
-                  $"Mode: {(dryRun ? "DRY-RUN" : semiAuto ? "SEMI-AUTO (you click Post)" : "FULL-AUTO")}.");
+                  $"Mode: {(dryRun ? "DRY-RUN" : "SEMI-AUTO (you click Post)")}.");
 
 // Post text: hand-written override if present, otherwise fetched from the live page.
 string body = article.Message ?? "";
@@ -92,6 +100,9 @@ if (string.IsNullOrWhiteSpace(body))
     foreach (var line in body.Split('\n')) Console.WriteLine($"      {line}");
 }
 
+// Start clean: wipe last run's screenshots/temp and reset this run's fail log.
+if (cleanArtifacts) PurgeArtifacts(cfg, resetFailLog: true);
+
 var poster = new Poster(cfg);
 int posted = 0, skipped = 0;
 
@@ -100,6 +111,14 @@ for (int i = 0; i < remaining.Count; i += per)
     var batch = remaining.Skip(i).Take(per).ToList();
     Console.WriteLine($"\n— Post {i / per + 1}/{postCount}: hook these {batch.Count} group(s):");
     foreach (var g in batch) Console.WriteLine($"      • {g.Name}");
+
+    // A short, watchable pause before each post — keeps the pacing human and gives you
+    // a moment to see what's coming before the composer starts filling.
+    if (cfg.PrePostDelayMs > 0)
+    {
+        Console.WriteLine($"  · pausing {cfg.PrePostDelayMs / 1000.0:0.#}s before composing…");
+        await page.WaitForTimeoutAsync(cfg.PrePostDelayMs);
+    }
 
     bool prepared = await poster.PrepareMultiAsync(page, article, batch, body);
     if (!prepared) { skipped += batch.Count; continue; }
@@ -110,16 +129,10 @@ for (int i = 0; i < remaining.Count; i += per)
         continue;
     }
 
-    if (semiAuto)
-    {
-        Console.Write("  → Make sure the groups are selected, click POST yourself, then press [Enter] (s+[Enter] to skip): ");
-        var key = Console.ReadLine()?.Trim().ToLowerInvariant();
-        if (key == "s") { skipped += batch.Count; Console.WriteLine("  · skipped."); continue; }
-    }
-    else
-    {
-        if (!await poster.SubmitAsync(page, article, batch[0].Url)) { skipped += batch.Count; continue; }
-    }
+    // Semi-auto only: YOU click Post. The tool never submits on its own.
+    Console.Write("  → Make sure the groups are selected, click POST yourself, then press [Enter] (s+[Enter] to skip): ");
+    var key = Console.ReadLine()?.Trim().ToLowerInvariant();
+    if (key == "s") { skipped += batch.Count; Console.WriteLine("  · skipped."); continue; }
 
     foreach (var g in batch) article.PostedGroups.Add(g.Url);
     PlanStore.Save(cfg.QueueFile, plan);   // persist after each batch → resume-safe
@@ -141,8 +154,40 @@ else if (!dryRun)
 
 Console.WriteLine($"\nRun finished. Group posts completed: {posted}, skipped/failed: {skipped}.");
 
+// Tidy up after ourselves: remove this run's screenshots + temp files. The fail log
+// (failed-groups.log) is kept as the post-run report unless there were no failures.
+if (cleanArtifacts) PurgeArtifacts(cfg, resetFailLog: false);
+
 
 // ── helpers ───────────────────────────────────────────────────────────────────
+
+// Remove transient run artifacts: everything in the screenshots dir and any stray *.tmp
+// next to the plan file. Never touches the plan, the Chrome profile, or report logs.
+// With resetFailLog, also clears failed-groups.log so a fresh run starts with an empty
+// failure list; otherwise an empty (no-failures) log is removed so nothing is left behind.
+static void PurgeArtifacts(Config cfg, bool resetFailLog)
+{
+    try
+    {
+        if (Directory.Exists(cfg.ScreenshotDir))
+            foreach (var f in Directory.EnumerateFiles(cfg.ScreenshotDir))
+                TryDelete(f);
+
+        var planDir = Path.GetDirectoryName(cfg.QueueFile) ?? ".";
+        foreach (var f in Directory.EnumerateFiles(planDir, "*.tmp")) TryDelete(f);
+
+        var failLog = Path.Combine(planDir, "failed-groups.log");
+        if (File.Exists(failLog) && (resetFailLog || new FileInfo(failLog).Length == 0))
+            TryDelete(failLog);
+    }
+    catch (Exception ex) { Console.WriteLine($"  (cleanup note: {ex.Message})"); }
+}
+
+static void TryDelete(string path)
+{
+    try { File.Delete(path); } catch { /* in use / already gone — ignore */ }
+}
+
 static string? GetOption(string[] args, string name)
 {
     for (int i = 0; i < args.Length - 1; i++)

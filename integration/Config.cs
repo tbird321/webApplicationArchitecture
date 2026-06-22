@@ -21,14 +21,23 @@ public sealed class Config
     /// <summary>If true, never launch Chrome — only attach to an instance you started yourself with the debug port.</summary>
     public bool AttachOnly { get; set; } = false;
 
-    /// <summary>If true, fill the post then wait for you to confirm in the console before submitting.</summary>
-    public bool SemiAuto { get; set; } = true;
-
     public int MinDelayMs { get; set; } = 4000;
     public int MaxDelayMs { get; set; } = 12000;
 
+    /// <summary>A deliberate, watchable pause before each post (batch) so you can see what
+    /// it's doing and to keep the pacing human. Set to 0 to disable.</summary>
+    public int PrePostDelayMs { get; set; } = 3000;
+
+    /// <summary>Small pause between in-composer steps (open, add groups, type) so each
+    /// stage is visible rather than happening in a blink. Set to 0 to disable.</summary>
+    public int StepDelayMs { get; set; } = 1200;
+
     /// <summary>How long to wait after typing a link for Facebook to render its preview card.</summary>
     public int LinkPreviewWaitMs { get; set; } = 6000;
+
+    /// <summary>Wipe transient run artifacts (screenshots, *.tmp) before and after a run so
+    /// nothing is left lying around. Override per-run with --keep-artifacts when debugging.</summary>
+    public bool CleanArtifacts { get; set; } = true;
 
     public string QueueFile { get; set; } = @".\posts.json";
     public string ScreenshotDir { get; set; } = @".\screenshots";

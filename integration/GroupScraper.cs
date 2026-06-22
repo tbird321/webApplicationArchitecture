@@ -3,12 +3,46 @@ using Microsoft.Playwright;
 namespace FacebookPoster;
 
 /// <summary>
-/// Scrapes the Facebook "Groups you've joined" page and writes groups-scraped.json,
-/// sorted by last-active time (most recent first).
+/// Scrapes the Facebook "Groups you've joined" page. <see cref="ScrapeAsync"/> returns the
+/// live url -> (name, lastActive) map; <see cref="RunAsync"/> writes it to
+/// groups-scraped.json sorted by last-active time (most recent first).
 /// </summary>
 public static class GroupScraper
 {
     public static async Task RunAsync(IPage page)
+    {
+        var groups = await ScrapeAsync(page);
+        if (groups.Count == 0)
+        {
+            Console.WriteLine("\n! No groups found. Make sure you're logged in and on the Groups page.");
+            return;
+        }
+
+        var sorted = groups
+            .OrderBy(g => g.Value.Minutes)
+            .ThenBy(g => g.Value.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        Console.WriteLine($"\nFound {sorted.Count} group(s), sorted by last active.");
+
+        var lines = sorted.Select(g =>
+        {
+            var safeName = g.Value.Name.Replace("\\", "\\\\").Replace("\"", "\\\"");
+            return $"    {{ \"Name\": \"{safeName}\", \"Url\": \"{g.Key}\" }}";
+        });
+        var json = "[\n" + string.Join(",\n", lines) + "\n]";
+
+        var outPath = Path.GetFullPath("groups-scraped.json");
+        await File.WriteAllTextAsync(outPath, json);
+        Console.WriteLine($"Written to: {outPath}");
+        Console.WriteLine("Paste the contents into the \"Groups\" array in posts.json, then remove any you don't want.");
+    }
+
+    /// <summary>
+    /// Scrolls the joined-groups page and returns a map of normalized group URL ->
+    /// (current display name, minutes since last active).
+    /// </summary>
+    public static async Task<Dictionary<string, (string Name, long Minutes)>> ScrapeAsync(IPage page)
     {
         Console.WriteLine("\nNavigating to your joined groups…");
         await page.GotoAsync("https://www.facebook.com/groups/?category=joined",
@@ -17,7 +51,6 @@ public static class GroupScraper
 
         Console.WriteLine("Scrolling to load all groups (this may take a few seconds)…");
 
-        // url -> (name, lastActiveMinutes)
         var groups = new Dictionary<string, (string Name, long Minutes)>(StringComparer.OrdinalIgnoreCase);
         int prevCount = 0;
         int unchangedRounds = 0;
@@ -80,30 +113,7 @@ public static class GroupScraper
             await page.WaitForTimeoutAsync(800);
         }
 
-        if (groups.Count == 0)
-        {
-            Console.WriteLine("\n! No groups found. Make sure you're logged in and on the Groups page.");
-            return;
-        }
-
-        var sorted = groups
-            .OrderBy(g => g.Value.Minutes)
-            .ThenBy(g => g.Value.Name, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        Console.WriteLine($"\nFound {sorted.Count} group(s), sorted by last active.");
-
-        var lines = sorted.Select(g =>
-        {
-            var safeName = g.Value.Name.Replace("\\", "\\\\").Replace("\"", "\\\"");
-            return $"    {{ \"Name\": \"{safeName}\", \"Url\": \"{g.Key}\" }}";
-        });
-        var json = "[\n" + string.Join(",\n", lines) + "\n]";
-
-        var outPath = Path.GetFullPath("groups-scraped.json");
-        await File.WriteAllTextAsync(outPath, json);
-        Console.WriteLine($"Written to: {outPath}");
-        Console.WriteLine("Paste the contents into the \"Groups\" array in posts.json, then remove any you don't want.");
+        return groups;
     }
 
     /// <summary>Converts a relative-time string like "17 minutes ago" to total minutes.</summary>
@@ -126,5 +136,19 @@ public static class GroupScraper
         if (label.Contains("month"))   return FirstInt(label) * 43200L;
         if (label.Contains("year"))    return FirstInt(label) * 525600L;
         return long.MaxValue;
+    }
+
+    /// <summary>Normalize a group URL to "groups/&lt;slug&gt;" (lowercased) for matching.</summary>
+    public static string NormalizeUrl(string url)
+    {
+        try
+        {
+            var uri = new Uri(url);
+            var parts = uri.AbsolutePath.Trim('/').Split('/');
+            if (parts.Length >= 2 && parts[0].Equals("groups", StringComparison.OrdinalIgnoreCase))
+                return "groups/" + parts[1].ToLowerInvariant();
+            return url.Trim().ToLowerInvariant();
+        }
+        catch { return url.Trim().ToLowerInvariant(); }
     }
 }

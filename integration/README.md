@@ -62,8 +62,8 @@ Easiest: **double-click `start.cmd`** and pick **2) semi-auto**. Or:
 ```
 run.cmd                 (semi-auto — you click Post)
 run.cmd -- --dry-run    (fill composers, never mark posted — great for testing)
-run.cmd -- --auto       (opt-in: the script clicks Post; higher ToS risk)
 ```
+There is **no auto-post mode** — the tool never clicks Post. That is always you.
 
 > **Running from a terminal you typed into?** On systems where Windows sets
 > `NoDefaultCurrentDirectoryInExePath`, cmd won't run a script in the current folder by
@@ -169,7 +169,7 @@ For each batch, `Poster.PrepareMultiAsync` does, in this exact order:
    It opens the **Add groups** picker, ticks each group's row checkbox, and clicks **Done**.
 3. Attach the image (if `ImagePath` is set).
 4. **Type the body** into the composer, then wait for the link preview card to render.
-5. Stop and let you review + click **Post** (semi-auto), or click it itself (`--auto`).
+5. Stop and let **you** review and click **Post**. The tool never submits on its own.
 
 It writes screenshots at each step to `screenshots/` (`group-picker`,
 `group-picker-selected`, `after-add-groups`, `prepared`, plus `*-fail` shots), which is
