@@ -34,18 +34,20 @@ echo   1. Log in            (one-time session setup)
 echo   2. Run - semi-auto   (you click Post)   ^<- normal
 echo   3. Run - dry run      (fill only, never post)
 echo   4. Run - FULL AUTO    (script clicks Post; higher risk)
-echo   5. Edit list file
-echo   6. Exit
+echo   5. Scrape my groups   (list all joined groups as JSON)
+echo   6. Edit list file
+echo   7. Exit
 echo(
 set "choice="
-set /p choice="Choose [1-6]: "
+set /p choice="Choose [1-7]: "
 
 if "%choice%"=="1" goto login
 if "%choice%"=="2" goto semi
 if "%choice%"=="3" goto dry
 if "%choice%"=="4" goto auto
-if "%choice%"=="5" goto edit
-if "%choice%"=="6" exit /b 0
+if "%choice%"=="5" goto scrape
+if "%choice%"=="6" goto edit
+if "%choice%"=="7" exit /b 0
 echo Invalid choice.
 goto menu
 
@@ -63,6 +65,10 @@ goto done
 
 :auto
 dotnet run -- --auto %PLANARG%
+goto done
+
+:scrape
+dotnet run -- scrape-groups
 goto done
 
 :edit

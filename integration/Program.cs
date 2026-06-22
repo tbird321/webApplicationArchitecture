@@ -21,6 +21,7 @@ using Microsoft.Playwright;
 
 var argv = Environment.GetCommandLineArgs().Skip(1).ToArray();
 bool loginOnly = argv.Contains("login", StringComparer.OrdinalIgnoreCase);
+bool scrapeGroups = argv.Contains("scrape-groups", StringComparer.OrdinalIgnoreCase);
 bool forceAuto = argv.Contains("--auto", StringComparer.OrdinalIgnoreCase);
 bool dryRun = argv.Contains("--dry-run", StringComparer.OrdinalIgnoreCase);
 
@@ -42,6 +43,12 @@ await EnsureLoggedIn(page, cfg);
 if (loginOnly)
 {
     Console.WriteLine("Session is ready in the dedicated profile. You can close this window.");
+    return;
+}
+
+if (scrapeGroups)
+{
+    await GroupScraper.RunAsync(page);
     return;
 }
 
