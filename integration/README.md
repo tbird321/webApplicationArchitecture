@@ -98,8 +98,7 @@ Each article is posted to all of them, in batches of `GroupsPerPost`.
       "Id": "Blood-Atonement", // unique; used in screenshot names
       "Link": "https://ldsapologetics.com/?page=Blood-Atonement",  // required
       "ImagePath": null,       // optional absolute path to an image
-      "PostedAtUtc": null,     // set automatically once posted to ALL groups
-      "PostedGroups": []       // group URLs done so far (resume-safe)
+      "PostedAtUtc": null      // set automatically once posted to ALL groups
       // "Message": "..."      // OPTIONAL override; omit to fetch text from the page
     }
   ]
