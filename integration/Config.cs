@@ -32,6 +32,19 @@ public sealed class Config
     /// stage is visible rather than happening in a blink. Set to 0 to disable.</summary>
     public int StepDelayMs { get; set; } = 1200;
 
+    /// <summary>Pause between ticking each group in the "Add groups" picker. Facebook
+    /// watches for rapid selection, so space them out. Set to 0 to disable.</summary>
+    public int GroupSelectDelayMs { get; set; } = 2000;
+
+    /// <summary>Move a real cursor (stepped mouse path + hover) before clicks, and type
+    /// at human speed, instead of teleporting/forced clicks. Leave on to look human.</summary>
+    public bool HumanizeInput { get; set; } = true;
+
+    /// <summary>Per-keystroke delay range (ms) when typing like a human, e.g. into the
+    /// group picker's search box. Each key waits a random value in [min,max].</summary>
+    public int TypeMinDelayMs { get; set; } = 70;
+    public int TypeMaxDelayMs { get; set; } = 180;
+
     /// <summary>How long to wait after typing a link for Facebook to render its preview card.</summary>
     public int LinkPreviewWaitMs { get; set; } = 6000;
 

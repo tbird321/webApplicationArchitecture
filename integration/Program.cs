@@ -111,13 +111,14 @@ for (int i = 0; i < remaining.Count; i += per)
     Console.WriteLine($"\n— Post {i / per + 1}/{postCount}: hook these {batch.Count} group(s):");
     foreach (var g in batch) Console.WriteLine($"      • {g.Name}");
 
-    // A short, watchable pause before each post — keeps the pacing human and gives you
-    // a moment to see what's coming before the composer starts filling.
+    // Facebook flags rapid automated activity, so EVERY set is gated on you — in all
+    // modes, including dry-run: nothing fills the composer until you press Enter.
+    Console.Write($"  → Press [Enter] to start this set of {batch.Count} group(s) (Ctrl+C to stop)… ");
+    Console.ReadLine();
+
+    // A short, watchable pause after you commit, before the composer starts filling.
     if (cfg.PrePostDelayMs > 0)
-    {
-        Console.WriteLine($"  · pausing {cfg.PrePostDelayMs / 1000.0:0.#}s before composing…");
         await page.WaitForTimeoutAsync(cfg.PrePostDelayMs);
-    }
 
     bool prepared = await poster.PrepareMultiAsync(page, article, batch, body);
     if (!prepared) { skipped += batch.Count; continue; }

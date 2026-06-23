@@ -114,7 +114,7 @@ public sealed class Poster
             await Screenshot(page, article, "no-composer");
             return false;
         }
-        await trigger.ClickAsync();
+        await MoveAndClickAsync(page, trigger);
 
         // Wait for the "Create post" dialog to actually open before hunting for its editor,
         // otherwise we can match a feed comment box that's still visible mid-animation.
@@ -183,7 +183,7 @@ public sealed class Poster
             LogFailedGroups(article, others, "picker-not-found");
             return;
         }
-        await moreBtn.ClickAsync();
+        await MoveAndClickAsync(page, moreBtn);
         await page.WaitForTimeoutAsync(1500);
 
         // Capture the picker the instant it opens, before touching anything.
@@ -197,8 +197,14 @@ public sealed class Poster
             Console.WriteLine("  (no picker search box found — only currently-visible groups can be ticked)");
 
         var failed = new List<Group>();
-        foreach (var g in others)
+        for (int gi = 0; gi < others.Count; gi++)
         {
+            var g = others[gi];
+
+            // Space out selections — Facebook flags rapid ticking. Pause between each group.
+            if (gi > 0 && _cfg.GroupSelectDelayMs > 0)
+                await page.WaitForTimeoutAsync(_cfg.GroupSelectDelayMs);
+
             bool ok = await TickGroupAsync(page, search, g.Name);
             if (!ok)
             {
@@ -229,7 +235,7 @@ public sealed class Poster
         if (done is not null)
         {
             Console.WriteLine("  · clicking picker confirm button…");
-            await done.ClickAsync();
+            await MoveAndClickAsync(page, done);
         }
         else
         {
@@ -245,7 +251,7 @@ public sealed class Poster
     /// so we walk up from the name to the nearest interactive ancestor and click that,
     /// then verify the row's checkbox actually flipped to checked.
     /// </summary>
-    private static async Task<bool> TickGroupAsync(IPage page, ILocator? search, string name)
+    private async Task<bool> TickGroupAsync(IPage page, ILocator? search, string name)
     {
         var target = NormName(name);
 
@@ -269,8 +275,8 @@ public sealed class Poster
         {
             try
             {
-                if (i > 0) await search.PressSequentiallyAsync(" ", new() { Delay = 8 });
-                await search.PressSequentiallyAsync(words[i], new() { Delay = 12 });
+                if (i > 0) await HumanTypeAsync(search, " ");
+                await HumanTypeAsync(search, words[i]);
             }
             catch { }
 
@@ -304,20 +310,31 @@ public sealed class Poster
     }
 
     /// <summary>Tick a checkbox by its document-order index (matches the JS enumeration).</summary>
-    private static async Task<bool> TickByIndexAsync(IPage page, int idx)
+    private async Task<bool> TickByIndexAsync(IPage page, int idx)
     {
         var checkbox = page.Locator("input[type='checkbox']").Nth(idx);
+        if (await IsCheckedNow(checkbox)) return true;
+
+        // Click the visible row the way a person does — the real <input> is hidden, so a
+        // human never clicks it directly; they click the row with the avatar + name.
+        var row = checkbox.Locator("xpath=ancestor::div[.//*[local-name()='image' or local-name()='img']][1]").First;
         try
         {
+            await MoveAndClickAsync(page, row);
             if (await IsCheckedNow(checkbox)) return true;
+        }
+        catch { /* fall through to forced fallbacks */ }
+
+        // Fallbacks if the humanized click didn't register the toggle — kept so selection
+        // still works when FB's row markup shifts. (Less human, but only on failure.)
+        try
+        {
             await checkbox.CheckAsync(new() { Force = true });
             if (await IsCheckedNow(checkbox)) return true;
         }
-        catch { /* fall through to row click */ }
-
+        catch { }
         try
         {
-            var row = checkbox.Locator("xpath=ancestor::div[.//*[local-name()='image' or local-name()='img']][1]").First;
             await row.ClickAsync(new() { Timeout = 3000, Force = true });
             return await IsCheckedNow(checkbox);
         }
@@ -557,6 +574,60 @@ public sealed class Poster
     private async Task StepPause(IPage page)
     {
         if (_cfg.StepDelayMs > 0) await page.WaitForTimeoutAsync(_cfg.StepDelayMs);
+    }
+
+    /// <summary>
+    /// Click an element the way a person would: move a real cursor to it along a short
+    /// stepped path, hover a beat, then press at that point — no teleport, no forced
+    /// synthetic click. Falls back to a plain click if the box can't be measured or
+    /// humanizing is turned off.
+    /// </summary>
+    private async Task MoveAndClickAsync(IPage page, ILocator loc)
+    {
+        if (_cfg.HumanizeInput)
+        {
+            try
+            {
+                await loc.ScrollIntoViewIfNeededAsync(new() { Timeout = 3000 });
+                var box = await loc.BoundingBoxAsync();
+                if (box is not null)
+                {
+                    // Aim at a random interior point, not the dead centre.
+                    float tx = box.X + box.Width  * (float)(0.30 + _rng.NextDouble() * 0.40);
+                    float ty = box.Y + box.Height * (float)(0.30 + _rng.NextDouble() * 0.40);
+                    // Approach via a waypoint above the target so the path isn't a straight line.
+                    float wx = box.X + box.Width * (float)_rng.NextDouble();
+                    float wy = Math.Max(0, box.Y - _rng.Next(10, 70));
+
+                    await page.Mouse.MoveAsync(wx, wy, new() { Steps = _rng.Next(6, 14) });
+                    await page.Mouse.MoveAsync(tx, ty, new() { Steps = _rng.Next(12, 30) });
+                    await page.WaitForTimeoutAsync(_rng.Next(90, 320));   // hover dwell
+                    await page.Mouse.DownAsync();
+                    await page.WaitForTimeoutAsync(_rng.Next(40, 120));   // press duration
+                    await page.Mouse.UpAsync();
+                    return;
+                }
+            }
+            catch { /* fall back to a plain click */ }
+        }
+        await loc.ClickAsync();
+    }
+
+    /// <summary>Type text one key at a time with a randomized human delay between keys
+    /// (plus the occasional longer think-pause), instead of machine-fast bursts.</summary>
+    private async Task HumanTypeAsync(ILocator field, string text)
+    {
+        if (!_cfg.HumanizeInput)
+        {
+            await field.PressSequentiallyAsync(text, new() { Delay = 12 });
+            return;
+        }
+        foreach (var ch in text)
+        {
+            await field.PressSequentiallyAsync(ch.ToString());
+            await Task.Delay(_rng.Next(_cfg.TypeMinDelayMs, _cfg.TypeMaxDelayMs + 1));
+            if (_rng.NextDouble() < 0.07) await Task.Delay(_rng.Next(180, 450));  // think-pause
+        }
     }
 
     private async Task Screenshot(IPage page, Article article, string tag)
