@@ -75,13 +75,12 @@ if (article is null)
     return;
 }
 
-var cmp = StringComparer.OrdinalIgnoreCase;
-var remaining = plan.Groups.Where(g => !article.PostedGroups.Contains(g.Url, cmp)).ToList();
+var remaining = plan.Groups.ToList();
 int per = plan.GroupsPerPost > 0 ? plan.GroupsPerPost : Math.Max(1, remaining.Count);
 int postCount = (int)Math.Ceiling(remaining.Count / (double)per);
 
 Console.WriteLine($"\nNext article: [{article.Id}]");
-Console.WriteLine($"  {article.PostedGroups.Count}/{plan.Groups.Count} groups already done; {remaining.Count} remaining.");
+Console.WriteLine($"  {remaining.Count} group(s) to post.");
 Console.WriteLine($"  {per} group(s) per post → {postCount} post(s) this run. " +
                   $"Mode: {(dryRun ? "DRY-RUN" : "SEMI-AUTO (you click Post)")}.");
 
@@ -134,13 +133,11 @@ for (int i = 0; i < remaining.Count; i += per)
     var key = Console.ReadLine()?.Trim().ToLowerInvariant();
     if (key == "s") { skipped += batch.Count; Console.WriteLine("  · skipped."); continue; }
 
-    foreach (var g in batch) article.PostedGroups.Add(g.Url);
-    PlanStore.Save(cfg.QueueFile, plan);   // persist after each batch → resume-safe
     posted += batch.Count;
-    Console.WriteLine($"  ✓ {article.PostedGroups.Count}/{plan.Groups.Count} groups done.");
+    Console.WriteLine($"  ✓ {posted}/{plan.Groups.Count} groups done.");
 }
 
-bool complete = plan.Groups.All(g => article.PostedGroups.Contains(g.Url, cmp));
+bool complete = posted == plan.Groups.Count;
 if (!dryRun && complete)
 {
     article.PostedAtUtc = DateTime.UtcNow;
@@ -149,7 +146,7 @@ if (!dryRun && complete)
 }
 else if (!dryRun)
 {
-    Console.WriteLine($"\n[{article.Id}] still has {plan.Groups.Count - article.PostedGroups.Count} group(s) to go; rerun to finish it.");
+    Console.WriteLine($"\n[{article.Id}] still has {plan.Groups.Count - posted} group(s) to go; rerun to finish it.");
 }
 
 Console.WriteLine($"\nRun finished. Group posts completed: {posted}, skipped/failed: {skipped}.");

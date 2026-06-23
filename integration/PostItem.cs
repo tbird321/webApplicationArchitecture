@@ -31,9 +31,6 @@ public sealed class Article
     /// <summary>Set once this article has been posted to ALL groups.</summary>
     public DateTime? PostedAtUtc { get; set; }
 
-    /// <summary>Group URLs already posted to (so an interrupted run can resume).</summary>
-    public List<string> PostedGroups { get; set; } = new();
-
     [JsonIgnore]
     public bool IsComplete => PostedAtUtc is not null;
 }
