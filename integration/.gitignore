@@ -1,0 +1,17 @@
+# Build output
+bin/
+obj/
+
+# Chrome profile — CONTAINS YOUR LOGGED-IN SESSION / COOKIES. Never commit.
+.fb-profile/
+
+# Run artifacts
+screenshots/
+failed-groups.log
+group-validation.log
+groups-scraped.json
+*.tmp
+
+# Local plans (your real groups/content). Example templates are kept.
+posts.*.json
+!*.example.json

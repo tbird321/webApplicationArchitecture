@@ -1,0 +1,16 @@
+{
+  "Groups": [
+    { "Name": "LDS Doctrine Discussion", "Url": "https://www.facebook.com/groups/333333333333333" },
+    { "Name": "Come Follow Me Study", "Url": "https://www.facebook.com/groups/444444444444444" }
+  ],
+  "GroupsPerPost": 8,
+  "Articles": [
+    {
+      "Id": "Example-Doctrine-Page",
+      "Link": "https://ldsdoctrines.com/?page=Example-Doctrine-Page",
+      "ImagePath": null,
+      "PostedAtUtc": null,
+      "PostedGroups": []
+    }
+  ]
+}
