@@ -3,6 +3,9 @@ using Microsoft.Playwright;
 
 namespace FacebookPoster;
 
+/// <summary>Outcome of waiting for you to click Post in single-group mode.</summary>
+public enum PostWait { Posted, Skipped, TimedOut }
+
 /// <summary>
 /// Drives Facebook's group composer + "post to more groups" picker. In the intended
 /// (semi-auto) mode it only PREPARES the post — fills text/link/image and tries to
@@ -16,6 +19,10 @@ public sealed class Poster
 {
     private readonly Config _cfg;
     private readonly Random _rng = new();
+
+    /// <summary>Remote image URL → local temp file, so a given image is downloaded once
+    /// per run and reused across every group instead of re-fetched for each post.</summary>
+    private readonly Dictionary<string, string> _imageCache = new(StringComparer.OrdinalIgnoreCase);
 
     public Poster(Config cfg) => _cfg = cfg;
 
@@ -170,6 +177,50 @@ public sealed class Poster
         await Screenshot(page, article, "prepared");
         Console.WriteLine("  ✓ composer filled. Confirm the groups, then post it yourself.");
         return true;
+    }
+
+    /// <summary>
+    /// Block until the "Create post" composer closes — i.e. YOU clicked Post (or discarded
+    /// it) — so single-group mode can advance to the next group with no Enter needed.
+    /// Polls the dialog's visibility; calls <paramref name="shouldSkip"/> each tick so the
+    /// caller can offer a keyboard skip. Returns Posted when the dialog goes away, Skipped if
+    /// the caller bails, or TimedOut after <paramref name="timeoutMs"/>.
+    /// </summary>
+    public async Task<PostWait> WaitForComposerClosedAsync(IPage page, Func<bool> shouldSkip, int timeoutMs = 600_000)
+    {
+        var dialog = page.Locator("div[role='dialog'][aria-label='Create post'], div[aria-label='Create post']").First;
+
+        // First confirm the composer is actually open, so a momentary read-miss right after
+        // prepare can't be mistaken for "posted". If it never opens we still fall through.
+        var openDeadline = DateTime.UtcNow.AddMilliseconds(8000);
+        bool sawOpen = false;
+        while (DateTime.UtcNow < openDeadline)
+        {
+            if (shouldSkip()) return PostWait.Skipped;
+            try { if (await dialog.IsVisibleAsync()) { sawOpen = true; break; } } catch { }
+            await page.WaitForTimeoutAsync(250);
+        }
+        if (!sawOpen)
+            Console.WriteLine("  (note: never saw the composer open — watching for it to close anyway.)");
+
+        // Now wait for it to disappear: that's the click-Post signal.
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (shouldSkip()) return PostWait.Skipped;
+            bool visible;
+            try { visible = await dialog.IsVisibleAsync(); }
+            catch { visible = false; }
+            if (!visible)
+            {
+                // Settle a beat so a transient re-render mid-submit doesn't double-count.
+                await page.WaitForTimeoutAsync(600);
+                try { if (await dialog.IsVisibleAsync()) continue; } catch { }
+                return PostWait.Posted;
+            }
+            await page.WaitForTimeoutAsync(400);
+        }
+        return PostWait.TimedOut;
     }
 
     /// <summary>Best-effort: open "Post to more groups" and tick the batch's other groups by name.</summary>
@@ -434,26 +485,36 @@ public sealed class Poster
     {
         var imagePath = article.ImagePath!;
 
-        // If it's a URL, download it to a temp file first.
+        // If it's a URL, download it to a temp file first — but only once per run. The same
+        // image goes to every group, so reuse the file we already pulled instead of re-fetching.
         if (imagePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
             imagePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"  · downloading image from URL…");
-            var ext = Path.GetExtension(new Uri(imagePath).AbsolutePath);
-            if (string.IsNullOrEmpty(ext)) ext = ".jpg";
-            var tmp = Path.Combine(Path.GetTempPath(), $"fb-img-{Guid.NewGuid():N}{ext}");
-            try
+            if (_imageCache.TryGetValue(imagePath, out var cached) && File.Exists(cached))
             {
-                using var http = new System.Net.Http.HttpClient();
-                var bytes = await http.GetByteArrayAsync(imagePath);
-                await File.WriteAllBytesAsync(tmp, bytes);
-                imagePath = tmp;
-                Console.WriteLine($"  · saved to {tmp}");
+                Console.WriteLine($"  · reusing downloaded image: {cached}");
+                imagePath = cached;
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine($"  ! Failed to download image: {ex.Message} (skipping attachment).");
-                return;
+                Console.WriteLine($"  · downloading image from URL…");
+                var ext = Path.GetExtension(new Uri(imagePath).AbsolutePath);
+                if (string.IsNullOrEmpty(ext)) ext = ".jpg";
+                var tmp = Path.Combine(Path.GetTempPath(), $"fb-img-{Guid.NewGuid():N}{ext}");
+                try
+                {
+                    using var http = new System.Net.Http.HttpClient();
+                    var bytes = await http.GetByteArrayAsync(imagePath);
+                    await File.WriteAllBytesAsync(tmp, bytes);
+                    _imageCache[imagePath] = tmp;
+                    Console.WriteLine($"  · saved to {tmp}");
+                    imagePath = tmp;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  ! Failed to download image: {ex.Message} (skipping attachment).");
+                    return;
+                }
             }
         }
         else if (!File.Exists(imagePath))

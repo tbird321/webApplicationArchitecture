@@ -28,6 +28,11 @@ public sealed class Article
     /// <summary>Optional absolute path to an image to attach.</summary>
     public string? ImagePath { get; set; }
 
+    /// <summary>Keys (group Url, or Name if no Url) of every group this article has been
+    /// posted to. Written one group at a time as you post, so an interrupted run resumes
+    /// where it left off and already-posted groups are skipped on the next run.</summary>
+    public List<string> PostedGroups { get; set; } = new();
+
     /// <summary>Set once this article has been posted to ALL groups.</summary>
     public DateTime? PostedAtUtc { get; set; }
 

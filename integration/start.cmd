@@ -54,21 +54,23 @@ echo ===================================================
 echo   1. Log in            (one-time session setup)
 echo   2. Validate groups   (pre-flight: check names ^& membership)
 echo   3. Run - semi-auto   (you click Post)   ^<- normal
-echo   4. Run - dry run      (fill only, never post)
-echo   5. Scrape my groups   (list all joined groups as JSON)
-echo   6. Edit list file
-echo   7. Exit
+echo   4. Run - one per post (one group at a time, avoids rate limits)
+echo   5. Run - dry run      (fill only, never post)
+echo   6. Scrape my groups   (list all joined groups as JSON)
+echo   7. Edit list file
+echo   8. Exit
 echo(
 set "choice="
-set /p choice="Choose [1-7]: "
+set /p choice="Choose [1-8]: "
 
 if "%choice%"=="1" goto login
 if "%choice%"=="2" goto validate
 if "%choice%"=="3" goto semi
-if "%choice%"=="4" goto dry
-if "%choice%"=="5" goto scrape
-if "%choice%"=="6" goto edit
-if "%choice%"=="7" exit /b 0
+if "%choice%"=="4" goto single
+if "%choice%"=="5" goto dry
+if "%choice%"=="6" goto scrape
+if "%choice%"=="7" goto edit
+if "%choice%"=="8" exit /b 0
 echo Invalid choice.
 goto menu
 
@@ -82,6 +84,10 @@ goto done
 
 :semi
 dotnet run -- %PLANARG%
+goto done
+
+:single
+dotnet run -- single %PLANARG%
 goto done
 
 :dry

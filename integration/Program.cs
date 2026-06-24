@@ -14,6 +14,9 @@ using Microsoft.Playwright;
 //
 //   Modes:
 //     (default)    Semi-auto: prepare each batch; you click Post.
+//     single       One group per post (per=1): a fresh native post in each group,
+//                  never the "Add groups" picker — sidesteps Facebook's rapid-ticking
+//                  rate limit. Slower (one post per group), but the safest pacing.
 //     login        Open Chrome at Facebook to establish the session, then exit.
 //     validate     Pre-flight: check group names/membership, then exit.
 //     --dry-run    Prepare composers but never mark posted.
@@ -23,6 +26,7 @@ var argv = Environment.GetCommandLineArgs().Skip(1).ToArray();
 bool loginOnly = argv.Contains("login", StringComparer.OrdinalIgnoreCase);
 bool scrapeGroups = argv.Contains("scrape-groups", StringComparer.OrdinalIgnoreCase);
 bool validate = argv.Contains("validate", StringComparer.OrdinalIgnoreCase);
+bool single = argv.Contains("single", StringComparer.OrdinalIgnoreCase);
 bool dryRun = argv.Contains("--dry-run", StringComparer.OrdinalIgnoreCase);
 bool keepArtifacts = argv.Contains("--keep-artifacts", StringComparer.OrdinalIgnoreCase);
 
@@ -68,6 +72,25 @@ if (validate)
     return;
 }
 
+// Reconcile first: finalize any article whose recorded group-posts already cover every
+// group (e.g. a prior run posted the last group but was interrupted before marking it
+// complete). This keeps the "first incomplete article" selection below honest.
+if (!dryRun && plan.Groups.Count > 0)
+{
+    bool changed = false;
+    foreach (var a in plan.Articles)
+    {
+        if (a.IsComplete) continue;
+        var done = new HashSet<string>(a.PostedGroups, StringComparer.OrdinalIgnoreCase);
+        if (plan.Groups.All(g => done.Contains(GroupKey(g))))
+        {
+            a.PostedAtUtc = DateTime.UtcNow;
+            changed = true;
+        }
+    }
+    if (changed) PlanStore.Save(cfg.QueueFile, plan);
+}
+
 var article = plan.Articles.FirstOrDefault(a => !a.IsComplete);
 if (article is null)
 {
@@ -75,14 +98,37 @@ if (article is null)
     return;
 }
 
-var remaining = plan.Groups.ToList();
-int per = plan.GroupsPerPost > 0 ? plan.GroupsPerPost : Math.Max(1, remaining.Count);
+// Skip groups this article was already posted to — only the rest remain this run.
+var alreadyPosted = new HashSet<string>(article.PostedGroups, StringComparer.OrdinalIgnoreCase);
+var remaining = plan.Groups.Where(g => !alreadyPosted.Contains(GroupKey(g))).ToList();
+int alreadyDone = plan.Groups.Count - remaining.Count;
+
+if (remaining.Count == 0)
+{
+    if (!dryRun)
+    {
+        article.PostedAtUtc = DateTime.UtcNow;
+        PlanStore.Save(cfg.QueueFile, plan);
+    }
+    Console.WriteLine($"[{article.Id}] was already posted to every group — marked complete.");
+    return;
+}
+
+// `single` forces one group per post: a separate native post in each group instead of
+// hooking many onto one via the "Add groups" picker (which is what trips the rate limit).
+int per = single ? 1 : (plan.GroupsPerPost > 0 ? plan.GroupsPerPost : Math.Max(1, remaining.Count));
 int postCount = (int)Math.Ceiling(remaining.Count / (double)per);
 
+string modeLabel = dryRun ? "DRY-RUN"
+                 : single ? "SINGLE (one group per post — you click Post)"
+                 : "SEMI-AUTO (you click Post)";
+
 Console.WriteLine($"\nNext article: [{article.Id}]");
-Console.WriteLine($"  {remaining.Count} group(s) to post.");
-Console.WriteLine($"  {per} group(s) per post → {postCount} post(s) this run. " +
-                  $"Mode: {(dryRun ? "DRY-RUN" : "SEMI-AUTO (you click Post)")}.");
+if (alreadyDone > 0)
+    Console.WriteLine($"  {alreadyDone} group(s) already posted (skipping). {remaining.Count} left.");
+else
+    Console.WriteLine($"  {remaining.Count} group(s) to post.");
+Console.WriteLine($"  {per} group(s) per post → {postCount} post(s) this run. Mode: {modeLabel}.");
 
 // Post text: hand-written override if present, otherwise fetched from the live page.
 string body = article.Message ?? "";
@@ -105,16 +151,37 @@ if (cleanArtifacts) PurgeArtifacts(cfg, resetFailLog: true);
 var poster = new Poster(cfg);
 int posted = 0, skipped = 0;
 
+// Record a group as posted and persist immediately, so progress survives an interrupt.
+void MarkGroupPosted(Group g)
+{
+    if (alreadyPosted.Add(GroupKey(g)))
+    {
+        article.PostedGroups.Add(GroupKey(g));
+        PlanStore.Save(cfg.QueueFile, plan);
+    }
+}
+
 for (int i = 0; i < remaining.Count; i += per)
 {
     var batch = remaining.Skip(i).Take(per).ToList();
-    Console.WriteLine($"\n— Post {i / per + 1}/{postCount}: hook these {batch.Count} group(s):");
-    foreach (var g in batch) Console.WriteLine($"      • {g.Name}");
 
-    // Facebook flags rapid automated activity, so EVERY set is gated on you — in all
-    // modes, including dry-run: nothing fills the composer until you press Enter.
-    Console.Write($"  → Press [Enter] to start this set of {batch.Count} group(s) (Ctrl+C to stop)… ");
-    Console.ReadLine();
+    if (single)
+    {
+        // One group at a time: no per-group Enter. The composer fills, you click Post,
+        // and we advance the moment the post box disappears. Spacing comes from your own
+        // Post clicks plus the pre-post delay below.
+        Console.WriteLine($"\n— Group {i + 1}/{remaining.Count}: {batch[0].Name}");
+    }
+    else
+    {
+        Console.WriteLine($"\n— Post {i / per + 1}/{postCount}: hook these {batch.Count} group(s):");
+        foreach (var g in batch) Console.WriteLine($"      • {g.Name}");
+
+        // Facebook flags rapid automated activity, so EVERY set is gated on you — in all
+        // modes, including dry-run: nothing fills the composer until you press Enter.
+        Console.Write($"  → Press [Enter] to start this set of {batch.Count} group(s) (Ctrl+C to stop)… ");
+        Console.ReadLine();
+    }
 
     // A short, watchable pause after you commit, before the composer starts filling.
     if (cfg.PrePostDelayMs > 0)
@@ -129,16 +196,42 @@ for (int i = 0; i < remaining.Count; i += per)
         continue;
     }
 
+    if (single)
+    {
+        // Hands-free advance: you click Post, and when the post box goes away we move on.
+        Console.WriteLine("  → Click POST in this group — when the post box closes I'll move to the next. (press 's' to skip)");
+        var result = await poster.WaitForComposerClosedAsync(page, SkipKeyPressed);
+        if (result == PostWait.Skipped)
+        {
+            skipped += batch.Count;
+            Console.WriteLine("  · skipped.");
+            continue;
+        }
+        if (result == PostWait.TimedOut)
+        {
+            skipped += batch.Count;
+            Console.WriteLine("  · timed out waiting for the post box to close — skipping.");
+            continue;
+        }
+        foreach (var g in batch) MarkGroupPosted(g);
+        posted += batch.Count;
+        Console.WriteLine($"  ✓ posted to {batch[0].Name} ({article.PostedGroups.Count}/{plan.Groups.Count}).");
+        continue;
+    }
+
     // Semi-auto only: YOU click Post. The tool never submits on its own.
     Console.Write("  → Make sure the groups are selected, click POST yourself, then press [Enter] (s+[Enter] to skip): ");
     var key = Console.ReadLine()?.Trim().ToLowerInvariant();
     if (key == "s") { skipped += batch.Count; Console.WriteLine("  · skipped."); continue; }
 
+    foreach (var g in batch) MarkGroupPosted(g);
     posted += batch.Count;
-    Console.WriteLine($"  ✓ {posted}/{plan.Groups.Count} groups done.");
+    Console.WriteLine($"  ✓ {article.PostedGroups.Count}/{plan.Groups.Count} groups done.");
 }
 
-bool complete = posted == plan.Groups.Count;
+// Complete when the recorded posts cover every group — not just this run's count, so a
+// run that finishes the last remaining groups still finalizes the article.
+bool complete = plan.Groups.All(g => alreadyPosted.Contains(GroupKey(g)));
 if (!dryRun && complete)
 {
     article.PostedAtUtc = DateTime.UtcNow;
@@ -147,7 +240,8 @@ if (!dryRun && complete)
 }
 else if (!dryRun)
 {
-    Console.WriteLine($"\n[{article.Id}] still has {plan.Groups.Count - posted} group(s) to go; rerun to finish it.");
+    int left = plan.Groups.Count - article.PostedGroups.Count;
+    Console.WriteLine($"\n[{article.Id}] still has {left} group(s) to go; rerun to finish it.");
 }
 
 Console.WriteLine($"\nRun finished. Group posts completed: {posted}, skipped/failed: {skipped}.");
@@ -185,6 +279,27 @@ static void TryDelete(string path)
 {
     try { File.Delete(path); } catch { /* in use / already gone — ignore */ }
 }
+
+// Non-blocking peek for an 's' keypress so single-group mode can offer a skip while it
+// polls for the post box to close. No-op if console input is redirected.
+static bool SkipKeyPressed()
+{
+    try
+    {
+        if (Console.KeyAvailable)
+        {
+            var k = Console.ReadKey(intercept: true);
+            return k.Key == ConsoleKey.S;
+        }
+    }
+    catch { /* input redirected / no console — interactive skip unavailable */ }
+    return false;
+}
+
+// Stable per-group identity used to record/skip posted groups: the Url, or the Name if
+// no Url is set. Trimmed; compared case-insensitively by the callers' HashSets.
+static string GroupKey(Group g) =>
+    !string.IsNullOrWhiteSpace(g.Url) ? g.Url.Trim() : g.Name.Trim();
 
 static string? GetOption(string[] args, string name)
 {
