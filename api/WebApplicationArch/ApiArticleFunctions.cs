@@ -226,6 +226,17 @@ namespace WebApplicationArch
                 using var stream = new MemoryStream(bytes);
                 await s3.UploadFile(stream, filename, s3Folder);
 
+                // Keep the public static page(s) that use this article in sync with the save.
+                // Best-effort: a prerender failure must never fail the content save itself.
+                try
+                {
+                    await RegenerateStaticPagesForArticle(article, articleId, environment, bucket, context);
+                }
+                catch (Exception prerenderEx)
+                {
+                    context.Logger.LogError($"Static prerender hook failed for article {articleId}: {prerenderEx.Message}");
+                }
+
                 return new APIGatewayProxyResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
@@ -306,9 +317,12 @@ namespace WebApplicationArch
                 sb.AppendLine("  </url>");
                 foreach (var p in servedPages)
                 {
-                    string encoded = Uri.EscapeDataString(p.name!);
+                    // Home is already emitted as the root URL above; skip the duplicate.
+                    if (string.Equals(p.name, "Home", StringComparison.OrdinalIgnoreCase)) continue;
+                    // Clean, path-based URL of the pre-rendered static page (see StaticPageRenderer).
+                    string slug = StaticPageRenderer.Slug(p.name!);
                     sb.AppendLine("  <url>");
-                    sb.AppendLine($"    <loc>https://www.{siteName}/?page={encoded}</loc>");
+                    sb.AppendLine($"    <loc>https://www.{siteName}/{slug}/</loc>");
                     sb.AppendLine($"    <lastmod>{today}</lastmod>");
                     sb.AppendLine("    <changefreq>monthly</changefreq>");
                     sb.AppendLine("    <priority>0.7</priority>");
@@ -424,6 +438,131 @@ namespace WebApplicationArch
             catch (Exception ex)
             {
                 context.Logger.LogError($"Error regenerating sitemap: {ex.Message}");
+                return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.InternalServerError, Body = $"Error: {ex.Message}", Headers = PostHeaders };
+            }
+        }
+
+        // Re-render every served page that references this article to static HTML in the public
+        // bucket. SearchPages populates each page's articles (via get_page_articles_view), so we can
+        // find the parent page(s) with a single query and filter in memory. No CloudFront
+        // invalidation here — the static page is uploaded with a short (max-age=300) cache so an edit
+        // is visible within minutes; the RegenerateAllStaticPages endpoint handles bulk invalidation.
+        private async Task RegenerateStaticPagesForArticle(ArticleModel article, int articleId, string environment, string contentBucket, ILambdaContext context)
+        {
+            var conn = await ConnectionInfoAsync(environment);
+            var websiteDao = new WebsiteDAO(conn);
+            var websites = await websiteDao.GetWebsites();
+            var site = websites.FirstOrDefault(w => w.id == article.websiteId);
+            if (site == null || string.IsNullOrWhiteSpace(site.name)) return;
+            string siteName = site.name;
+
+            var pageDao = new PageDAO(conn);
+            var allPages = await pageDao.SearchPages(new List<string>(), new List<string>(), null, null, article.websiteId.ToString());
+            var affected = (allPages ?? new List<PageModel>())
+                .Where(p => !string.IsNullOrWhiteSpace(p.name)
+                            && (string.IsNullOrEmpty(p.status) || p.status == "published")
+                            && p.articles != null && p.articles.Any(a => a.id == articleId))
+                .ToList();
+
+            var renderer = new StaticPageRenderer(contentBucket, "us-west-2");
+            foreach (var pg in affected)
+            {
+                try { await renderer.RenderAsync(pg, article.websiteId, siteName, upload: true); }
+                catch (Exception ex) { context.Logger.LogError($"Static render failed for page {pg.name}: {ex.Message}"); }
+            }
+            context.Logger.Log($"Static prerender: article {articleId} touched {affected.Count} page(s).");
+        }
+
+        // Backfill / bulk migrate: re-render EVERY served page for a website to static HTML in the
+        // public bucket, then invalidate CloudFront. Mirror of RegenerateSitemap. Run once to migrate
+        // a site onto static pages, or after a large content batch.
+        public async Task<APIGatewayProxyResponse> RegenerateAllStaticPages(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            try
+            {
+                if (request.QueryStringParameters == null
+                    || !request.QueryStringParameters.ContainsKey("websiteId")
+                    || !int.TryParse(request.QueryStringParameters["websiteId"], out int websiteId))
+                {
+                    return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.BadRequest, Body = "Missing or invalid 'websiteId' query parameter.", Headers = PostHeaders };
+                }
+
+                string environment = GetEnvironment(request);
+                var conn = await ConnectionInfoAsync(environment);
+                var websiteDao = new WebsiteDAO(conn);
+                var websites = await websiteDao.GetWebsites();
+                var site = websites.FirstOrDefault(w => w.id == websiteId);
+                if (site == null || string.IsNullOrWhiteSpace(site.name))
+                {
+                    return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.NotFound, Body = JsonConvert.SerializeObject(new { error = "website_not_found", websiteId }), Headers = PostHeaders };
+                }
+                string siteName = site.name;
+
+                var pageDao = new PageDAO(conn);
+                var allPages = await pageDao.SearchPages(new List<string>(), new List<string>(), null, null, websiteId.ToString());
+                var served = (allPages ?? new List<PageModel>())
+                    .Where(p => !string.IsNullOrWhiteSpace(p.name) && (string.IsNullOrEmpty(p.status) || p.status == "published"))
+                    .ToList();
+
+                string contentBucket = Environment.GetEnvironmentVariable("CONTENT_BUCKET") ?? "www-websitecontent";
+                var renderer = new StaticPageRenderer(contentBucket, "us-west-2");
+                int publishedCount = 0, skippedCount = 0;
+                var errors = new List<string>();
+                foreach (var pg in served)
+                {
+                    try
+                    {
+                        var doc = await renderer.RenderAsync(pg, websiteId, siteName, upload: true);
+                        if (doc == null) skippedCount++; else publishedCount++;
+                    }
+                    catch (Exception ex) { errors.Add($"{pg.name}: {ex.Message}"); }
+                }
+
+                // Best-effort CloudFront invalidation of the whole distribution (mirror RegenerateSitemap).
+                bool invAttempted = false, invSucceeded = false; string invError = null; string invDist = null;
+                try
+                {
+                    invAttempted = true;
+                    using var cf = new AmazonCloudFrontClient();
+                    string aliasWww = $"www.{siteName}"; string aliasBare = siteName;
+                    var distros = await cf.ListDistributionsAsync(new ListDistributionsRequest());
+                    var match = distros.DistributionList?.Items?.FirstOrDefault(d => d.Aliases?.Items != null && d.Aliases.Items.Any(a => a == aliasWww || a == aliasBare));
+                    if (match != null)
+                    {
+                        invDist = match.Id;
+                        await cf.CreateInvalidationAsync(new CreateInvalidationRequest
+                        {
+                            DistributionId = match.Id,
+                            InvalidationBatch = new InvalidationBatch
+                            {
+                                CallerReference = $"static-{siteName}-{DateTime.UtcNow.Ticks}",
+                                Paths = new Paths { Quantity = 1, Items = new List<string> { "/*" } }
+                            }
+                        });
+                        invSucceeded = true;
+                    }
+                    else { invError = $"No CloudFront distribution found with alias '{aliasWww}' or '{aliasBare}'."; }
+                }
+                catch (Exception cfEx) { invError = cfEx.Message; context.Logger.LogError($"CloudFront invalidation failed: {cfEx.Message}"); }
+
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Body = JsonConvert.SerializeObject(new
+                    {
+                        websiteId,
+                        site = siteName,
+                        published = publishedCount,
+                        skipped = skippedCount,
+                        errors = errors.Count == 0 ? null : errors,
+                        cloudFrontInvalidation = new { attempted = invAttempted, succeeded = invSucceeded, distributionId = invDist, error = invError }
+                    }),
+                    Headers = PostHeaders
+                };
+            }
+            catch (Exception ex)
+            {
+                context.Logger.LogError($"Error regenerating static pages: {ex.Message}");
                 return new APIGatewayProxyResponse { StatusCode = (int)HttpStatusCode.InternalServerError, Body = $"Error: {ex.Message}", Headers = PostHeaders };
             }
         }
