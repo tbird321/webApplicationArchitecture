@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LDS Faith in Crisis</title>
+<meta name="description" content="Root Page">
+<link rel="canonical" href="https://www.ldsfaithincrisis.com/">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Home">
+<meta property="og:description" content="Root Page">
+<meta property="og:url" content="https://www.ldsfaithincrisis.com/">
+<meta property="og:site_name" content="LDS Faith in Crisis">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Home">
+<meta name="twitter:description" content="Root Page">
+<style>/* ===========================================================================
+   Structural stylesheet for PUBLIC STATIC PAGES.
+
+   SINGLE SOURCE OF TRUTH. Three things read this file:
+     1. StaticPageRenderer  (C#, embedded resource)  -- the on-save re-render
+     2. publish-static-pages.ps1                     -- the bulk backfill
+     3. StaticLayoutCssTests                         -- drift detection
+   Edit it here and nowhere else.
+
+   WHY IT EXISTS
+   The site's appearance is entirely CSS driven: a page's `layout` value becomes
+   a class ("2, 1 Grid" -> "layout-2-1") on the article container, and CSS grid
+   rules do the rest. Those rules live in
+   react/baseProject/src/sitecontent/content/PageContainer.css, and the menu's
+   rules in reactcomponents/.../NestedDynamicMenu.css -- both compiled into the
+   SPA bundle.
+
+   A pre-rendered static page never loads that bundle. It inlines the site's
+   theme.css, but theme.css is the ThemeBuilder output (colours, fonts) and
+   contains none of this. Without this file every static page loses its
+   .articleContents padding and every grid and menu rule.
+
+   SELECTOR NOTE
+   PageContainer.css targets "> div:nth-child(...)" because the SPA wraps each
+   article in a <div>. The static renderer emits <article>. The child element
+   name is therefore dropped here -- "> :nth-child(...)" matches both, so these
+   rules stay correct for either markup.
+
+   KEEPING IN SYNC
+   Add a layout to PageContainer.css and you must mirror it here, or pages using
+   it render as a plain vertical stack. StaticLayoutCssTests fails when they
+   drift apart.
+   =========================================================================== */
+
+/* ---- navigation ----------------------------------------------------------
+   The SPA renders <div class="nested-dynamic-menu"> with DynamicMenu children.
+   The static renderer emits semantic <nav class="menuContents"><ul>...</ul>
+   instead: better for crawlers, and it works with JavaScript disabled. These
+   rules give that markup the same horizontal bar + hover dropdown. The SPA's
+   dropdown is pure CSS :hover (not JS state), so nothing is lost by going
+   static. :focus-within is added so the menu is keyboard operable, which the
+   SPA version is not. */
+.menuContents{position:relative;z-index:1000;max-width:100%}
+.menuContents ul{list-style:none;margin:0;padding:0}
+.menuContents > ul{display:flex;flex-wrap:wrap}
+.menuContents > ul > li{position:relative;flex:1 1 auto;white-space:nowrap}
+.menuContents .nav-section{display:block;padding:10px;cursor:default}
+.menuContents > ul > li > ul{display:none;position:absolute;left:0;background-color:#f9f9f9;min-width:160px;box-shadow:0 8px 16px 0 rgba(0,0,0,.2);z-index:1}
+.menuContents > ul > li:hover > ul,.menuContents > ul > li:focus-within > ul{display:block}
+.menuContents > ul > li > ul a{color:#000;padding:12px 16px;text-decoration:none;display:block;white-space:nowrap}
+.menuContents > ul > li > ul a:hover,.menuContents > ul > li > ul a:focus{background-color:#f1f1f1}
+
+/* ---- article container --------------------------------------------------- */
+.articleContents{padding-left:15%;padding-right:15%}
+.articleContents::after{content:"";display:block;clear:both}
+
+@media (max-width:480px){.layout-2-1{grid-template-columns:1fr !important}.articleContents{padding-left:0;padding-right:0}}
+@media (max-width:768px){.layout-2-1{grid-template-columns:1fr !important}.articleContents{padding-left:0;padding-right:0}}
+
+/* ---- layouts ------------------------------------------------------------- */
+.layout-standard{display:grid;grid-template-columns:1fr;gap:10px}
+
+.layout-1 > :nth-child(1n + 1){grid-column:1 / -1}
+
+.layout-1-1_3-2_3{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto;gap:10px}
+.layout-1-1_3-2_3 > :nth-child(5n + 1){grid-column:1 / -1}
+.layout-1-1_3-2_3 > :nth-child(5n + 2){grid-column:1 / 2}
+.layout-1-1_3-2_3 > :nth-child(5n + 3){grid-column:2 / 4}
+.layout-1-1_3-2_3 > :nth-child(5n + 4){grid-column:1 / 3}
+.layout-1-1_3-2_3 > :nth-child(5n + 5){grid-column:3 / 4}
+
+.layout-1-1_3{display:grid;grid-template-columns:1fr 2fr;grid-template-rows:auto;gap:10px}
+.layout-1-1_3 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-1_3 > :nth-child(3n + 2){grid-column:1 / 2}
+.layout-1-1_3 > :nth-child(3n + 3){grid-column:2 / 3}
+
+.layout-1-2-3{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:auto;gap:10px}
+.layout-1-2-3 > :nth-child(6n + 1){grid-column:1 / -1}
+.layout-1-2-3 > :nth-child(6n + 2),.layout-1-2-3 > :nth-child(6n + 3){grid-column:span 3}
+.layout-1-2-3 > :nth-child(6n + 4),.layout-1-2-3 > :nth-child(6n + 5),.layout-1-2-3 > :nth-child(6n + 6){grid-column:span 2}
+
+.layout-1-2_3-1_3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-1-2_3-1_3 > :nth-child(5n + 1){grid-column:1 / -1}
+.layout-1-2_3-1_3 > :nth-child(5n + 2){grid-column:1 / 3}
+.layout-1-2_3-1_3 > :nth-child(5n + 3){grid-column:3 / 4}
+.layout-1-2_3-1_3 > :nth-child(5n + 4){grid-column:1 / 2}
+.layout-1-2_3-1_3 > :nth-child(5n + 5){grid-column:2 / 4}
+
+.layout-1-2_3{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.layout-1-2_3 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-2_3 > :nth-child(3n + 2){grid-column:1 / 2}
+.layout-1-2_3 > :nth-child(3n + 3){grid-column:2 / 3}
+
+.layout-1-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.layout-1-2 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-2 > :nth-child(3n + 2),.layout-1-2 > :nth-child(3n + 3){grid-column:auto}
+
+.layout-1-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-1-3 > :nth-child(4n + 1){grid-column:1 / -1}
+.layout-1-3 > :nth-child(4n + 2),.layout-1-3 > :nth-child(4n + 3),.layout-1-3 > :nth-child(4n + 4){grid-column:auto}
+
+.layout-1_3{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.layout-1_3 > :nth-child(2n + 1){grid-column:1 / 2}
+.layout-1_3 > :nth-child(2n + 2){grid-column:2 / 3}
+
+.layout-1_3-1{display:grid;grid-template-columns:1fr 2fr;grid-auto-rows:auto;gap:10px}
+.layout-1_3-1 > :nth-child(3n + 1){grid-column:1 / 2}
+.layout-1_3-1 > :nth-child(3n + 2){grid-column:2 / 3}
+.layout-1_3-1 > :nth-child(3n + 3){grid-column:1 / -1}
+
+.layout-1_3-2_3{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;gap:10px}
+.layout-1_3-2_3 > :nth-child(4n + 1){grid-column:1 / span 1}
+.layout-1_3-2_3 > :nth-child(4n + 2){grid-column:2 / span 2}
+.layout-1_3-2_3 > :nth-child(4n + 3){grid-column:1 / span 2}
+.layout-1_3-2_3 > :nth-child(4n + 4){grid-column:3 / span 1}
+
+.layout-2-1{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.layout-2-1 > :nth-child(3n + 1),.layout-2-1 > :nth-child(3n + 2){grid-column:auto}
+.layout-2-1 > :nth-child(3n + 3){grid-row:auto;grid-column:1 / -1}
+
+.layout-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.layout-2 > :nth-child(2n - 1),.layout-2 > :nth-child(2n){grid-column:auto}
+
+.layout-2-3{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.layout-2-3 > :nth-child(5n + 1),.layout-2-3 > :nth-child(5n + 2){grid-column:span 3}
+.layout-2-3 > :nth-child(5n + 3),.layout-2-3 > :nth-child(5n + 4),.layout-2-3 > :nth-child(5n + 5){grid-column:span 2}
+
+.layout-2_3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-2_3-1 > :nth-child(3n + 1){grid-column:1 / span 2}
+.layout-2_3-1 > :nth-child(3n + 2){grid-column:3 / span 1}
+.layout-2_3-1 > :nth-child(3n + 3){grid-column:1 / -1}
+
+.layout-2_3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-2_3 > :nth-child(2n + 1){grid-column:1 / span 2}
+.layout-2_3 > :nth-child(2n + 2){grid-column:3 / span 1}
+
+.layout-3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-3-1 > :nth-child(4n + 1),.layout-3-1 > :nth-child(4n + 2),.layout-3-1 > :nth-child(4n + 3){grid-column:span 1}
+.layout-3-1 > :nth-child(4n + 4){grid-column:1 / -1}
+
+.layout-3-2{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.layout-3-2 > :nth-child(5n + 1),.layout-3-2 > :nth-child(5n + 2),.layout-3-2 > :nth-child(5n + 3){grid-column:span 2}
+.layout-3-2 > :nth-child(5n + 4),.layout-3-2 > :nth-child(5n + 5){grid-column:span 3}
+
+.layout-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-3 > *{grid-column:span 1}
+</style>
+<style>.headerContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* This stacks your items vertically. Remove if you want horizontal layout. */
+}
+
+.menuContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* This stacks your items vertically. Remove if you want horizontal layout. */
+}
+
+.bodyStyle {
+    margin-left: 10%;
+    margin-right: 10%;  
+}
+
+.question {
+    font-weight: bold;
+    font-size: 24px;
+    text-align: center;
+    padding-bottom: 25px;
+}
+
+.mainContent {
+    padding-top: 25px;
+    padding-bottom: 25px;
+}
+
+.comingSoon {
+    text-align: center;
+    font-size: 48px;
+    font-weight: bolder;
+    font-family: cursive;
+}
+.parent-menu-button {
+    min-width: unset !important;
+}
+
+</style>
+<style>clickable {
+	background-color: #2e4f8d;
+}
+</style>
+<script type="application/ld+json">{"headline":"Home","@type":"Article","url":"https://www.ldsfaithincrisis.com/","description":"Root Page","inLanguage":"en","@context":"https://schema.org","mainEntityOfPage":"https://www.ldsfaithincrisis.com/","publisher":{"url":"https://www.ldsfaithincrisis.com/","name":"LDS Faith in Crisis","@type":"Organization"}}</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J6H714HFSM1"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-J6H714HFSM1');</script>
+</head>
+<body>
+<div class="pageContents">
+<header class="headerContents"><p><a href="https://www.ldsfaithincrisis.com/"><img style="display: block; margin-left: auto; margin-right: auto;" src="https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsfaithincrisis.com/images/FaithIncrisisLogo.png" alt="" width="240" height="160"></a></p></header>
+<nav class="menuContents" aria-label="Site navigation"><ul>
+<li><span class="nav-section">About Us</span>
+</li>
+<li><span class="nav-section">PodCasts</span>
+</li>
+</ul></nav>
+
+<main class="articleContents layout-standard">
+<article><p><span style="font-family: georgia, palatino, serif;">So you&rsquo;ve realized something doesn&rsquo;t make sense.&nbsp;</span></p>
+<p><span style="font-family: georgia, palatino, serif;">You&rsquo;ve learned something new that seems to be in complete contradiction from what you have been told or have believed from The Church of Jesus Christ of Latter-day Saints. You don&rsquo;t know what to do.&nbsp; </span><span style="font-family: georgia, palatino, serif;">You can&rsquo;t figure out how to reconcile the new truth that you feel so sure is true with the old one. </span></p>
+<p><span style="font-family: georgia, palatino, serif;">Your questions are valid and legitimate.</span></p>
+<p><span style="font-family: georgia, palatino, serif;">At LDS Faith in Crisis we dive into the most eye-catching paradoxes and dichotomies found in The Church of Jesus Christ of Latter-day Saints. Rather than turning a blind eye to the complexities of truth, we intend to look at each square in the face.</span></p>
+<p><span style="font-family: georgia, palatino, serif;">We present the best possible evidence supporting diverse perspectives of Church doctrine, history, and practice to help widen your viewpoint.This knowledge will empower you to make more intentional choices in your spiritual journey.</span></p>
+<p><span style="font-family: georgia, palatino, serif;">While you are becoming more knowledgeable, we provide practical resources to help you navigate complex emotions, create and maintain healthy relationships with friends and family, and find the confidence to live authentically.</span></p></article>
+
+</main>
+</div>
+</body>
+</html>

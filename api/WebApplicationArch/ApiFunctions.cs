@@ -493,6 +493,106 @@ public class ApiFunctions
 
     }
 
+    /// <summary>
+    /// POST /website  { "name": "example.com", "description": "..." }
+    ///
+    /// Creates the CMS row a new site needs before it can hold any pages. Until this
+    /// existed, provisioning a site required a hand-written INSERT, which made
+    /// end-to-end site creation impossible to script.
+    ///
+    /// IDEMPOTENT: if a website row already carries this name it is returned unchanged
+    /// rather than duplicated. Two rows with the same domain would silently split a
+    /// site's pages in half, and nothing downstream would report it.
+    /// </summary>
+    private class CreateWebsiteRequest
+    {
+        public string? name { get; set; }
+        public string? description { get; set; }
+    }
+
+    public async Task<APIGatewayProxyResponse> CreateWebsite(APIGatewayProxyRequest request, ILambdaContext context)
+    {
+        try
+        {
+            CreateWebsiteRequest? body;
+            try
+            {
+                body = JsonConvert.DeserializeObject<CreateWebsiteRequest>(request.Body ?? "{}");
+            }
+            catch (JsonException jex)
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Body = JsonConvert.SerializeObject(new { error = "bad_body", message = jex.Message }),
+                    Headers = postHeaders
+                };
+            }
+            string name = body?.name?.Trim() ?? "";
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Body = JsonConvert.SerializeObject(new { error = "missing_name", message = "A 'name' is required, and must be the site's registrable domain (e.g. example.com)." }),
+                    Headers = postHeaders
+                };
+            }
+
+            // The name is not a label -- it is the key everything else joins on. The render
+            // trigger matches it against the S3 path segment, and the renderer builds bucket
+            // names and canonical URLs from it. A stray scheme or slash breaks all of that.
+            if (name.Contains("://") || name.Contains("/") || !name.Contains("."))
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Body = JsonConvert.SerializeObject(new { error = "bad_name", name, message = "'name' must be a bare domain such as example.com -- no scheme, no path, no www prefix." }),
+                    Headers = postHeaders
+                };
+            }
+
+            string environment = GetEnvironment(request);
+            context.Logger.Log($"Environment Retrieved: {environment}");
+            IWebsiteProcessing processing = await GetProcessorAsync(environment);
+
+            var existing = (await processing.GetWebsites())
+                .FirstOrDefault(w => string.Equals(w.name, name, StringComparison.OrdinalIgnoreCase));
+            if (existing != null)
+            {
+                context.Logger.Log($"Website already exists: {name} (id {existing.id})");
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Body = JsonConvert.SerializeObject(new { id = existing.id, name = existing.name, created = false }),
+                    Headers = postHeaders
+                };
+            }
+
+            int id = await processing.InsertWebsite(name, body?.description ?? "");
+            context.Logger.Log($"Website created: {name} (id {id})");
+
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.Created,
+                Body = JsonConvert.SerializeObject(new { id, name, created = true }),
+                Headers = postHeaders
+            };
+        }
+        catch (Exception ex)
+        {
+            context.Logger.LogError($"Error creating website: {ex.Message}");
+            context.Logger.LogError($"Error Trace: {ex.StackTrace}");
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.InternalServerError,
+                Body = $"Error occurred: {ex.Message}",
+                Headers = postHeaders
+            };
+        }
+    }
+
     public async Task<APIGatewayProxyResponse> GetArticleById(APIGatewayProxyRequest request, ILambdaContext context)
     {
        try

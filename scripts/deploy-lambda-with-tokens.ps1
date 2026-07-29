@@ -80,6 +80,26 @@ if ([string]::IsNullOrEmpty($lambdaApiBaseUrl)) {
 
 Write-Host 'Generated new token values (hidden).' -ForegroundColor Cyan
 Write-Host ''
+# Which sites the on-save hook may publish static pages for. EMPTY = publish nothing,
+# which is the safe default: publishing to a site that has not been migrated would write
+# a page named "Home" straight over its live SPA shell at the bucket root. Opt sites in
+# one at a time (comma-separated website ids, or 'all') as they are cut over.
+# NOTE: this is a template parameter, so it is re-applied on EVERY deploy -- if it is not
+# set here, a later deploy silently turns the hook back off.
+# Managed policy that grants the Lambdas read access to the CMS database credentials in
+# Secrets Manager. The API functions already carry it; the S3 render trigger needs it too or
+# it cannot resolve which pages to re-render. Override via RDS_SECRET_POLICY_ARN when moving
+# to a different AWS account.
+$rdsSecretPolicyArn = $env:RDS_SECRET_POLICY_ARN
+if ([string]::IsNullOrWhiteSpace($rdsSecretPolicyArn)) {
+    $rdsSecretPolicyArn = 'arn:aws:iam::646797148861:policy/webapplicationRDSSecretRead'
+}
+
+$staticPublishSites = $env:STATIC_PUBLISH_SITES
+if ($null -eq $staticPublishSites) { $staticPublishSites = '' }
+Write-Host ("STATIC_PUBLISH_SITES = '{0}'{1}" -f $staticPublishSites,
+    $(if ([string]::IsNullOrWhiteSpace($staticPublishSites)) { '  (on-save static publishing DISABLED)' } else { '' })) -ForegroundColor Cyan
+Write-Host ''
 Write-Host 'Deploy settings:' -ForegroundColor Cyan
 Write-Host "  StackName   = $StackName"
 Write-Host "  S3Bucket    = $S3Bucket"
@@ -87,6 +107,7 @@ Write-Host "  Template    = $templateFullPath"
 Write-Host "  ProjectDir  = $projectFullPath"
 Write-Host "  ProfileName = $ProfileName"
 Write-Host "  Region      = $Region"
+Write-Host "  PublishSites= '$staticPublishSites'"
 Write-Host ''
 
 $confirmation = Read-Host 'Proceed with deploy? (Y/N)'
@@ -125,9 +146,19 @@ try {
     }
 
     Write-Host 'Deploying stack...' -ForegroundColor Green
-    & sam deploy --region $Region --template-file $builtTemplatePath @profileArg --stack-name $StackName --s3-bucket $S3Bucket --capabilities CAPABILITY_IAM --parameter-overrides "TokenSecret=$tokenSecret" "TokenIV=$tokenIV" "McpApiKey=$mcpApiKey" "LambdaApiBaseUrl=$lambdaApiBaseUrl" "ContentBucket=www-websitecontent"
-    if ($LASTEXITCODE -ne 0) {
-        throw "SAM deploy failed with exit code $LASTEXITCODE."
+    $deployOut = & sam deploy --region $Region --template-file $builtTemplatePath @profileArg --stack-name $StackName --s3-bucket $S3Bucket --capabilities CAPABILITY_IAM --parameter-overrides "TokenSecret=$tokenSecret" "TokenIV=$tokenIV" "McpApiKey=$mcpApiKey" "LambdaApiBaseUrl=$lambdaApiBaseUrl" "ContentBucket=www-websitecontent" "StaticPublishSites=$staticPublishSites" "RdsSecretReadPolicyArn=$rdsSecretPolicyArn" 2>&1
+    $deployExit = $LASTEXITCODE
+    $deployOut | ForEach-Object { Write-Host $_ }
+
+    # SAM exits non-zero when the changeset is empty. That is not a failure -- it means
+    # the stack already matches the template, which is the expected result of re-running
+    # a deploy. Treating it as an error makes a successful no-op look like a broken one.
+    $noChanges = ($deployOut | Out-String) -match 'No changes to deploy'
+    if ($deployExit -ne 0 -and -not $noChanges) {
+        throw "SAM deploy failed with exit code $deployExit."
+    }
+    if ($noChanges) {
+        Write-Host 'Stack already matches the template -- nothing to deploy.' -ForegroundColor Cyan
     }
 
     Write-Host 'Verifying deployed Lambda environment variables...' -ForegroundColor Green

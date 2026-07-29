@@ -19,6 +19,9 @@
     <PackageReference Include="Amazon.Lambda.Serialization.Json" Version="2.1.1" />
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.0" />
     <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="2.7.0" />
+    <!-- S3 ObjectCreated events: the admin writes article HTML straight to S3 via Amplify
+         Storage, so the API is never called. The re-render has to be driven off the bucket. -->
+    <PackageReference Include="Amazon.Lambda.S3Events" Version="3.1.0" />
     <PackageReference Include="AWSSDK.CognitoIdentity" Version="3.7.300.25" />
     <PackageReference Include="AWSSDK.RDSDataService" Version="3.7.301.1" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.305" />
@@ -30,5 +33,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MySQLConnector\MySQLConnector.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Structural CSS for pre-rendered public pages. Single source of truth, shared
+         with publish-static-pages.ps1. Without this every static page silently loses
+         its layout, padding and menu styling. See StaticLayoutCss.cs. -->
+    <EmbeddedResource Include="..\..\infra\static\page-layout.css" Link="page-layout.css" />
   </ItemGroup>
 </Project>

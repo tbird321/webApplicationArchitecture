@@ -18,6 +18,16 @@
     "ContentBucket": {
       "Type": "String",
       "Default": "www-websitecontent"
+    },
+    "StaticPublishSites": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Comma-separated website ids the on-save hook may publish static pages for, or 'all'. EMPTY (the default) publishes nothing. Sites opt in one at a time as they are migrated: publishing to a site that has not been cut over would write a page named Home straight over its live SPA shell at the bucket root."
+    },
+    "RdsSecretReadPolicyArn": {
+      "Type": "String",
+      "Default": "arn:aws:iam::646797148861:policy/webapplicationRDSSecretRead",
+      "Description": "Managed policy granting secretsmanager:GetSecretValue for the CMS database credentials. The API functions already use it; the S3 render trigger needs it too."
     }
   },
   "Globals": {
@@ -32,6 +42,9 @@
           },
           "CONTENT_BUCKET": {
             "Ref": "ContentBucket"
+          },
+          "STATIC_PUBLISH_SITES": {
+            "Ref": "StaticPublishSites"
           }
         }
       }
@@ -291,6 +304,34 @@
             "Properties": {
               "Path": "/layout",
               "Method": "get",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "CreateWebsiteFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiFunctions::CreateWebsite",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          {
+            "Ref": "RdsSecretReadPolicyArn"
+          }
+        ],
+        "Events": {
+          "CreateWebsite": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/website",
+              "Method": "POST",
               "RestApiId": {
                 "Ref": "WebArchAPI"
               }
@@ -805,6 +846,50 @@
         }
       }
     },
+    "InvalidateCacheFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiCacheFunctions::InvalidateCache",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Environment": {
+          "Variables": {
+            "MCP_API_KEY": {
+              "Ref": "McpApiKey"
+            }
+          }
+        },
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "cloudfront:ListDistributions",
+                  "cloudfront:CreateInvalidation"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        ],
+        "Events": {
+          "InvalidateCache": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/cache/invalidate",
+              "Method": "POST",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
     "RegenerateSitemapFunction": {
       "Type": "AWS::Serverless::Function",
       "Properties": {
@@ -951,6 +1036,58 @@
           }
         }
       }
+    },
+    "StaticRenderOnUploadFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiStaticRenderFunctions::RenderOnArticleUpload",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 512,
+        "Timeout": 120,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          {
+            "Ref": "RdsSecretReadPolicyArn"
+          },
+          {
+            "S3ReadPolicy": {
+              "BucketName": {
+                "Ref": "ContentBucket"
+              }
+            }
+          },
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:PutObject",
+                  "s3:PutObjectAcl",
+                  "s3:GetObject"
+                ],
+                "Resource": "arn:aws:s3:::www.*/*"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "StaticRenderOnUploadInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "StaticRenderOnUploadFunction"
+        },
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:s3:::${ContentBucket}"
+        }
+      }
     }
   },
   "Outputs": {
@@ -958,6 +1095,12 @@
       "Description": "API endpoint URL for Prod environment",
       "Value": {
         "Fn::Sub": "https://${WebArchAPI}.execute-api.${AWS::Region}.amazonaws.com/prod"
+      }
+    },
+    "StaticRenderFunctionName": {
+      "Description": "Lambda invoked by S3 when article HTML changes; re-renders affected static pages.",
+      "Value": {
+        "Ref": "StaticRenderOnUploadFunction"
       }
     }
   }

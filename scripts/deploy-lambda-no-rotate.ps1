@@ -17,6 +17,10 @@ The path to the SAM template, relative to the repo root.
 
 .PARAMETER ProjectPath
 The path to the Lambda project folder, relative to the repo root.
+
+.PARAMETER SkipPublishSitesCheck
+Skip the guard that refuses to silently shrink STATIC_PUBLISH_SITES. Only for the case
+where you deliberately intend to turn static publishing off for a site.
 #>
 param(
     [string]$StackName = 'webapplicationarch',
@@ -24,7 +28,8 @@ param(
     [string]$TemplatePath = 'api/WebApplicationArch/serverless.template',
     [string]$ProjectPath = 'api/WebApplicationArch',
     [string]$ProfileName = '',
-    [string]$Region = 'us-west-2'
+    [string]$Region = 'us-west-2',
+    [switch]$SkipPublishSitesCheck
 )
 
 $repoRoot = Resolve-Path "$PSScriptRoot\.."
@@ -98,6 +103,75 @@ if ([string]::IsNullOrEmpty($lambdaApiBaseUrl)) {
 
 Write-Host 'Using existing token values (hidden).' -ForegroundColor Cyan
 Write-Host ''
+# Which sites the on-save hook may publish static pages for. EMPTY = publish nothing,
+# which is the safe default: publishing to a site that has not been migrated would write
+# a page named "Home" straight over its live SPA shell at the bucket root. Opt sites in
+# one at a time (comma-separated website ids, or 'all') as they are cut over.
+# NOTE: this is a template parameter, so it is re-applied on EVERY deploy -- if it is not
+# set here, a later deploy silently turns the hook back off.
+# Managed policy that grants the Lambdas read access to the CMS database credentials in
+# Secrets Manager. The API functions already carry it; the S3 render trigger needs it too or
+# it cannot resolve which pages to re-render. Override via RDS_SECRET_POLICY_ARN when moving
+# to a different AWS account.
+$rdsSecretPolicyArn = $env:RDS_SECRET_POLICY_ARN
+if ([string]::IsNullOrWhiteSpace($rdsSecretPolicyArn)) {
+    $rdsSecretPolicyArn = 'arn:aws:iam::646797148861:policy/webapplicationRDSSecretRead'
+}
+
+# Resolve from the shell first, then fall back to the User-scoped variable. The fallback is
+# not a nicety: a shell opened BEFORE the User variable was set inherits nothing, so the
+# obvious-looking deploy from that shell would pass StaticPublishSites='' and silently turn
+# static publishing off for EVERY site -- including ones migrated weeks ago, which would then
+# quietly stop updating with no error anywhere.
+$staticPublishSites = $env:STATIC_PUBLISH_SITES
+if ([string]::IsNullOrWhiteSpace($staticPublishSites)) {
+    $userScoped = [Environment]::GetEnvironmentVariable('STATIC_PUBLISH_SITES', 'User')
+    if (-not [string]::IsNullOrWhiteSpace($userScoped)) {
+        $staticPublishSites = $userScoped
+        Write-Host "STATIC_PUBLISH_SITES not set in this shell; using the User-scoped value '$userScoped'." -ForegroundColor Yellow
+    }
+}
+if ($null -eq $staticPublishSites) { $staticPublishSites = '' }
+
+# Deploying an empty value is a legitimate thing to want (disable everything deliberately),
+# but it must never happen by omission. Compare against what is already deployed and make the
+# operator say yes to a reduction.
+if (-not $SkipPublishSitesCheck) {
+    $deployedSites = ''
+    $q = 'Stacks[0].Parameters[?ParameterKey==`StaticPublishSites`].ParameterValue'
+    $describeArgs = @('cloudformation', 'describe-stacks', '--stack-name', $StackName,
+                      '--region', $Region, '--query', $q, '--output', 'text')
+    if (-not [string]::IsNullOrEmpty($ProfileName)) { $describeArgs += @('--profile', $ProfileName) }
+    # A first-ever deploy has no stack to read, which is fine -- there is nothing to lose yet.
+    $raw = & aws @describeArgs 2>$null
+    if ($LASTEXITCODE -eq 0 -and $raw) { $deployedSites = ($raw -join '').Trim() }
+    if ($deployedSites -eq 'None') { $deployedSites = '' }
+
+    $currentIds = @($staticPublishSites -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    $deployedIds = @($deployedSites -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    $losing = @($deployedIds | Where-Object { $_ -notin $currentIds -and $currentIds -notcontains 'all' })
+
+    if ($losing.Count -gt 0) {
+        Write-Host ''
+        Write-Host 'WARNING: this deploy would STOP static publishing for site(s) that have it today.' -ForegroundColor Red
+        Write-Host ("  currently deployed : '{0}'" -f $deployedSites) -ForegroundColor Red
+        Write-Host ("  about to deploy    : '{0}'" -f $staticPublishSites) -ForegroundColor Red
+        Write-Host ("  would lose         : {0}" -f ($losing -join ', ')) -ForegroundColor Red
+        Write-Host ''
+        Write-Host 'Those sites keep serving, but every future content edit stops reaching the' -ForegroundColor DarkGray
+        Write-Host 'public page, with no error. The list is cumulative -- include every migrated site.' -ForegroundColor DarkGray
+        Write-Host ''
+        $answer = Read-Host "Continue anyway? (y/N)"
+        if ($answer -ne 'y') {
+            Write-Host 'Aborted. Set the full list and re-run, e.g.:' -ForegroundColor Yellow
+            Write-Host ("  `$env:STATIC_PUBLISH_SITES = '{0}'" -f (($deployedIds + $currentIds | Select-Object -Unique) -join ','))
+            exit 1
+        }
+    }
+}
+Write-Host ("STATIC_PUBLISH_SITES = '{0}'{1}" -f $staticPublishSites,
+    $(if ([string]::IsNullOrWhiteSpace($staticPublishSites)) { '  (on-save static publishing DISABLED)' } else { '' })) -ForegroundColor Cyan
+Write-Host ''
 Write-Host 'Deploy settings:' -ForegroundColor Cyan
 Write-Host "  StackName   = $StackName"
 Write-Host "  S3Bucket    = $S3Bucket"
@@ -105,6 +179,7 @@ Write-Host "  Template    = $templateFullPath"
 Write-Host "  ProjectDir  = $projectFullPath"
 Write-Host "  ProfileName = $ProfileName"
 Write-Host "  Region      = $Region"
+Write-Host "  PublishSites= '$staticPublishSites'"
 Write-Host ''
 
 $confirmation = Read-Host 'Proceed with deploy using these values? (Y/N)'
@@ -143,9 +218,19 @@ try {
     }
 
     Write-Host 'Deploying stack without rotating secrets...' -ForegroundColor Green
-    & sam deploy --region $Region --template-file $builtTemplatePath @profileArg --stack-name $StackName --s3-bucket $S3Bucket --capabilities CAPABILITY_IAM --parameter-overrides "TokenSecret=$tokenSecret" "TokenIV=$tokenIV" "McpApiKey=$mcpApiKey" "LambdaApiBaseUrl=$lambdaApiBaseUrl" "ContentBucket=www-websitecontent"
-    if ($LASTEXITCODE -ne 0) {
-        throw "SAM deploy failed with exit code $LASTEXITCODE."
+    $deployOut = & sam deploy --region $Region --template-file $builtTemplatePath @profileArg --stack-name $StackName --s3-bucket $S3Bucket --capabilities CAPABILITY_IAM --parameter-overrides "TokenSecret=$tokenSecret" "TokenIV=$tokenIV" "McpApiKey=$mcpApiKey" "LambdaApiBaseUrl=$lambdaApiBaseUrl" "ContentBucket=www-websitecontent" "StaticPublishSites=$staticPublishSites" "RdsSecretReadPolicyArn=$rdsSecretPolicyArn" 2>&1
+    $deployExit = $LASTEXITCODE
+    $deployOut | ForEach-Object { Write-Host $_ }
+
+    # SAM exits non-zero when the changeset is empty. That is not a failure -- it means
+    # the stack already matches the template, which is the expected result of re-running
+    # a deploy. Treating it as an error makes a successful no-op look like a broken one.
+    $noChanges = ($deployOut | Out-String) -match 'No changes to deploy'
+    if ($deployExit -ne 0 -and -not $noChanges) {
+        throw "SAM deploy failed with exit code $deployExit."
+    }
+    if ($noChanges) {
+        Write-Host 'Stack already matches the template -- nothing to deploy.' -ForegroundColor Cyan
     }
 
     Write-Host 'Verifying deployed Lambda environment variables...' -ForegroundColor Green

@@ -12,8 +12,8 @@
 
 .PARAMETER Site
     The site to regenerate. Accepts a site key (ldsapologetics, ldsdoctrines,
-    ldsdiscussions, cesletter, ldsfaithincrisis, reflectiverealizations) or
-    'all'. Default: all.
+    ldsdiscussions, cesletter, ldsfaithincrisis) or 'all'. Default: all.
+    reflectiverealizations is excluded on purpose -- see sites.json.
 
 .PARAMETER NoUpload
     Build sitemap files into .\dist\sitemaps\ locally without uploading to S3.
@@ -55,7 +55,7 @@
 #>
 
 param(
-    [ValidateSet('all', 'ldsapologetics', 'ldsdoctrines', 'ldsdiscussions', 'cesletter', 'ldsfaithincrisis', 'reflectiverealizations')]
+    [ValidateSet('all', 'ldsapologetics', 'ldsdoctrines', 'ldsdiscussions', 'cesletter', 'ldsfaithincrisis')]
     [string]$Site = 'all',
     [switch]$NoUpload,
     [switch]$NoInvalidate,
@@ -77,7 +77,8 @@ if (-not [string]::IsNullOrEmpty($Region)) {
 $sites = @(
     @{ Key = 'ldsfaithincrisis';       Id = 1; Domain = 'ldsfaithincrisis.com' }
     @{ Key = 'ldsdoctrines';           Id = 2; Domain = 'ldsdoctrines.com' }
-    @{ Key = 'reflectiverealizations'; Id = 4; Domain = 'reflectiverealizations.com' }
+    # reflectiverealizations (id 4) is deliberately absent -- hand-built static site,
+    # not the SPA, and it maintains its own sitemap.xml. See "excluded" in sites.json.
     @{ Key = 'ldsapologetics';         Id = 5; Domain = 'ldsapologetics.com' }
     @{ Key = 'ldsdiscussions';         Id = 6; Domain = 'ldsdiscussions.info' }
     @{ Key = 'cesletter';              Id = 8; Domain = 'cesletter.info' }

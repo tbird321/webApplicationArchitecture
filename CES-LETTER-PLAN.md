@@ -147,7 +147,7 @@ Other Concerns
 
 ---
 
-## CURRENT STATUS (last updated 2026-05-21)
+## CURRENT STATUS (last updated 2026-05-21) 
 
 ### ✅ ALL 27 PAGES COMPLETE — Full Build Done (2026-05-21)
 
@@ -520,7 +520,7 @@ All content published. Menu review recommended as next step.
 | S3 Site Bucket | www.cesletter.info |
 | S3 Content Bucket | www-websitecontent |
 | Article S3 Path | public/websites/cesletter.info/articles/ |
-| Deploy Profile | Admin |
+| Deploy Profile | tbirdcontractinggmailcom |
 | Agent template | `e:\dev\webApplicationArchitecture\CES-LETTER-AGENT-TEMPLATE.md` |
 | Source site | https://read.cesletter.org |
-| CloudFront invalidation | `aws cloudfront create-invalidation --distribution-id E156MTQRSC8VG6 --paths "/*" --profile Admin` |
+| CloudFront invalidation | `aws cloudfront create-invalidation --distribution-id E156MTQRSC8VG6 --paths "/*" --profile tbirdcontractinggmailcom` |

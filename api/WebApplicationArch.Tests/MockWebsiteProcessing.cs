@@ -268,5 +268,7 @@ namespace WebApplicationArch.Tests
         public Task UnpublishPage(int pageId) => Task.CompletedTask;
         public Task PublishArticle(int articleId) => Task.CompletedTask;
         public Task UnpublishArticle(int articleId) => Task.CompletedTask;
+        public Task DeletePage(int pageId) => Task.CompletedTask;
+        public Task DeleteArticle(int articleId) => Task.CompletedTask;
     }
 }

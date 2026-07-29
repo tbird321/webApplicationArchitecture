@@ -359,51 +359,8 @@ namespace WebApplicationArch
                 //    served immediately instead of waiting for the CDN's TTL to expire. If the
                 //    distribution can't be found or the call fails, the S3 write has already
                 //    succeeded — we just surface the invalidation status in the response.
-                bool invalidationAttempted = false;
-                bool invalidationSucceeded = false;
-                string? invalidationDistributionId = null;
-                string? invalidationId = null;
-                string? invalidationError = null;
-                try
-                {
-                    invalidationAttempted = true;
-                    using var cf = new AmazonCloudFrontClient();
-                    string aliasWww = $"www.{siteName}";
-                    string aliasBare = siteName;
-                    var distros = await cf.ListDistributionsAsync(new ListDistributionsRequest());
-                    var match = distros.DistributionList?.Items?.FirstOrDefault(d =>
-                        d.Aliases?.Items != null &&
-                        d.Aliases.Items.Any(a => a == aliasWww || a == aliasBare));
-                    if (match != null)
-                    {
-                        invalidationDistributionId = match.Id;
-                        var invReq = new CreateInvalidationRequest
-                        {
-                            DistributionId = match.Id,
-                            InvalidationBatch = new InvalidationBatch
-                            {
-                                CallerReference = $"sitemap-{siteName}-{DateTime.UtcNow.Ticks}",
-                                Paths = new Paths
-                                {
-                                    Quantity = 2,
-                                    Items = new List<string> { "/sitemap.xml", "/robots.txt" }
-                                }
-                            }
-                        };
-                        var invResp = await cf.CreateInvalidationAsync(invReq);
-                        invalidationId = invResp?.Invalidation?.Id;
-                        invalidationSucceeded = true;
-                    }
-                    else
-                    {
-                        invalidationError = $"No CloudFront distribution found with alias '{aliasWww}' or '{aliasBare}'.";
-                    }
-                }
-                catch (Exception cfEx)
-                {
-                    invalidationError = cfEx.Message;
-                    context.Logger.LogError($"CloudFront invalidation failed for {siteName}: {cfEx.Message}");
-                }
+                var invalidation = await CloudFrontCache.InvalidateAsync(
+                    siteName, new[] { "/sitemap.xml", "/robots.txt" }, "sitemap", context);
 
                 return new APIGatewayProxyResponse
                 {
@@ -425,11 +382,11 @@ namespace WebApplicationArch
                         },
                         cloudFrontInvalidation = new
                         {
-                            attempted = invalidationAttempted,
-                            succeeded = invalidationSucceeded,
-                            distributionId = invalidationDistributionId,
-                            invalidationId,
-                            error = invalidationError
+                            attempted = invalidation.Attempted,
+                            succeeded = invalidation.Succeeded,
+                            distributionId = invalidation.DistributionId,
+                            invalidationId = invalidation.InvalidationId,
+                            error = invalidation.Error
                         }
                     }),
                     Headers = PostHeaders
@@ -463,6 +420,15 @@ namespace WebApplicationArch
                             && (string.IsNullOrEmpty(p.status) || p.status == "published")
                             && p.articles != null && p.articles.Any(a => a.id == articleId))
                 .ToList();
+
+            // Opt-in per site. Until a site has been cut over, publishing on save would
+            // write into its live public bucket -- and for a page named "Home" that means
+            // overwriting the SPA shell at the bucket root. See IsPublishEnabled.
+            if (!StaticPageRenderer.IsPublishEnabled(article.websiteId))
+            {
+                context.Logger.Log($"Static prerender: skipped, website {article.websiteId} not in STATIC_PUBLISH_SITES.");
+                return;
+            }
 
             var renderer = new StaticPageRenderer(contentBucket, "us-west-2");
             foreach (var pg in affected)
@@ -518,32 +484,9 @@ namespace WebApplicationArch
                     catch (Exception ex) { errors.Add($"{pg.name}: {ex.Message}"); }
                 }
 
-                // Best-effort CloudFront invalidation of the whole distribution (mirror RegenerateSitemap).
-                bool invAttempted = false, invSucceeded = false; string invError = null; string invDist = null;
-                try
-                {
-                    invAttempted = true;
-                    using var cf = new AmazonCloudFrontClient();
-                    string aliasWww = $"www.{siteName}"; string aliasBare = siteName;
-                    var distros = await cf.ListDistributionsAsync(new ListDistributionsRequest());
-                    var match = distros.DistributionList?.Items?.FirstOrDefault(d => d.Aliases?.Items != null && d.Aliases.Items.Any(a => a == aliasWww || a == aliasBare));
-                    if (match != null)
-                    {
-                        invDist = match.Id;
-                        await cf.CreateInvalidationAsync(new CreateInvalidationRequest
-                        {
-                            DistributionId = match.Id,
-                            InvalidationBatch = new InvalidationBatch
-                            {
-                                CallerReference = $"static-{siteName}-{DateTime.UtcNow.Ticks}",
-                                Paths = new Paths { Quantity = 1, Items = new List<string> { "/*" } }
-                            }
-                        });
-                        invSucceeded = true;
-                    }
-                    else { invError = $"No CloudFront distribution found with alias '{aliasWww}' or '{aliasBare}'."; }
-                }
-                catch (Exception cfEx) { invError = cfEx.Message; context.Logger.LogError($"CloudFront invalidation failed: {cfEx.Message}"); }
+                // Best-effort whole-distribution flush: a bulk re-render touches every page, so
+                // there is nothing to be gained by listing them (and "/*" bills as one path).
+                var invalidation = await CloudFrontCache.InvalidateAsync(siteName, new[] { "/*" }, "static", context);
 
                 return new APIGatewayProxyResponse
                 {
@@ -555,7 +498,7 @@ namespace WebApplicationArch
                         published = publishedCount,
                         skipped = skippedCount,
                         errors = errors.Count == 0 ? null : errors,
-                        cloudFrontInvalidation = new { attempted = invAttempted, succeeded = invSucceeded, distributionId = invDist, error = invError }
+                        cloudFrontInvalidation = new { attempted = invalidation.Attempted, succeeded = invalidation.Succeeded, distributionId = invalidation.DistributionId, error = invalidation.Error }
                     }),
                     Headers = PostHeaders
                 };
