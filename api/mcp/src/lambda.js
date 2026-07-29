@@ -6,8 +6,9 @@ import { collectionTools } from './tools/collections.js';
 import { metadataTools } from './tools/metadata.js';
 import { compositeTools } from './tools/composite.js';
 import { sourceFetchTools } from './tools/sourceFetch.js';
+import { cacheTools } from './tools/cache.js';
 
-const allTools = [...compositeTools, ...sourceFetchTools, ...pageTools, ...articleTools, ...navigationTools, ...collectionTools, ...metadataTools];
+const allTools = [...compositeTools, ...sourceFetchTools, ...pageTools, ...articleTools, ...navigationTools, ...collectionTools, ...metadataTools, ...cacheTools];
 const toolMap = new Map(allTools.map(t => [t.name, t]));
 
 const reply = (statusCode, body) => ({

@@ -243,6 +243,7 @@ s3://www-websitecontent/public/websites/{websiteName}/articles/{articlePath}
 ## AWS
 
 - Region: `us-west-2`
-- Deploy profile: `Admin`
+- Profile: `tbirdcontractinggmailcom` (used for everything — deploys, S3, CloudFront, ACM)
 - Lambda stack: `webapplicationarch`
-- Deploy command (from `api/WebApplicationArch/`): `dotnet lambda deploy-serverless --profile Admin`
+- Deploy command (from `api/WebApplicationArch/`): `dotnet lambda deploy-serverless`
+  (the profile comes from `aws-lambda-tools-defaults.json`; pass `--profile <name>` to override)

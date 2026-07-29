@@ -1,0 +1,79 @@
+{
+  "_comment": [
+    "Single registry of the sites this repo manages. Adding a new site means adding",
+    "one entry here -- the admin-subdomain scripts read this file so a new site does",
+    "not require editing any script.",
+    "",
+    "  key          short slug used on the command line and in bucket names (no dots)",
+    "  id           WEBSITE_ID in the CMS database / MCP server",
+    "  domain       registrable domain, as registered at GoDaddy",
+    "  title        human-readable site title",
+    "  analytics    GA4 measurement id, or empty",
+    "  dns          where the authoritative DNS lives: godaddy | route53",
+    "  configPrefix filename prefix in react/baseProject/configs/ for this site's",
+    "               build assets. NOT always the same as key -- ldsfaithincrisis",
+    "               uses 'faithInCrisis'. null means no config set exists yet.",
+    "",
+    "publish-static-pages.ps1 and regenerate-sitemaps.ps1 still carry their own",
+    "inline $sites tables; they predate this file and were left alone.",
+    "",
+    "'excluded' lists domains this tooling must NOT touch, with the reason. They are",
+    "kept here rather than deleted so the reason survives -- Resolve-Site reads it and",
+    "refuses the key with that explanation instead of a bare 'unknown site'."
+  ],
+  "excluded": [
+    {
+      "key": "reflectiverealizations",
+      "id": 4,
+      "domain": "reflectiverealizations.com",
+      "reason": "Not a React SPA. It is a hand-built static site (no script tags, its own fonts/stylesheets, a hand-authored homepage with client reviews) and is already fully crawlable, so the prerender migration has nothing to gain. Worse, its CMS record holds a single 2KB article, so -Phase root would overwrite the 8.5KB hand-built homepage with that render and destroy the design. Verified 2026-07-29."
+    }
+  ],
+  "sites": [
+    {
+      "key": "ldsfaithincrisis",
+      "id": 1,
+      "domain": "ldsfaithincrisis.com",
+      "title": "LDS Faith in Crisis",
+      "analytics": "G-3X09PX2WS1",
+      "dns": "godaddy",
+      "configPrefix": "faithInCrisis"
+    },
+    {
+      "key": "ldsdoctrines",
+      "id": 2,
+      "domain": "ldsdoctrines.com",
+      "title": "LDS Doctrines",
+      "analytics": "G-PY9E2KT5DC",
+      "dns": "godaddy",
+      "configPrefix": "ldsdoctrines"
+    },
+    {
+      "key": "ldsapologetics",
+      "id": 5,
+      "domain": "ldsapologetics.com",
+      "title": "LDS Apologetics",
+      "analytics": "G-J6H714HFSM",
+      "dns": "godaddy",
+      "configPrefix": "ldsapologetics"
+    },
+    {
+      "key": "ldsdiscussions",
+      "id": 6,
+      "domain": "ldsdiscussions.info",
+      "title": "LDS Discussions",
+      "analytics": "G-G8VH9TBRNR",
+      "dns": "godaddy",
+      "configPrefix": "ldsdiscussions"
+    },
+    {
+      "key": "cesletter",
+      "id": 8,
+      "domain": "cesletter.info",
+      "title": "CES Letter",
+      "analytics": "G-Z4XDMTTGRN",
+      "dns": "godaddy",
+      "configPrefix": "cesletter"
+    }
+  ]
+}

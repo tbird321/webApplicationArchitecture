@@ -2,181 +2,175 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.cesletter.info/</loc>
-    <lastmod>2026-06-05</lastmod>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=Home</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/bom-overview/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=BOM-Overview</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/bom-archaeology/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=BOM-Archaeology</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/boa-papyri/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=BOA-Papyri</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/boa-facsimiles/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=BOA-Facsimiles</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/boa-cosmology/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=BOA-Cosmology</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/fv-accounts/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=FV-Accounts</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/pol-overview/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=POL-Overview</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/pro-doctrines/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=PRO-Doctrines</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/bom-sources/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=BOM-Sources</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/bom-dna/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=BOM-DNA</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/fv-context/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=FV-Context</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/ch-priesthood/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=CH-Priesthood</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/pol-polyandry/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=POL-Polyandry</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/test-spirit/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=TEST-Spirit</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/pro-hofmann/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=PRO-Hofmann</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/bom-translation/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=BOM-Translation</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/sci-death/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=SCI-Death</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/bom-anachronisms/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=BOM-Anachronisms</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/ch-witnesses/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=CH-Witnesses</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/pol-denials/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=POL-Denials</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/pro-pattern/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=PRO-Pattern</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/tem-masonry/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=TEM-Masonry</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/sci-flood/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=SCI-Flood</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/ch-kinderhook/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=CH-Kinderhook</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/oth-finances/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=OTH-Finances</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/oth-history/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=OTH-History</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/oth-discipline/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.cesletter.info/?page=OTH-Discipline</loc>
-    <lastmod>2026-06-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.cesletter.info/?page=About</loc>
-    <lastmod>2026-06-05</lastmod>
+    <loc>https://www.cesletter.info/about/</loc>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

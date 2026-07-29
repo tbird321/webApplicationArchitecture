@@ -162,7 +162,7 @@ Even though `UserSecurity.cs` was updated to use env vars, the old hardcoded val
 1. Add `var auth = ValidateApiKey(request); if (auth != null) return auth;` to the top of every handler in:
    - `api/WebApplicationArch/ApiFunctions.cs` (~20 methods)
    - `api/WebApplicationArch/ApiArticleFunctions.cs` (~8 methods)
-2. Deploy the Lambda stack: `dotnet lambda deploy-serverless --profile Admin`
+2. Deploy the Lambda stack: `dotnet lambda deploy-serverless`
 3. Verify all sites still work — admin UI now requires the key; MCP server already sends it
 
 **Why this order is safe:**

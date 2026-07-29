@@ -12,8 +12,8 @@
 
 .PARAMETER Site
     The site to regenerate. Accepts a site key (ldsapologetics, ldsdoctrines,
-    ldsdiscussions, cesletter, ldsfaithincrisis, reflectiverealizations) or
-    'all'. Default: all.
+    ldsdiscussions, cesletter, ldsfaithincrisis) or 'all'. Default: all.
+    reflectiverealizations is excluded on purpose -- see sites.json.
 
 .PARAMETER NoUpload
     Build sitemap files into .\dist\sitemaps\ locally without uploading to S3.
@@ -55,7 +55,7 @@
 #>
 
 param(
-    [ValidateSet('all', 'ldsapologetics', 'ldsdoctrines', 'ldsdiscussions', 'cesletter', 'ldsfaithincrisis', 'reflectiverealizations')]
+    [ValidateSet('all', 'ldsapologetics', 'ldsdoctrines', 'ldsdiscussions', 'cesletter', 'ldsfaithincrisis')]
     [string]$Site = 'all',
     [switch]$NoUpload,
     [switch]$NoInvalidate,
@@ -77,7 +77,8 @@ if (-not [string]::IsNullOrEmpty($Region)) {
 $sites = @(
     @{ Key = 'ldsfaithincrisis';       Id = 1; Domain = 'ldsfaithincrisis.com' }
     @{ Key = 'ldsdoctrines';           Id = 2; Domain = 'ldsdoctrines.com' }
-    @{ Key = 'reflectiverealizations'; Id = 4; Domain = 'reflectiverealizations.com' }
+    # reflectiverealizations (id 4) is deliberately absent -- hand-built static site,
+    # not the SPA, and it maintains its own sitemap.xml. See "excluded" in sites.json.
     @{ Key = 'ldsapologetics';         Id = 5; Domain = 'ldsapologetics.com' }
     @{ Key = 'ldsdiscussions';         Id = 6; Domain = 'ldsdiscussions.info' }
     @{ Key = 'cesletter';              Id = 8; Domain = 'cesletter.info' }
@@ -148,11 +149,16 @@ function New-SitemapXml {
     [void]$sb.AppendLine('    <priority>1.0</priority>')
     [void]$sb.AppendLine('  </url>')
 
-    # One <url> per published page
+    # One <url> per published page. Clean path-based URLs of the pre-rendered static pages
+    # (must match StaticPageRenderer.Slug / publish-static-pages.ps1). NOTE: only meaningful
+    # once the static pages have actually been published to the bucket — publish first, then
+    # regenerate the sitemap, or crawlers will hit 404s.
     foreach ($p in $Pages) {
-        $slug    = [uri]::EscapeDataString($p.name)
+        if ($p.name -ieq 'Home') { continue }  # root URL already emitted above
+        $slug = ($p.name.Trim().ToLowerInvariant() -replace '\s+', '-') -replace '[^a-z0-9\-]', ''
+        $slug = ($slug -replace '-{2,}', '-').Trim('-')
         [void]$sb.AppendLine('  <url>')
-        [void]$sb.AppendLine("    <loc>https://www.$Domain/?page=$slug</loc>")
+        [void]$sb.AppendLine("    <loc>https://www.$Domain/$slug/</loc>")
         [void]$sb.AppendLine("    <lastmod>$today</lastmod>")
         [void]$sb.AppendLine('    <changefreq>monthly</changefreq>')
         [void]$sb.AppendLine('    <priority>0.7</priority>')

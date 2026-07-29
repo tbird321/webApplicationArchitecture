@@ -187,6 +187,27 @@ namespace WebApplicationArch.content
             return true;
         }
 
+        // Overload that sets Content-Type (and optionally Cache-Control). Required for static HTML
+        // pages: without an explicit text/html content type the object is served as
+        // application/octet-stream and browsers download it instead of rendering it.
+        public async Task<bool> UploadFile(Stream filestream, string filename, string path, string contentType, string cacheControl = null)
+        {
+            string s3Filename = GetS3Filename(filename, path);
+            var uploadRequest = new PutObjectRequest
+            {
+                InputStream = filestream,
+                BucketName = BucketName,
+                Key = s3Filename,
+                ContentType = contentType
+            };
+            if (!string.IsNullOrEmpty(cacheControl))
+            {
+                uploadRequest.Headers.CacheControl = cacheControl;
+            }
+            await amazonClient.PutObjectAsync(uploadRequest);
+            return true;
+        }
+
         public async Task<List<s3FileInfo>> GetFileList(string bucketPath)
         {
             var imageFiles = await ListingObjects(bucketPath);
