@@ -374,6 +374,32 @@ before each visible one. Use that only after the first site has proven the proce
 >
 > **Trap 4 — sitemap last (step 8).** A sitemap full of URLs that 404 teaches
 > crawlers to distrust the site.
+>
+> **Trap 5 — a newly created page does not render until the article is saved twice.**
+> The MCP `create_page_with_article` tool writes the article HTML to S3 *before* the
+> page link exists, so the render trigger fires with no slug to resolve and skips the
+> page. It reports success, `regenerate_sitemap` happily lists the new URL, and the
+> live URL 404s. Nothing logs an error. Fix by calling `set_article_content` on the
+> same article id a second time with identical HTML, or by running
+> `publish-static-pages.ps1 -Site X -Upload -ExcludeHome`. **A correct sitemap is not
+> evidence that a page rendered** — those are separate code paths. Always spot-check
+> one live URL after a batch of new pages. Found on cesletter.info, 2026-07-29.
+>
+> **Trap 6 — a menu change is a whole-site re-render, not a one-file edit.** The nav
+> is defined once in `sitemenu.json`, but the prerenderer **bakes a copy of it into
+> every page's HTML** at render time. Adding, removing, renaming, or reordering a menu
+> item therefore leaves every already-rendered page carrying the old nav — the new
+> entry is unreachable from anywhere except a direct URL or the sitemap, and nothing
+> reports a problem. After any menu change, re-render the whole site:
+>
+> ```powershell
+> ./scripts/publish-static-pages.ps1 -Site X -Upload -ExcludeHome
+> ./scripts/publish-static-pages.ps1 -Site X -Upload -Slug Home     # the root
+> ```
+>
+> Then invalidate. On a large site (`ldsdoctrines`, 471 pages) budget accordingly —
+> this is the reason to batch menu edits rather than make them one at a time.
+> Found on cesletter.info, 2026-07-29.
 
 ### Rolling back
 

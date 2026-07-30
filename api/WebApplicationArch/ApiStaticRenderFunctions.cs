@@ -68,6 +68,36 @@ namespace WebApplicationArch
         }
 
         /// <summary>
+        /// Recognise "public/websites/{domain}/sitemenu.json".
+        ///
+        /// The nav is BAKED into every page's HTML at render time (StaticPageRenderer.BuildNav
+        /// reads this file once per render), so it is not enough to update the file -- every
+        /// already-rendered page keeps the old nav until it is re-rendered. Adding a menu item
+        /// therefore has to re-render the WHOLE site or the new entry is invisible everywhere
+        /// except its own pages, with nothing reporting a problem.
+        ///
+        /// This is deliberately a separate parser from TryParseArticleKey, which must keep
+        /// REJECTING this key -- a menu write is a whole-site render, not a one-page render.
+        /// </summary>
+        public static bool TryParseMenuKey(string key, out string domain)
+        {
+            domain = null;
+            if (string.IsNullOrWhiteSpace(key)) return false;
+
+            var decoded = Uri.UnescapeDataString(key.Replace("+", " "));
+            var parts = decoded.Split('/');
+
+            // public / websites / {domain} / sitemenu.json  -- exactly four segments.
+            if (parts.Length != 4) return false;
+            if (!string.Equals(parts[0], "public", StringComparison.OrdinalIgnoreCase)) return false;
+            if (!string.Equals(parts[1], "websites", StringComparison.OrdinalIgnoreCase)) return false;
+            if (!string.Equals(parts[3], "sitemenu.json", StringComparison.OrdinalIgnoreCase)) return false;
+
+            domain = parts[2];
+            return !string.IsNullOrWhiteSpace(domain);
+        }
+
+        /// <summary>
         /// S3 ObjectCreated handler. One invocation may carry several records; a failure on one
         /// must not abandon the rest, so each is handled independently.
         /// </summary>
