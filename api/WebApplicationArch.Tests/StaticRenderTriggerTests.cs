@@ -68,4 +68,59 @@ public class StaticRenderTriggerTests
         Assert.False(ApiStaticRenderFunctions.TryParseArticleKey("index.html", out _, out _));
         Assert.False(ApiStaticRenderFunctions.TryParseArticleKey("about-us/index.html", out _, out _));
     }
+
+    // ---------------------------------------------------------------- menu key parsing
+    //
+    // The nav is baked into every page's HTML at render time, so a sitemenu.json write has to
+    // re-render the WHOLE site. Misparse it in one direction and menu edits silently stop
+    // propagating; in the other, an unrelated upload kicks off a 471-page render.
+
+    [Theory]
+    [InlineData("public/websites/cesletter.info/sitemenu.json", "cesletter.info")]
+    [InlineData("public/websites/ldsdoctrines.com/sitemenu.json", "ldsdoctrines.com")]
+    [InlineData("public/websites/ldsfaithincrisis.com/sitemenu.json", "ldsfaithincrisis.com")]
+    // Casing of the filename is not guaranteed across writers.
+    [InlineData("public/websites/cesletter.info/SiteMenu.json", "cesletter.info")]
+    public void Parses_MenuKeys(string key, string expectedDomain)
+    {
+        Assert.True(ApiStaticRenderFunctions.TryParseMenuKey(key, out var domain), $"should have parsed '{key}'");
+        Assert.Equal(expectedDomain, domain);
+    }
+
+    [Theory]
+    // Articles are a per-page render, never a whole-site one.
+    [InlineData("public/websites/cesletter.info/articles/bom-dna.html")]
+    // Other per-site metadata files must not trigger a full render.
+    [InlineData("public/websites/cesletter.info/header.html")]
+    [InlineData("public/websites/cesletter.info/site-meta.json")]
+    // A menu nested deeper, or shallower, than the real location.
+    [InlineData("public/websites/cesletter.info/articles/sitemenu.json")]
+    [InlineData("public/websites/sitemenu.json")]
+    // Near-misses on the filename.
+    [InlineData("public/websites/cesletter.info/sitemenu.json.bak")]
+    [InlineData("public/websites/cesletter.info/my-sitemenu.json")]
+    // Malformed / unrelated.
+    [InlineData("public/assets/cesletter.info/sitemenu.json")]
+    [InlineData("sitemenu.json")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void Rejects_NonMenuKeys(string key)
+    {
+        Assert.False(ApiStaticRenderFunctions.TryParseMenuKey(key, out _), $"should NOT have parsed '{key}'");
+    }
+
+    [Fact]
+    public void MenuAndArticleParsers_AreMutuallyExclusive()
+    {
+        // The handler tries the menu parser first and falls through to the article one. If a key
+        // ever satisfied both, a menu write would also be treated as an article write.
+        const string menu = "public/websites/cesletter.info/sitemenu.json";
+        const string article = "public/websites/cesletter.info/articles/bom-dna.html";
+
+        Assert.True(ApiStaticRenderFunctions.TryParseMenuKey(menu, out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseArticleKey(menu, out _, out _));
+
+        Assert.True(ApiStaticRenderFunctions.TryParseArticleKey(article, out _, out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseMenuKey(article, out _));
+    }
 }

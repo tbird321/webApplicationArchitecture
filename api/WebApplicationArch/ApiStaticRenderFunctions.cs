@@ -125,12 +125,20 @@ namespace WebApplicationArch
                 return;
             }
 
+            // One admin drag-and-drop can write sitemenu.json several times, and S3 may deliver
+            // those writes in a single batch. A whole-site render is expensive, so collapse
+            // repeats: render each site's menu at most once per invocation.
+            var menuRendered = new HashSet<int>();
+
             foreach (var record in evnt.Records)
             {
                 var key = record?.S3?.Object?.Key;
                 try
                 {
-                    if (!TryParseArticleKey(key, out var domain, out var articlePath))
+                    bool isMenu = TryParseMenuKey(key, out var domain);
+                    string articlePath = null;
+
+                    if (!isMenu && !TryParseArticleKey(key, out domain, out articlePath))
                     {
                         context.Logger.Log($"Static render trigger: skipping non-article key '{key}'.");
                         continue;
@@ -154,7 +162,19 @@ namespace WebApplicationArch
                         continue;
                     }
 
-                    await RenderPagesForArticlePath(site, websiteId, articlePath, environment, contentBucket, context);
+                    if (isMenu)
+                    {
+                        if (!menuRendered.Add(websiteId))
+                        {
+                            context.Logger.Log($"Static render trigger: menu for {domain} already re-rendered in this batch.");
+                            continue;
+                        }
+                        await RenderAllPagesForSite(site, websiteId, environment, contentBucket, context);
+                    }
+                    else
+                    {
+                        await RenderPagesForArticlePath(site, websiteId, articlePath, environment, contentBucket, context);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -163,6 +183,71 @@ namespace WebApplicationArch
                 }
             }
         }
+
+        /// <summary>
+        /// Re-render EVERY served page on the site. Driven by a sitemenu.json write, because the
+        /// nav is baked into each page's HTML and a menu change is otherwise invisible.
+        ///
+        /// Rendered with bounded concurrency: ldsdoctrines is ~471 pages and each render does
+        /// several S3 reads, so sequential rendering would run for many minutes and time the
+        /// Lambda out. The work is I/O bound, so a modest fan-out is the whole fix.
+        /// </summary>
+        private async Task RenderAllPagesForSite(
+            WebsiteModel site, int websiteId, string environment, string contentBucket, ILambdaContext context)
+        {
+            if (string.IsNullOrWhiteSpace(site.name)) return;
+
+            var conn = await ConnectionInfoAsync(environment);
+            var pageDao = new PageDAO(conn);
+            var allPages = await pageDao.SearchPages(
+                new List<string>(), new List<string>(), null, null, websiteId.ToString());
+
+            var served = (allPages ?? new List<PageModel>())
+                .Where(p => !string.IsNullOrWhiteSpace(p.name)
+                            && (string.IsNullOrEmpty(p.status) || p.status == "published"))
+                .ToList();
+
+            if (served.Count == 0)
+            {
+                context.Logger.Log($"Static render trigger: menu changed on {site.name} but no served pages to render.");
+                return;
+            }
+
+            context.Logger.Log($"Static render trigger: menu changed on {site.name} -- re-rendering {served.Count} page(s).");
+
+            var renderer = new StaticPageRenderer(contentBucket, "us-west-2");
+            using var gate = new System.Threading.SemaphoreSlim(MenuRenderConcurrency);
+            int ok = 0;
+
+            var tasks = served.Select(async pg =>
+            {
+                await gate.WaitAsync();
+                try
+                {
+                    await renderer.RenderAsync(pg, websiteId, site.name, upload: true);
+                    System.Threading.Interlocked.Increment(ref ok);
+                }
+                catch (Exception ex)
+                {
+                    // One bad page must not abandon the other 470.
+                    context.Logger.LogError($"Static render trigger: page '{pg.name}' failed: {ex.Message}");
+                }
+                finally
+                {
+                    gate.Release();
+                }
+            });
+
+            await Task.WhenAll(tasks);
+            context.Logger.Log($"Static render trigger: menu re-render touched {ok}/{served.Count} page(s) on {site.name}.");
+        }
+
+        /// <summary>
+        /// How many pages to render at once on a menu-driven whole-site render. Tuned against the
+        /// Lambda's memory: too high and the S3 client's connection pool and GC start costing more
+        /// than the parallelism buys.
+        /// </summary>
+        private const int MenuRenderConcurrency = 8;
 
         /// <summary>
         /// Find every served page on this site whose articles include the given articlePath, and

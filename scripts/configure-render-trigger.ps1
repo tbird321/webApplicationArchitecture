@@ -59,10 +59,16 @@ Set-StrictMode -Version Latest
 
 . "$PSScriptRoot\lib\SiteInfra.ps1"
 
-# Stable id so re-running replaces our entry rather than stacking duplicates.
-$ConfigId = 'static-render-on-article-upload'
-$Prefix   = 'public/websites/'
-$Suffix   = '.html'
+# Stable ids so re-running replaces our entries rather than stacking duplicates.
+$ConfigId     = 'static-render-on-article-upload'
+$Prefix       = 'public/websites/'
+$Suffix       = '.html'
+
+# S3 filter rules allow ONE prefix and ONE suffix per entry and no wildcard in the middle, so
+# the menu needs its own notification -- '.html' never matches 'sitemenu.json'. A menu write
+# re-renders the WHOLE site, because the nav is baked into every page's HTML at render time.
+$MenuConfigId = 'static-render-on-menu-upload'
+$MenuSuffix   = 'sitemenu.json'
 
 Write-Host 'Static re-render trigger' -ForegroundColor White
 Write-Host "  bucket  : s3://$ContentBucket"
@@ -125,9 +131,10 @@ foreach ($c in $lambdaCfgs) {
     if ($c) { Write-Note ("  - {0} -> {1}" -f (Get-Prop $c 'Id'), (Get-Prop $c 'LambdaFunctionArn')) }
 }
 
-# Drop only our own entry; everything else is preserved verbatim.
-$kept = @($lambdaCfgs | Where-Object { (Get-Prop $_ 'Id') -ne $ConfigId })
-if ($kept.Count -ne $lambdaCfgs.Count) { Write-Note "replacing the existing '$ConfigId' entry" }
+# Drop only our own entries; everything else is preserved verbatim.
+$ourIds = @($ConfigId, $MenuConfigId)
+$kept = @($lambdaCfgs | Where-Object { $ourIds -notcontains (Get-Prop $_ 'Id') })
+if ($kept.Count -ne $lambdaCfgs.Count) { Write-Note "replacing the existing '$ConfigId' / '$MenuConfigId' entries" }
 
 # ------------------------------------------------------------------- build the new config
 Write-Step 3 $(if ($Remove) { 'Remove the trigger' } else { 'Add the trigger' })
@@ -147,6 +154,23 @@ if (-not $Remove) {
                 FilterRules = @(
                     [pscustomobject]@{ Name = 'prefix'; Value = $Prefix }
                     [pscustomobject]@{ Name = 'suffix'; Value = $Suffix }
+                )
+            }
+        }
+    }
+
+    # Second entry: the nav. Without this a menu edit updates sitemenu.json and every
+    # already-rendered page keeps the old nav -- the new item is unreachable and nothing
+    # reports a problem. Routed to the same Lambda; TryParseMenuKey tells the two apart.
+    $newLambdaCfgs += [pscustomobject]@{
+        Id                = $MenuConfigId
+        LambdaFunctionArn = $fnArn
+        Events            = @('s3:ObjectCreated:*')
+        Filter            = [pscustomobject]@{
+            Key = [pscustomobject]@{
+                FilterRules = @(
+                    [pscustomobject]@{ Name = 'prefix'; Value = $Prefix }
+                    [pscustomobject]@{ Name = 'suffix'; Value = $MenuSuffix }
                 )
             }
         }
@@ -182,14 +206,15 @@ $after = Invoke-Aws @('s3api', 'get-bucket-notification-configuration', '--bucke
 $afterCfgs = @()
 $raw = Get-Prop $after 'LambdaFunctionConfigurations'
 if ($null -ne $raw) { $afterCfgs = @($raw | Where-Object { $null -ne $_ }) }
-$ours = @($afterCfgs | Where-Object { (Get-Prop $_ 'Id') -eq $ConfigId })
-if ($ours) {
-    Write-Ok 'notification is in place'
-} else {
-    throw 'The notification was written but is not present on read-back.'
-}
+$ours     = @($afterCfgs | Where-Object { (Get-Prop $_ 'Id') -eq $ConfigId })
+$oursMenu = @($afterCfgs | Where-Object { (Get-Prop $_ 'Id') -eq $MenuConfigId })
+if ($ours)     { Write-Ok 'article notification is in place' }
+else           { throw 'The article notification was written but is not present on read-back.' }
+if ($oursMenu) { Write-Ok 'menu notification is in place' }
+else           { throw 'The menu notification was written but is not present on read-back.' }
 
-Write-Host "`nDone. Editing an article in the admin now re-renders its static page." -ForegroundColor Green
+Write-Host "`nDone. Editing an article in the admin now re-renders its static page," -ForegroundColor Green
+Write-Host 'and changing the menu re-renders the whole site.' -ForegroundColor Green
 Write-Host ''
 Write-Host '  Only sites listed in STATIC_PUBLISH_SITES are re-rendered -- the trigger fires for' -ForegroundColor DarkGray
 Write-Host '  every site, and the Lambda skips any that has not been cut over.' -ForegroundColor DarkGray

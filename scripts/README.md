@@ -390,16 +390,50 @@ before each visible one. Use that only after the first site has proven the proce
 > every page's HTML** at render time. Adding, removing, renaming, or reordering a menu
 > item therefore leaves every already-rendered page carrying the old nav — the new
 > entry is unreachable from anywhere except a direct URL or the sitemap, and nothing
-> reports a problem. After any menu change, re-render the whole site:
+> reports a problem. Found on cesletter.info, 2026-07-29.
+>
+> This is now handled automatically — a `sitemenu.json` write triggers a whole-site
+> re-render — but **only once the pending deploy below has run.** Until then, do it by
+> hand after any menu change:
 >
 > ```powershell
 > ./scripts/publish-static-pages.ps1 -Site X -Upload -ExcludeHome
 > ./scripts/publish-static-pages.ps1 -Site X -Upload -Slug Home     # the root
 > ```
 >
-> Then invalidate. On a large site (`ldsdoctrines`, 471 pages) budget accordingly —
-> this is the reason to batch menu edits rather than make them one at a time.
-> Found on cesletter.info, 2026-07-29.
+> Then invalidate. Either way, on a large site (`ldsdoctrines`, 471 pages) a single
+> menu edit costs a full re-render — so batch menu changes rather than making them one
+> at a time.
+
+### Pending: automatic re-render on menu change
+
+Written and unit-tested, **not yet deployed** as of 2026-07-30. Two commands, in this
+order:
+
+```powershell
+# STATIC_PUBLISH_SITES is a template parameter re-applied on every deploy. If it is
+# unset in the shell, publishing turns OFF for every site at once -- set it first.
+$env:STATIC_PUBLISH_SITES = [Environment]::GetEnvironmentVariable('STATIC_PUBLISH_SITES','User')
+$env:STATIC_PUBLISH_SITES        # expect: 1,8,5,6,2,4  -- do not proceed if empty
+./scripts/deploy-lambda-no-rotate.ps1 -ProfileName tbirdcontractinggmailcom
+./scripts/configure-render-trigger.ps1
+```
+
+`configure-render-trigger.ps1` now writes **two** notifications — one for articles
+(`.html`) and one for the menu (`sitemenu.json`). S3 allows a single prefix and suffix
+per entry, so the menu cannot share the article filter. Both target the same Lambda;
+`ApiStaticRenderFunctions.TryParseMenuKey` tells them apart.
+
+The render Lambda moves to **1024 MB / 900 s** to cover the worst-case whole-site
+render, and renders pages 8-at-a-time (`MenuRenderConcurrency`) since the work is
+I/O bound. Verify after deploying:
+
+```powershell
+./scripts/configure-render-trigger.ps1 -WhatIf     # shows both entries, writes nothing
+aws logs tail /aws/lambda/<fn> --follow --profile tbirdcontractinggmailcom --region us-west-2
+```
+
+Then change one menu item and confirm an unrelated page picks up the new nav.
 
 ### Rolling back
 
