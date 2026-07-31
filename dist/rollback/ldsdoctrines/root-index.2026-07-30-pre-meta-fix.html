@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LDS Doctrines</title>
+<meta name="description" content="Root Page">
+<link rel="canonical" href="https://www.ldsdoctrines.com/">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Home">
+<meta property="og:description" content="Root Page">
+<meta property="og:url" content="https://www.ldsdoctrines.com/">
+<meta property="og:site_name" content="LDS Doctrines">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Home">
+<meta name="twitter:description" content="Root Page">
+<style>/* ===========================================================================
+   Structural stylesheet for PUBLIC STATIC PAGES.
+
+   SINGLE SOURCE OF TRUTH. Three things read this file:
+     1. StaticPageRenderer  (C#, embedded resource)  -- the on-save re-render
+     2. publish-static-pages.ps1                     -- the bulk backfill
+     3. StaticLayoutCssTests                         -- drift detection
+   Edit it here and nowhere else.
+
+   WHY IT EXISTS
+   The site's appearance is entirely CSS driven: a page's `layout` value becomes
+   a class ("2, 1 Grid" -> "layout-2-1") on the article container, and CSS grid
+   rules do the rest. Those rules live in
+   react/baseProject/src/sitecontent/content/PageContainer.css, and the menu's
+   rules in reactcomponents/.../NestedDynamicMenu.css -- both compiled into the
+   SPA bundle.
+
+   A pre-rendered static page never loads that bundle. It inlines the site's
+   theme.css, but theme.css is the ThemeBuilder output (colours, fonts) and
+   contains none of this. Without this file every static page loses its
+   .articleContents padding and every grid and menu rule.
+
+   SELECTOR NOTE
+   PageContainer.css targets "> div:nth-child(...)" because the SPA wraps each
+   article in a <div>. The static renderer emits <article>. The child element
+   name is therefore dropped here -- "> :nth-child(...)" matches both, so these
+   rules stay correct for either markup.
+
+   KEEPING IN SYNC
+   Add a layout to PageContainer.css and you must mirror it here, or pages using
+   it render as a plain vertical stack. StaticLayoutCssTests fails when they
+   drift apart.
+   =========================================================================== */
+
+/* ---- document baseline ---------------------------------------------------
+   Copied from react/baseProject/src/index.css, which is compiled into the SPA
+   bundle and therefore never reaches a static page. Without it every page falls
+   back to the browser default -- Times New Roman instead of the system sans
+   stack, plus the default 8px body margin and no font smoothing.
+
+   This is the FIRST thing in the file so a per-site BaseStyles.css or theme.css
+   can still override the font (cesletter sets Open Sans, for instance). */
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+code{font-family:source-code-pro,Menlo,Monaco,Consolas,'Courier New',monospace}
+
+/* ---- navigation ----------------------------------------------------------
+   The SPA renders <div class="nested-dynamic-menu"> with DynamicMenu children.
+   The static renderer emits semantic <nav class="menuContents"><ul>...</ul>
+   instead: better for crawlers, and it works with JavaScript disabled. These
+   rules give that markup the same horizontal bar + hover dropdown. The SPA's
+   dropdown is pure CSS :hover (not JS state), so nothing is lost by going
+   static. :focus-within is added so the menu is keyboard operable, which the
+   SPA version is not. */
+.menuContents{position:relative;z-index:1000;max-width:100%}
+.menuContents ul{list-style:none;margin:0;padding:0}
+.menuContents > ul{display:flex;flex-wrap:wrap}
+.menuContents > ul > li{position:relative;flex:1 1 auto;white-space:nowrap}
+/* Top-level entries: a link when the item points at a page, a plain heading when it is
+   only a group label. Both need the same box so the bar does not jump between them. */
+.menuContents .nav-section{display:block;padding:10px;cursor:default}
+.menuContents > ul > li > a{display:block;padding:10px;text-decoration:none;color:inherit}
+.menuContents > ul > li > a:hover,.menuContents > ul > li > a:focus{text-decoration:underline}
+.menuContents > ul > li > ul{display:none;position:absolute;left:0;background-color:#f9f9f9;min-width:160px;box-shadow:0 8px 16px 0 rgba(0,0,0,.2);z-index:1}
+.menuContents > ul > li:hover > ul,.menuContents > ul > li:focus-within > ul{display:block}
+.menuContents > ul > li > ul a{color:#000;padding:12px 16px;text-decoration:none;display:block;white-space:nowrap}
+.menuContents > ul > li > ul a:hover,.menuContents > ul > li > ul a:focus{background-color:#f1f1f1}
+
+/* ---- article container --------------------------------------------------- */
+.articleContents{padding-left:15%;padding-right:15%}
+.articleContents::after{content:"";display:block;clear:both}
+
+@media (max-width:480px){.layout-2-1{grid-template-columns:1fr !important}.articleContents{padding-left:0;padding-right:0}}
+@media (max-width:768px){.layout-2-1{grid-template-columns:1fr !important}.articleContents{padding-left:0;padding-right:0}}
+
+/* ---- layouts ------------------------------------------------------------- */
+.layout-standard{display:grid;grid-template-columns:1fr;gap:10px}
+
+.layout-1 > :nth-child(1n + 1){grid-column:1 / -1}
+
+.layout-1-1_3-2_3{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto;gap:10px}
+.layout-1-1_3-2_3 > :nth-child(5n + 1){grid-column:1 / -1}
+.layout-1-1_3-2_3 > :nth-child(5n + 2){grid-column:1 / 2}
+.layout-1-1_3-2_3 > :nth-child(5n + 3){grid-column:2 / 4}
+.layout-1-1_3-2_3 > :nth-child(5n + 4){grid-column:1 / 3}
+.layout-1-1_3-2_3 > :nth-child(5n + 5){grid-column:3 / 4}
+
+.layout-1-1_3{display:grid;grid-template-columns:1fr 2fr;grid-template-rows:auto;gap:10px}
+.layout-1-1_3 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-1_3 > :nth-child(3n + 2){grid-column:1 / 2}
+.layout-1-1_3 > :nth-child(3n + 3){grid-column:2 / 3}
+
+.layout-1-2-3{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:auto;gap:10px}
+.layout-1-2-3 > :nth-child(6n + 1){grid-column:1 / -1}
+.layout-1-2-3 > :nth-child(6n + 2),.layout-1-2-3 > :nth-child(6n + 3){grid-column:span 3}
+.layout-1-2-3 > :nth-child(6n + 4),.layout-1-2-3 > :nth-child(6n + 5),.layout-1-2-3 > :nth-child(6n + 6){grid-column:span 2}
+
+.layout-1-2_3-1_3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-1-2_3-1_3 > :nth-child(5n + 1){grid-column:1 / -1}
+.layout-1-2_3-1_3 > :nth-child(5n + 2){grid-column:1 / 3}
+.layout-1-2_3-1_3 > :nth-child(5n + 3){grid-column:3 / 4}
+.layout-1-2_3-1_3 > :nth-child(5n + 4){grid-column:1 / 2}
+.layout-1-2_3-1_3 > :nth-child(5n + 5){grid-column:2 / 4}
+
+.layout-1-2_3{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.layout-1-2_3 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-2_3 > :nth-child(3n + 2){grid-column:1 / 2}
+.layout-1-2_3 > :nth-child(3n + 3){grid-column:2 / 3}
+
+.layout-1-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.layout-1-2 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-2 > :nth-child(3n + 2),.layout-1-2 > :nth-child(3n + 3){grid-column:auto}
+
+.layout-1-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-1-3 > :nth-child(4n + 1){grid-column:1 / -1}
+.layout-1-3 > :nth-child(4n + 2),.layout-1-3 > :nth-child(4n + 3),.layout-1-3 > :nth-child(4n + 4){grid-column:auto}
+
+.layout-1_3{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.layout-1_3 > :nth-child(2n + 1){grid-column:1 / 2}
+.layout-1_3 > :nth-child(2n + 2){grid-column:2 / 3}
+
+.layout-1_3-1{display:grid;grid-template-columns:1fr 2fr;grid-auto-rows:auto;gap:10px}
+.layout-1_3-1 > :nth-child(3n + 1){grid-column:1 / 2}
+.layout-1_3-1 > :nth-child(3n + 2){grid-column:2 / 3}
+.layout-1_3-1 > :nth-child(3n + 3){grid-column:1 / -1}
+
+.layout-1_3-2_3{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;gap:10px}
+.layout-1_3-2_3 > :nth-child(4n + 1){grid-column:1 / span 1}
+.layout-1_3-2_3 > :nth-child(4n + 2){grid-column:2 / span 2}
+.layout-1_3-2_3 > :nth-child(4n + 3){grid-column:1 / span 2}
+.layout-1_3-2_3 > :nth-child(4n + 4){grid-column:3 / span 1}
+
+.layout-2-1{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.layout-2-1 > :nth-child(3n + 1),.layout-2-1 > :nth-child(3n + 2){grid-column:auto}
+.layout-2-1 > :nth-child(3n + 3){grid-row:auto;grid-column:1 / -1}
+
+.layout-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.layout-2 > :nth-child(2n - 1),.layout-2 > :nth-child(2n){grid-column:auto}
+
+.layout-2-3{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.layout-2-3 > :nth-child(5n + 1),.layout-2-3 > :nth-child(5n + 2){grid-column:span 3}
+.layout-2-3 > :nth-child(5n + 3),.layout-2-3 > :nth-child(5n + 4),.layout-2-3 > :nth-child(5n + 5){grid-column:span 2}
+
+.layout-2_3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-2_3-1 > :nth-child(3n + 1){grid-column:1 / span 2}
+.layout-2_3-1 > :nth-child(3n + 2){grid-column:3 / span 1}
+.layout-2_3-1 > :nth-child(3n + 3){grid-column:1 / -1}
+
+.layout-2_3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-2_3 > :nth-child(2n + 1){grid-column:1 / span 2}
+.layout-2_3 > :nth-child(2n + 2){grid-column:3 / span 1}
+
+.layout-3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-3-1 > :nth-child(4n + 1),.layout-3-1 > :nth-child(4n + 2),.layout-3-1 > :nth-child(4n + 3){grid-column:span 1}
+.layout-3-1 > :nth-child(4n + 4){grid-column:1 / -1}
+
+.layout-3-2{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.layout-3-2 > :nth-child(5n + 1),.layout-3-2 > :nth-child(5n + 2),.layout-3-2 > :nth-child(5n + 3){grid-column:span 2}
+.layout-3-2 > :nth-child(5n + 4),.layout-3-2 > :nth-child(5n + 5){grid-column:span 3}
+
+.layout-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-3 > *{grid-column:span 1}
+</style>
+<style>.headerContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* This stacks your items vertically. Remove if you want horizontal layout. */
+}
+
+.menuContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* This stacks your items vertically. Remove if you want horizontal layout. */
+}
+
+.bodyStyle {
+    margin-left: 10%;
+    margin-right: 10%;
+    font-size: large;
+    font-family: Georgia;
+}
+
+.question {
+    font-weight: bold;
+    font-size: 24px;
+    text-align: center;
+    padding-bottom: 25px;
+}
+
+.mainContent {
+    padding-top: 25px;
+    padding-bottom: 25px;
+}
+
+.comingSoon {
+    text-align: center;
+    font-size: 48px;
+    font-weight: bolder;
+    font-family: cursive;
+}
+.parent-menu-button {
+    min-width: unset !important;
+}
+
+</style>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Home","description":"Root Page","inLanguage":"en","mainEntityOfPage":"https://www.ldsdoctrines.com/","url":"https://www.ldsdoctrines.com/","publisher":{"url":"https://www.ldsdoctrines.com/","name":"LDS Doctrines","@type":"Organization"}}</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PY9E2KT5DC"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PY9E2KT5DC');</script>
+</head>
+<body>
+<div class="pageContents">
+<header class="headerContents"><div style="cursor: pointer;"><img src="https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/LDS Doctrines.jpg" alt="" width="251" height="77"></div></header>
+<nav class="menuContents" aria-label="Site navigation"><ul>
+<li><span class="nav-section">Basics</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/found-god/">Who is God?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-child-of-god/">You are a child of God</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-jesus/">Who is Jesus Christ?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-holy-ghost/">Who is the Holy Ghost?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-gospel/">What is the Gospel of Jesus Christ?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-plan-of-salvation/">What is the Plan of Salvation?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-repentance/">What is Repentance?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-baptism/">Baptism</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-grace/">What is Grace?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-sacrament/">The Sacrament/Communion</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-scripture/">What is Scripture?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-priesthood/">What is Priesthood?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-preexistence/">Where did I come from?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-why-here/">Why are we on the earth?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-spirit/">What is a Spirit</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-after-death/">What happens when we die?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-resurrection/">What is the resurrection?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-prophet/">What is a Prophet?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-commandments/">Why do we have commandments?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-organized-church/">Why is an Organized Religion Important?</a></li>
+</ul>
+</li>
+<li><span class="nav-section">A</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/articlesoffaith/">Articles of Faith</a></li>
+<li><a href="https://www.ldsdoctrines.com/angel/">Angel</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-atonement/">Atonement</a></li>
+<li><a href="https://www.ldsdoctrines.com/abrahamcovenant-blood/">Abrahamic Covenant - Blood Oath</a></li>
+<li><a href="https://www.ldsdoctrines.com/apostasy/">Apostasy</a></li>
+<li><a href="https://www.ldsdoctrines.com/adam-ondi-ahman/">Adam-ondi-Ahman</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-apostle/">Apostle - What Is One?</a></li>
+<li><a href="https://www.ldsdoctrines.com/anti-christ/">Anti-Christs of the Book of Mormon</a></li>
+<li><a href="https://www.ldsdoctrines.com/are-mormons-christian/">Are Mormons Christian?</a></li>
+<li><a href="https://www.ldsdoctrines.com/great-apostasy/">The Great Apostasy</a></li>
+<li><a href="https://www.ldsdoctrines.com/astrology-signs-heavens/">Astrology and the Signs of the Heavens</a></li>
+<li><a href="https://www.ldsdoctrines.com/abortion/">Abortion</a></li>
+</ul>
+</li>
+<li><span class="nav-section">B</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/bethlehem-jesus/">Bethlehem - Birthplace of Jesus</a></li>
+<li><a href="https://www.ldsdoctrines.com/baptism-fordead/">Baptism for the Dead</a></li>
+<li><a href="https://www.ldsdoctrines.com/bookofmormon-stylometry/">Book of Mormon Stylometry</a></li>
+<li><a href="https://www.ldsdoctrines.com/bookofmormon-racist/">Is the Book of Mormon Racist?</a></li>
+<li><a href="https://www.ldsdoctrines.com/baal/">Baal</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-baptism/">Baptism</a></li>
+<li><a href="https://www.ldsdoctrines.com/blood-oath/">Blood Oath</a></li>
+<li><a href="https://www.ldsdoctrines.com/blood-atonement/">Blood Atonement</a></li>
+<li><a href="https://www.ldsdoctrines.com/bofm-isaiah/">Book of Mormon and Isaiah</a></li>
+<li><a href="https://www.ldsdoctrines.com/bofm-witnesses/">Witnesses of the Book of Mormon</a></li>
+<li><a href="https://www.ldsdoctrines.com/bofm-arabia/">Nahom, Bountiful, Arabian Journey</a></li>
+<li><a href="https://www.ldsdoctrines.com/bofm-chiasmus/">Chiasmus and the Book of Mormon</a></li>
+<li><a href="https://www.ldsdoctrines.com/bible-reliability/">Can We Trust the Bible?</a></li>
+<li><a href="https://www.ldsdoctrines.com/bofm-evidences/">Book of Mormon Evidences</a></li>
+<li><a href="https://www.ldsdoctrines.com/book-of-abraham/">Book of Abraham</a></li>
+<li><a href="https://www.ldsdoctrines.com/bom-translation/">Book of Mormon Translation</a></li>
+<li><a href="https://www.ldsdoctrines.com/body-power-over-spirits/">The Power of a Body Over Disembodied Spirits</a></li>
+<li><a href="https://www.ldsdoctrines.com/birth-control/">Birth Control &amp;amp; Family Planning</a></li>
+</ul>
+</li>
+<li><span class="nav-section">C</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/conversion/">What is Conversion</a></li>
+<li><a href="https://www.ldsdoctrines.com/comefollowme/">Come Follow Me</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-child-of-god/">Child of God</a></li>
+<li><a href="https://www.ldsdoctrines.com/called-of-god/">Called of God</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-commandments/">Commandments - Why?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-organized-church/">Church - It's Importance</a></li>
+<li><a href="https://www.ldsdoctrines.com/love-of-christ/">Charity</a></li>
+<li><a href="https://www.ldsdoctrines.com/covenant-defined/">Covenant - Definition</a></li>
+<li><a href="https://www.ldsdoctrines.com/council-in-heaven/">Council in Heaven</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-consecration/">Law of Consecration</a></li>
+<li><a href="https://www.ldsdoctrines.com/city-of-enoch/">City of Enoch</a></li>
+<li><a href="https://www.ldsdoctrines.com/calling-and-election/">Calling and Election Made Sure</a></li>
+<li><a href="https://www.ldsdoctrines.com/celestial-kingdom/">Celestial Kingdom</a></li>
+<li><a href="https://www.ldsdoctrines.com/consecrated-oil/">Consecrated Oil</a></li>
+<li><a href="https://www.ldsdoctrines.com/covenants-of-god/">The Covenants of God — From Adam to the Restoration</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-creation/">The Creation</a></li>
+<li><a href="https://www.ldsdoctrines.com/casting-lots/">Casting Lots</a></li>
+<li><a href="https://www.ldsdoctrines.com/law-of-chastity/">The Law of Chastity</a></li>
+<li><a href="https://www.ldsdoctrines.com/church-organization/">Church Organization</a></li>
+</ul>
+</li>
+<li><span class="nav-section">D</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/discipleship/">Discipleship</a></li>
+<li><a href="https://www.ldsdoctrines.com/dna-book-of-mormon/">DNA and the Book of Mormon</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-doctrine/">What is Doctrine</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-after-death/">Death - what is after?</a></li>
+<li><a href="https://www.ldsdoctrines.com/dead-sea-scrolls/">Dead Sea Scrolls and LDS</a></li>
+<li><a href="https://www.ldsdoctrines.com/doctrine-of-christ/">The Doctrine of Christ</a></li>
+<li><a href="https://www.ldsdoctrines.com/doctrine-and-covenants/">The Doctrine and Covenants</a></li>
+<li><a href="https://www.ldsdoctrines.com/dispensations/">Dispensations</a></li>
+<li><a href="https://www.ldsdoctrines.com/dating-and-courtship/">Dating &amp;amp; Courtship</a></li>
+<li><a href="https://www.ldsdoctrines.com/divorce/">Divorce</a></li>
+</ul>
+</li>
+<li><span class="nav-section">E</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/evolution/">Evolution</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-eternal-progression/">Eternal Progression</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-exaltation/">Exaltation</a></li>
+<li><a href="https://www.ldsdoctrines.com/evolution-lds/">Evolution - LDS Position</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-eternalmarriage/">Eternal Marriage</a></li>
+<li><a href="https://www.ldsdoctrines.com/elias-elijah-john/">Elias, Elijah, and John</a></li>
+<li><a href="https://www.ldsdoctrines.com/evil-spirits-possession/">Evil Spirits, Possession &amp;amp; Casting Them Out</a></li>
+<li><a href="https://www.ldsdoctrines.com/living-earth/">The Living Earth</a></li>
+<li><a href="https://www.ldsdoctrines.com/endowment/">The Endowment</a></li>
+</ul>
+</li>
+<li><span class="nav-section">F</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/thefall/">The Fall of Adam and Eve</a></li>
+<li><a href="https://www.ldsdoctrines.com/forgiveness/">Forgiveness</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-faith/">Faith</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-fasting/">Fasting</a></li>
+<li><a href="https://www.ldsdoctrines.com/first-vision/">The First Vision</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-forgiveness/">Forgiveness - Full Doctrine</a></li>
+<li><a href="https://www.ldsdoctrines.com/free-agency/">Free Agency</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-family/">The Family</a></li>
+<li><a href="https://www.ldsdoctrines.com/foreordination/">Foreordination</a></li>
+<li><a href="https://www.ldsdoctrines.com/family-history/">Family History &amp;amp; Temple Work</a></li>
+</ul>
+</li>
+<li><span class="nav-section">G</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/gates-of-hell/">Gates of Hell</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-holy-ghost/">God - The Holy Ghost</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-god/">God - The Father</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-jesus/">God - Jesus Christ</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-gospel/">Gospel</a></li>
+<li><a href="https://www.ldsdoctrines.com/good-evil/">Good and Evil</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-grace/">Grace</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-gatheringofisrael/">Gathering of Israel</a></li>
+<li><a href="https://www.ldsdoctrines.com/great-and-abominable/">Great and Abominable Church</a></li>
+<li><a href="https://www.ldsdoctrines.com/general-conference/">General Conference</a></li>
+<li><a href="https://www.ldsdoctrines.com/gender-identity/">Gender &amp;amp; Transgender Identity</a></li>
+</ul>
+</li>
+<li><span class="nav-section">H</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/found-holy-ghost/">Holy Ghost</a></li>
+<li><a href="https://www.ldsdoctrines.com/bofm-horses/">Horses in the Book of Mormon</a></li>
+<li><a href="https://www.ldsdoctrines.com/healing-sick/">Healing the Sick</a></li>
+<li><a href="https://www.ldsdoctrines.com/heavenly-mother/">Heavenly Mother</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-hope/">Hope</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-humility/">Humility</a></li>
+<li><a href="https://www.ldsdoctrines.com/healing-faith-priesthood/">Healing by Faith and by Priesthood</a></li>
+</ul>
+</li>
+<li><span class="nav-section">I</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/intelligences/">Intelligences</a></li>
+</ul>
+</li>
+<li><span class="nav-section">J</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/found-jesus/">Jesus Christ</a></li>
+<li><a href="https://www.ldsdoctrines.com/jesuschrist-no-ordinary/">Jesus Christ - No Ordinary Man</a></li>
+<li><a href="https://www.ldsdoctrines.com/joseph-smith-prophet/">Joseph Smith - Prophet or Fraud?</a></li>
+<li><a href="https://www.ldsdoctrines.com/final-judgment/">The Final Judgment</a></li>
+</ul>
+</li>
+<li><span class="nav-section">K</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/kabbalah-lds/">Kabbalah and LDS Doctrine</a></li>
+<li><a href="https://www.ldsdoctrines.com/kolob/">Kolob</a></li>
+<li><a href="https://www.ldsdoctrines.com/king-follett/">King Follett Discourse</a></li>
+<li><a href="https://www.ldsdoctrines.com/karma-law-restoration/">Karma and the Law of Restoration</a></li>
+</ul>
+</li>
+<li><span class="nav-section">L</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/found-satan/">Lucifer</a></li>
+<li><a href="https://www.ldsdoctrines.com/lesson-plans/">Lesson Plans</a></li>
+<li><a href="https://www.ldsdoctrines.com/love-of-christ/">Love of Christ</a></li>
+<li><a href="https://www.ldsdoctrines.com/liahona/">The Liahona</a></li>
+<li><a href="https://www.ldsdoctrines.com/law-of-moses/">Law of Moses</a></li>
+<li><a href="https://www.ldsdoctrines.com/light-of-christ/">The Light of Christ</a></li>
+</ul>
+</li>
+<li><span class="nav-section">M</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/mountain-meadows/">Mountain Meadows Massacre</a></li>
+<li><a href="https://www.ldsdoctrines.com/masonry-temple/">Masonry and the Temple</a></li>
+<li><a href="https://www.ldsdoctrines.com/the-millennium/">The Millennium</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-missionarywork/">Missionary Work</a></li>
+<li><a href="https://www.ldsdoctrines.com/mysteries-of-god/">Mysteries of God</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-miracles/">Miracles</a></li>
+<li><a href="https://www.ldsdoctrines.com/blessing-vs-magic/">Priesthood Blessing vs. Ritual Magic</a></li>
+</ul>
+</li>
+<li><span class="nav-section">N</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/new-jerusalem/">New Jerusalem</a></li>
+<li><a href="https://www.ldsdoctrines.com/name-of-church/">Name of the Church</a></li>
+</ul>
+</li>
+<li><span class="nav-section">O</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/theoldtestament/">The Old Testament</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-organized-church/">Organized Religion?</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-outerdarkness/">Outer Darkness</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-obedience/">Obedience</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-ordinances/">The Ordinances of the Gospel</a></li>
+<li><a href="https://www.ldsdoctrines.com/out-of-body-visions/">Out of the Body — Visions and Being Caught Up Into Heaven</a></li>
+</ul>
+</li>
+<li><span class="nav-section">P</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/found-prophet/">Prophets</a></li>
+<li><a href="https://www.ldsdoctrines.com/prophets-test/">Prophets - The Test of a Prophet</a></li>
+<li><a href="https://www.ldsdoctrines.com/polygamy/">Polygamy</a></li>
+<li><a href="https://www.ldsdoctrines.com/prophets-warning/">Prophets - Prepare for his coming</a></li>
+<li><a href="https://www.ldsdoctrines.com/prophets-calling/">Prophets - Called of God</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-priesthood/">Priesthood</a></li>
+<li><a href="https://www.ldsdoctrines.com/priesthood-restrictions/">Priesthood: Black Restrictions</a></li>
+<li><a href="https://www.ldsdoctrines.com/priesthood-keys/">Priesthood Keys</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-preexistence/">Pre-Existence</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-plan-of-salvation/">Plan of Salvation</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-patriarchalblessings/">Patriarchal Blessings</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-prayer/">Prayer</a></li>
+<li><a href="https://www.ldsdoctrines.com/passover-type/">The Passover as Type of Christ</a></li>
+<li><a href="https://www.ldsdoctrines.com/people-of-scripture/">People of Scripture</a></li>
+<li><a href="https://www.ldsdoctrines.com/pearl-of-great-price/">The Pearl of Great Price</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-peace/">Peace</a></li>
+<li><a href="https://www.ldsdoctrines.com/priesthood-power-over-evil/">Priesthood Power Over Evil</a></li>
+<li><a href="https://www.ldsdoctrines.com/pornography/">Pornography</a></li>
+<li><a href="https://www.ldsdoctrines.com/the-two-priesthoods/">Priesthood: Aaronic &amp;amp; Melchizedek</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Q</span>
+</li>
+<li><span class="nav-section">R</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/found-repentance/">Repentance</a></li>
+<li><a href="https://www.ldsdoctrines.com/reasonforrepentance/">Repentance - Why it was in the plan</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-resurrection/">The Resurrection</a></li>
+<li><a href="https://www.ldsdoctrines.com/revelation-how/">How to Receive Revelation</a></li>
+<li><a href="https://www.ldsdoctrines.com/res-required/">Why the Resurrection is Required</a></li>
+<li><a href="https://www.ldsdoctrines.com/framework-of-revelation/">What is Revelation</a></li>
+<li><a href="https://www.ldsdoctrines.com/resurrection-detail/">Resurrection - What Kind of Body?</a></li>
+<li><a href="https://www.ldsdoctrines.com/restoration-of-gospel/">The Restoration of the Gospel</a></li>
+</ul>
+</li>
+<li><span class="nav-section">S</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/signs-of-the-times/">Signs of the Times</a></li>
+<li><a href="https://www.ldsdoctrines.com/bookofmormon-stylometry/">Stylometry in the Book of Mormon</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-sin/">Sin</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-satan/">Satan</a></li>
+<li><a href="https://www.ldsdoctrines.com/salvation-event/">Salvation</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-spirit/">Spirit Bodies</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-sacrament/">Sacrament</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-scripture/">Scripture</a></li>
+<li><a href="https://www.ldsdoctrines.com/faithalone/">Sola Fide</a></li>
+<li><a href="https://www.ldsdoctrines.com/sola-fide-refutation/">Why Sola Fide Just Can't Be True</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-spiritworld/">The Spirit World</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-spiritualgifts/">Spiritual Gifts</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-sabbath/">The Sabbath</a></li>
+<li><a href="https://www.ldsdoctrines.com/sons-of-perdition/">Sons of Perdition</a></li>
+<li><a href="https://www.ldsdoctrines.com/sealing-power/">The Sealing Power</a></li>
+<li><a href="https://www.ldsdoctrines.com/salvation-for-dead/">Salvation for the Dead</a></li>
+<li><a href="https://www.ldsdoctrines.com/second-comforter/">The Second Comforter</a></li>
+<li><a href="https://www.ldsdoctrines.com/same-sex-attraction/">Same-Sex Attraction &amp;amp; Marriage</a></li>
+<li><a href="https://www.ldsdoctrines.com/suicide/">Suicide</a></li>
+</ul>
+</li>
+<li><span class="nav-section">T</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/talks/">Talks</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-threeglories/">Three Degrees of Glory</a></li>
+<li><a href="https://www.ldsdoctrines.com/translated-beings/">Translated Beings</a></li>
+<li><a href="https://www.ldsdoctrines.com/two-sticks/">Two Sticks - Ezekiel 37</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-temple/">The Temple</a></li>
+<li><a href="https://www.ldsdoctrines.com/tabernacle/">The Tabernacle</a></li>
+<li><a href="https://www.ldsdoctrines.com/three-bodies/">Three Glories - Paul's Teaching</a></li>
+<li><a href="https://www.ldsdoctrines.com/temple-gates-off-hinges/">How Temple Attendance Opens the Gates of Hell and Binds Us to the Savior</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-truth/">Truth</a></li>
+<li><a href="https://www.ldsdoctrines.com/ten-commandments/">The Ten Commandments</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-temptation/">Temptation</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-testimony/">Testimony</a></li>
+<li><a href="https://www.ldsdoctrines.com/temple-garments/">Temple Garments</a></li>
+</ul>
+</li>
+<li><span class="nav-section">V</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/the-veil/">The Veil of Forgetfulness</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-virtue/">Virtue</a></li>
+</ul>
+</li>
+<li><span class="nav-section">W</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/found-wordofwisdom/">Word of Wisdom</a></li>
+<li><a href="https://www.ldsdoctrines.com/why-suffering/">Why God Allows Suffering</a></li>
+<li><a href="https://www.ldsdoctrines.com/found-worship/">Worship</a></li>
+</ul>
+</li>
+<li><span class="nav-section">X</span>
+</li>
+<li><span class="nav-section">Y</span>
+</li>
+<li><span class="nav-section">Z</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/zion-defined/">Zion</a></li>
+</ul>
+</li>
+<li><span class="nav-section">U</span>
+<ul>
+<li><a href="https://www.ldsdoctrines.com/urim-thummim/">Urim and Thummim</a></li>
+</ul>
+</li>
+</ul></nav>
+
+<main class="articleContents layout-standard">
+<article><p style="text-align: center; margin: 0 0 20px 0;"><img src="https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/HeaderImage1.jpg" alt="" width="100%"></p>
+<h2 style="font-size: 1.3em; font-weight: bold; color: #1a1410; border-bottom: 2px solid #b8860b; padding-bottom: 6px; margin: 0 0 16px 0;">Why a site dedicated to Gospel Doctrine?</h2>
+<ol style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 28px 0; padding-left: 22px;">
+<li style="margin-bottom: 8px;">Encourage individuals to make their scripture study an in-depth experience, to not just read the scriptures but &ldquo;Study&rdquo; them. It is difficult to <a href="https://www.churchofjesuschrist.org/study/scriptures/bofm/2-ne/32?lang=eng#2" target="_blank" rel="noopener">&ldquo;Feast upon the words of Christ&rdquo;</a> without pondering, praying, and seeking for the deeper meanings of the scriptures.</li>
+<li style="margin-bottom: 8px;">Provide additional information for any &ldquo;Come Follow Me&rdquo; classes that desire to use this material.</li>
+<li style="margin-bottom: 8px;">Provide supplementary materials to teachers of the gospel to help them prepare lessons to teach by the spirit and encourage the spirit of revelation to inspire them and their students to have stronger testimonies of Jesus Christ.</li>
+<li style="margin-bottom: 8px;">Receive additional insights from readers. Please feel free to <a href="mailto:webmaster@ldsdoctrines.com">email me</a> with any comments/concerns!</li>
+</ol>
+<h2 style="font-size: 1.3em; font-weight: bold; color: #1a1410; border-bottom: 2px solid #b8860b; padding-bottom: 6px; margin: 0 0 16px 0;">Who am I?</h2>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">My name is Theron Bird, and I have been a member of The Church of Jesus Christ of Latter-day Saints my entire life. I was raised on a small farm in eastern Washington, where my earliest experiences with the gospel were taught to me by my parents in our home. Those early lessons, often reinforced through daily work and family devotionals, helped me see the connection between faith, effort, and the blessings of the Lord.</p>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">As I grew older, my testimony deepened through continued study and practice. In high school, I attended early morning seminary, which became a foundational part of my spiritual growth. Waking up before sunrise to study the scriptures with peers was not always easy, but it built in me a discipline and love for the word of God that has carried into my adult life. Those early mornings often set the tone for my day and gave me a sense of purpose and grounding in the gospel of Jesus Christ.</p>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">Through these experiences, I came to see that faith is not simply something inherited, but something that must be nurtured, questioned, and chosen again and again. I learned to rely on prayer, scripture study, and the influence of the Holy Ghost to guide my decisions and strengthen my resolve. My upbringing on the farm taught me the value of hard work and patience, while my gospel study taught me the eternal perspective that gives meaning to both trials and triumphs.</p>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 28px 0;">I claim no special authority, save being a man with a &ldquo;Testimony of Jesus Christ,&rdquo; a holder of the priesthood, and one that <a href="https://www.churchofjesuschrist.org/study/scriptures/nt/1-pet/3?lang=eng#14" target="_blank" rel="noopener">is ready in all times and places to give an answer to every man that asketh you the reason of the hope that is in me</a>. I am an avid learner, and seek the &ldquo;Truth&rdquo; in everything that I study whether it be secular, or religious. While trying to learn something new every day, I do not shy away from difficult questions and believe that even if we don&rsquo;t know the answer now&mdash;eventually we will and it will all make sense. The truth really can and will combine together unto one great whole!</p>
+<h2 style="font-size: 1.3em; font-weight: bold; color: #1a1410; border-bottom: 2px solid #b8860b; padding-bottom: 6px; margin: 0 0 16px 0;">What if you find something wrong with the site?</h2>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 28px 0;">If you find anything wrong with the site or the doctrine that is being taught, please <a href="mailto:webmaster@ldsdoctrines.com">contact me</a>! My goal is always to teach correct doctrine substantiated by the &ldquo;Scriptures.&rdquo; I do reference additional informational items, but try to keep all doctrine substantiated by direct scriptural reference.</p>
+<h2 style="font-size: 1.3em; font-weight: bold; color: #1a1410; border-bottom: 2px solid #b8860b; padding-bottom: 6px; margin: 0 0 16px 0;">Doctrinal Disclaimer</h2>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 28px 0;">The following information is provided as a service to users of this site. I have to my best ability confirmed that the information herein is doctrinally correct, but this website is not an official site of the church and I do not claim to represent the church in any way. I would request you follow the admonition of Paul to <a href="https://www.churchofjesuschrist.org/study/scriptures/nt/1-thes/5?lang=eng#20" target="_blank" rel="noopener">prove all things hold fast to that which is good</a>.</p>
+<h2 style="font-size: 1.3em; font-weight: bold; color: #1a1410; border-bottom: 2px solid #b8860b; padding-bottom: 6px; margin: 0 0 16px 0;">What is Church of Jesus Christ of Latter-Day Saints Doctrine and how is it to be determined?</h2>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">LDS Newsroom &mdash; <strong><a href="https://newsroom.churchofjesuschrist.org/article/approaching-mormon-doctrine" target="_blank" rel="noopener">article 4 May 2007</a></strong></p>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">Not every statement made by a Church leader, past or present, necessarily constitutes doctrine. A single statement made by a single leader on a single occasion often represents a personal, though well-considered, opinion, but is not meant to be officially binding for the whole Church.</p>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">Based on the scriptures, Joseph Smith declared: &ldquo;The fundamental principles of our religion are the testimony of the Apostles and Prophets, concerning Jesus Christ, that He died, was buried, and rose again the third day, and ascended into heaven; and all other things which pertain to our religion are only appendages to it.&rdquo;</p></article>
+
+</main>
+</div>
+</body>
+</html>

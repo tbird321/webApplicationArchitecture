@@ -226,6 +226,9 @@ Write-Host "`nDone. Editing an article in the admin now re-renders its static pa
 Write-Host 'Changing the menu, header, site-meta or theme re-renders the WHOLE site,' -ForegroundColor Green
 Write-Host 'because all four are baked into every page at render time.' -ForegroundColor Green
 Write-Host ''
+Write-Host '  header.html needs no notification of its own -- it already arrives via the' -ForegroundColor DarkGray
+Write-Host "  article entry's '.html' suffix, and the Lambda's parser routes it." -ForegroundColor DarkGray
+Write-Host ''
 Write-Host '  Only sites listed in STATIC_PUBLISH_SITES are re-rendered -- the trigger fires for' -ForegroundColor DarkGray
 Write-Host '  every site, and the Lambda skips any that has not been cut over.' -ForegroundColor DarkGray
 Write-Host ''

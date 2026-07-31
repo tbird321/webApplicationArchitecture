@@ -75,34 +75,44 @@ public class StaticRenderTriggerTests
     // time, so a write to any of them has to re-render the WHOLE site. Misparse in one
     // direction and those edits silently stop propagating; in the other, an unrelated upload
     // kicks off a 471-page render.
+    //
+    // header.html is the reason the allowlist is explicit: the article notification filters on
+    // suffix ".html", so every loose .html in a site folder already reaches this Lambda.
 
     [Theory]
     // The nav.
-    [InlineData("public/websites/cesletter.info/sitemenu.json", "cesletter.info")]
-    [InlineData("public/websites/ldsdoctrines.com/sitemenu.json", "ldsdoctrines.com")]
-    [InlineData("public/websites/ldsfaithincrisis.com/sitemenu.json", "ldsfaithincrisis.com")]
+    [InlineData("public/websites/cesletter.info/sitemenu.json", "cesletter.info", "sitemenu.json")]
+    [InlineData("public/websites/ldsdoctrines.com/sitemenu.json", "ldsdoctrines.com", "sitemenu.json")]
+    [InlineData("public/websites/ldsfaithincrisis.com/sitemenu.json", "ldsfaithincrisis.com", "sitemenu.json")]
     // The header banner -- baked in exactly like the nav, so a header edit is a whole-site
     // render too. This was previously asserted NOT to parse, which meant header changes
     // reached no already-rendered page.
-    [InlineData("public/websites/cesletter.info/header.html", "cesletter.info")]
-    [InlineData("public/websites/ldsdoctrines.com/header.html", "ldsdoctrines.com")]
+    [InlineData("public/websites/ldsapologetics.com/header.html", "ldsapologetics.com", "header.html")]
+    [InlineData("public/websites/ldsdoctrines.com/header.html", "ldsdoctrines.com", "header.html")]
     // Public title + GA measurement id, both written into every page's <head>.
-    [InlineData("public/websites/cesletter.info/site-meta.json", "cesletter.info")]
+    [InlineData("public/websites/ldsfaithincrisis.com/site-meta.json", "ldsfaithincrisis.com", "site-meta.json")]
+    [InlineData("public/websites/cesletter.info/site-meta.json", "cesletter.info", "site-meta.json")]
     // Casing of the filename is not guaranteed across writers.
-    [InlineData("public/websites/cesletter.info/SiteMenu.json", "cesletter.info")]
-    [InlineData("public/websites/cesletter.info/Header.HTML", "cesletter.info")]
-    public void Parses_SiteAssetKeys(string key, string expectedDomain)
+    [InlineData("public/websites/cesletter.info/SiteMenu.json", "cesletter.info", "SiteMenu.json")]
+    [InlineData("public/websites/cesletter.info/Header.HTML", "cesletter.info", "Header.HTML")]
+    public void Parses_SiteAssetKeys(string key, string expectedDomain, string expectedAsset)
     {
-        Assert.True(ApiStaticRenderFunctions.TryParseSiteAssetKey(key, out var domain), $"should have parsed '{key}'");
+        Assert.True(ApiStaticRenderFunctions.TryParseSiteAssetKey(key, out var domain, out var asset), $"should have parsed '{key}'");
         Assert.Equal(expectedDomain, domain);
+        Assert.Equal(expectedAsset, asset);
     }
 
     [Theory]
     // Articles are a per-page render, never a whole-site one.
     [InlineData("public/websites/cesletter.info/articles/bom-dna.html")]
+    // A stray .html in the site folder reaches this Lambda via the article filter. It must NOT
+    // be mistaken for a site-wide asset and trigger a full re-render.
+    [InlineData("public/websites/cesletter.info/scratch.html")]
+    [InlineData("public/websites/cesletter.info/header.html.bak")]
     // An asset nested deeper, or shallower, than the real location.
     [InlineData("public/websites/cesletter.info/articles/sitemenu.json")]
     [InlineData("public/websites/cesletter.info/articles/header.html")]
+    [InlineData("public/websites/cesletter.info/sub/header.html")]
     [InlineData("public/websites/sitemenu.json")]
     // Near-misses on the filename.
     [InlineData("public/websites/cesletter.info/sitemenu.json.bak")]
@@ -117,7 +127,7 @@ public class StaticRenderTriggerTests
     [InlineData(null)]
     public void Rejects_NonSiteAssetKeys(string key)
     {
-        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey(key, out _), $"should NOT have parsed '{key}'");
+        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey(key, out _, out _), $"should NOT have parsed '{key}'");
     }
 
     [Theory]
@@ -126,8 +136,10 @@ public class StaticRenderTriggerTests
     [InlineData("public/assets/cesletter.info/themes/Theme.CSS", "cesletter.info")]
     public void Parses_ThemeKeys(string key, string expectedDomain)
     {
-        Assert.True(ApiStaticRenderFunctions.TryParseThemeKey(key, out var domain), $"should have parsed '{key}'");
+        Assert.True(ApiStaticRenderFunctions.TryParseThemeKey(key, out var domain, out var asset), $"should have parsed '{key}'");
         Assert.Equal(expectedDomain, domain);
+        // The render log names the file that caused the re-render, so the parser has to report it.
+        Assert.Equal("theme.css", asset, ignoreCase: true);
     }
 
     [Theory]
@@ -142,7 +154,7 @@ public class StaticRenderTriggerTests
     [InlineData(null)]
     public void Rejects_NonThemeKeys(string key)
     {
-        Assert.False(ApiStaticRenderFunctions.TryParseThemeKey(key, out _), $"should NOT have parsed '{key}'");
+        Assert.False(ApiStaticRenderFunctions.TryParseThemeKey(key, out _, out _), $"should NOT have parsed '{key}'");
     }
 
     [Fact]
@@ -161,18 +173,18 @@ public class StaticRenderTriggerTests
 
         foreach (var key in siteWide)
         {
-            Assert.True(ApiStaticRenderFunctions.TryParseSiteAssetKey(key, out _), key);
+            Assert.True(ApiStaticRenderFunctions.TryParseSiteAssetKey(key, out _, out _), key);
             Assert.False(ApiStaticRenderFunctions.TryParseArticleKey(key, out _, out _), key);
-            Assert.False(ApiStaticRenderFunctions.TryParseThemeKey(key, out _), key);
+            Assert.False(ApiStaticRenderFunctions.TryParseThemeKey(key, out _, out _), key);
         }
 
         Assert.True(ApiStaticRenderFunctions.TryParseArticleKey(article, out _, out _));
-        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey(article, out _));
-        Assert.False(ApiStaticRenderFunctions.TryParseThemeKey(article, out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey(article, out _, out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseThemeKey(article, out _, out _));
 
         const string theme = "public/assets/cesletter.info/themes/theme.css";
-        Assert.True(ApiStaticRenderFunctions.TryParseThemeKey(theme, out _));
-        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey(theme, out _));
+        Assert.True(ApiStaticRenderFunctions.TryParseThemeKey(theme, out _, out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey(theme, out _, out _));
         Assert.False(ApiStaticRenderFunctions.TryParseArticleKey(theme, out _, out _));
     }
 
@@ -181,9 +193,9 @@ public class StaticRenderTriggerTests
     {
         // Same guard as Rejects_TheStaticOutputItself, for the theme notification: nothing the
         // renderer writes to the public bucket may ever look like a trigger.
-        Assert.False(ApiStaticRenderFunctions.TryParseThemeKey("index.html", out _));
-        Assert.False(ApiStaticRenderFunctions.TryParseThemeKey("about-us/index.html", out _));
-        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey("index.html", out _));
-        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey("about-us/index.html", out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseThemeKey("index.html", out _, out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseThemeKey("about-us/index.html", out _, out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey("index.html", out _, out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey("about-us/index.html", out _, out _));
     }
 }

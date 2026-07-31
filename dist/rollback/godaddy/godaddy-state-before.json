@@ -1,0 +1,138 @@
+﻿{
+    "ldsapologetics.com":  {
+                               "domain":  "ldsapologetics.com",
+                               "wwwCNAME":  {
+                                                "value":  [
+                                                              {
+                                                                  "data":  "d3rti7pvczu9p8.cloudfront.net",
+                                                                  "name":  "www",
+                                                                  "ttl":  3600,
+                                                                  "type":  "CNAME"
+                                                              }
+                                                          ],
+                                                "Count":  1
+                                            },
+                               "apexA":  {
+                                             "value":  [
+                                                           {
+                                                               "data":  "Parked",
+                                                               "name":  "@",
+                                                               "ttl":  600,
+                                                               "type":  "A"
+                                                           }
+                                                       ],
+                                             "Count":  1
+                                         },
+                               "forwards":  "ERR 404"
+                           },
+    "cesletter.info":  {
+                           "domain":  "cesletter.info",
+                           "wwwCNAME":  {
+                                            "value":  [
+                                                          {
+                                                              "data":  "d36g5mxa2l69e9.cloudfront.net",
+                                                              "name":  "www",
+                                                              "ttl":  3600,
+                                                              "type":  "CNAME"
+                                                          }
+                                                      ],
+                                            "Count":  1
+                                        },
+                           "apexA":  {
+                                         "value":  [
+                                                       {
+                                                           "data":  "Parked",
+                                                           "name":  "@",
+                                                           "ttl":  600,
+                                                           "type":  "A"
+                                                       }
+                                                   ],
+                                         "Count":  1
+                                     },
+                           "forwards":  "ERR 404"
+                       },
+    "ldsdiscussions.info":  {
+                                "domain":  "ldsdiscussions.info",
+                                "wwwCNAME":  {
+                                                 "value":  [
+                                                               {
+                                                                   "data":  "d2ioalrfp6i2z6.cloudfront.net",
+                                                                   "name":  "www",
+                                                                   "ttl":  3600,
+                                                                   "type":  "CNAME"
+                                                               }
+                                                           ],
+                                                 "Count":  1
+                                             },
+                                "apexA":  {
+                                              "value":  [
+                                                            {
+                                                                "data":  "Parked",
+                                                                "name":  "@",
+                                                                "ttl":  600,
+                                                                "type":  "A"
+                                                            }
+                                                        ],
+                                              "Count":  1
+                                          },
+                                "forwards":  "ERR 404"
+                            },
+    "ldsfaithincrisis.com":  {
+                                 "domain":  "ldsfaithincrisis.com",
+                                 "wwwCNAME":  {
+                                                  "value":  [
+                                                                {
+                                                                    "data":  "d1tr8i0xy194bp.cloudfront.net",
+                                                                    "name":  "www",
+                                                                    "ttl":  3600,
+                                                                    "type":  "CNAME"
+                                                                }
+                                                            ],
+                                                  "Count":  1
+                                              },
+                                 "apexA":  {
+                                               "value":  [
+                                                             {
+                                                                 "data":  "Parked",
+                                                                 "name":  "@",
+                                                                 "ttl":  600,
+                                                                 "type":  "A"
+                                                             }
+                                                         ],
+                                               "Count":  1
+                                           },
+                                 "forwards":  "ERR 404"
+                             },
+    "ldsdoctrines.com":  {
+                             "domain":  "ldsdoctrines.com",
+                             "wwwCNAME":  {
+                                              "value":  [
+                                                            {
+                                                                "data":  "d2852dgk1umk32.cloudfront.net",
+                                                                "name":  "www",
+                                                                "ttl":  3600,
+                                                                "type":  "CNAME"
+                                                            }
+                                                        ],
+                                              "Count":  1
+                                          },
+                             "apexA":  {
+                                           "value":  [
+                                                         {
+                                                             "data":  "15.197.225.128",
+                                                             "name":  "@",
+                                                             "ttl":  3600,
+                                                             "type":  "A"
+                                                         },
+                                                         {
+                                                             "data":  "3.33.251.168",
+                                                             "name":  "@",
+                                                             "ttl":  3600,
+                                                             "type":  "A"
+                                                         }
+                                                     ],
+                                           "Count":  2
+                                       },
+                             "forwards":  "ERR 404"
+                         }
+}

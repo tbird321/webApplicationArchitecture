@@ -224,12 +224,33 @@ namespace WebApplicationArch.content
             return text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
         }
 
+        /// <summary>
+        /// Turn markup into plain text: strip tags, then resolve HTML entities.
+        ///
+        /// The decode is the part that is easy to miss and expensive to get wrong. Article HTML
+        /// follows the house style in CLAUDE.md, which uses &amp;mdash;, &amp;ldquo; and &amp;rdquo;
+        /// liberally. Stripping tags leaves those entities as LITERAL TEXT, and Enc() then escapes
+        /// their ampersand -- so an &lt;h1&gt; reading "A &amp;mdash; B" became the title
+        /// "A &amp;amp;mdash; B", which search engines and browser tabs render as the visible
+        /// characters "A &amp;mdash; B". Decoding here means Enc() escapes a real em dash, which
+        /// needs no escaping at all.
+        ///
+        /// Decode must happen BEFORE truncation too, or "&amp;mdash;" burns 7 characters of the
+        /// 160-character description budget instead of 1.
+        /// </summary>
+        private static string PlainText(string markup)
+        {
+            if (string.IsNullOrEmpty(markup)) return "";
+            var stripped = Regex.Replace(markup, @"(?s)<[^>]+>", "");
+            return System.Net.WebUtility.HtmlDecode(stripped);
+        }
+
         private static string FirstH1(string html)
         {
             if (string.IsNullOrEmpty(html)) return "";
             var m = Regex.Match(html, @"(?is)<h1[^>]*>(.*?)</h1>");
             if (!m.Success) return "";
-            return Regex.Replace(m.Groups[1].Value, @"(?s)<[^>]+>", "").Trim();
+            return PlainText(m.Groups[1].Value).Trim();
         }
 
         private static string MetaDescription(string pageDesc, string html)
@@ -238,10 +259,21 @@ namespace WebApplicationArch.content
             if (string.IsNullOrWhiteSpace(d))
             {
                 var m = Regex.Match(html ?? "", @"(?is)<p[^>]*>(.*?)</p>");
-                if (m.Success) d = Regex.Replace(m.Groups[1].Value, @"(?s)<[^>]+>", "");
+                if (m.Success) d = m.Groups[1].Value;
             }
-            d = Regex.Replace(d ?? "", @"\s+", " ").Trim();
-            if (d.Length > 160) d = d.Substring(0, 157).TrimEnd() + "...";
+            // Applied to the CMS description as well as the extracted paragraph: descriptions are
+            // authored alongside the HTML and pick up the same entities.
+            d = PlainText(d ?? "");
+            d = Regex.Replace(d, @"\s+", " ").Trim();
+            if (d.Length > 160)
+            {
+                // Truncate on a word boundary -- cutting mid-word produced descriptions ending
+                // "...f..." in live search results.
+                var cut = d.Substring(0, 157);
+                var lastSpace = cut.LastIndexOf(' ');
+                if (lastSpace > 100) cut = cut.Substring(0, lastSpace);
+                d = cut.TrimEnd(' ', ',', ';', ':', '-', '—') + "...";
+            }
             return d;
         }
 

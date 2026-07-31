@@ -18,11 +18,23 @@ export const compositeTools = [
             },
             required: ['pageName', 'articleName', 'htmlContent']
         },
+        // ORDER IS LOAD-BEARING: the HTML upload is LAST, and must stay last.
+        //
+        // Writing article HTML to S3 is what fires the static re-render trigger
+        // (ApiStaticRenderFunctions.RenderOnArticleUpload). That handler looks for every
+        // SERVED page whose articles include the uploaded path -- so at the moment of the
+        // write the page must already exist, already be linked to the article, and already
+        // be published. Upload any earlier and the trigger fires against a page that does
+        // not exist yet, finds nothing, logs "no served page references ...", and skips.
+        //
+        // That is exactly what this tool used to do, and the symptom was brutal to diagnose:
+        // the tool reported success, regenerate_sitemap listed the new URL, and the live page
+        // 404'd until someone happened to save the article a second time. Nothing errored.
         handler: (args) => acquireLock(async () => {
             const wid = websiteIdAsNumber();
             const layout = args.layout || 'Standard';
 
-            // 1. Create article record
+            // 1. Create article record (metadata only -- content comes last, see above)
             const article = await apiPost('/article', {
                 id: null,
                 articleId: args.pageName,
@@ -37,10 +49,7 @@ export const compositeTools = [
                 status: 'draft'
             });
 
-            // 2. Upload HTML content to S3
-            await apiPost(`/article/${article.id}/content`, { htmlContent: args.htmlContent });
-
-            // 3. Create page record
+            // 2. Create page record
             const page = await apiPost('/page', {
                 id: null,
                 name: args.pageName,
@@ -53,7 +62,7 @@ export const compositeTools = [
                 status: 'draft'
             });
 
-            // 4. Link article to page — spread the full article object so no fields are null.
+            // 3. Link article to page — spread the full article object so no fields are null.
             // Passing a minimal article object (omitting description, memeImagePath, etc.) causes
             // MySQL Connector/NET 8.2.0 to throw NullReferenceException when inferring the MySQL
             // type for a null AddWithValue call inside UpsertArticle.
@@ -71,16 +80,22 @@ export const compositeTools = [
                 status: 'draft'
             });
 
-            // 5. Publish both
+            // 4. Publish both. Must precede the upload: the render trigger only considers
+            // pages whose status is published (or empty), so uploading first would render
+            // nothing even with the link in place.
             await apiPost(`/article/${article.id}/publish`, {});
             await apiPost(`/page/${page.id}/publish`, {});
+
+            // 5. Upload HTML content to S3 -- LAST, so this write is the thing that triggers
+            // the render, with the page created, linked and published.
+            await apiPost(`/article/${article.id}/content`, { htmlContent: args.htmlContent });
 
             return {
                 pageId: page.id,
                 articleId: article.id,
                 pageName: args.pageName,
                 articlePath: `${args.pageName}.html`,
-                message: `Page "${args.pageName}" created and published (pageId:${page.id}, articleId:${article.id}). Add to menu with add_menu_item.`
+                message: `Page "${args.pageName}" created and published (pageId:${page.id}, articleId:${article.id}). The static page renders within a few seconds; allow up to 5 minutes for CloudFront. Add to menu with add_menu_item — note that a menu change re-renders the whole site.`
             };
         })
     }
