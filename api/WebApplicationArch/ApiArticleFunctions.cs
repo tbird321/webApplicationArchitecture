@@ -472,13 +472,19 @@ namespace WebApplicationArch
 
                 string contentBucket = Environment.GetEnvironmentVariable("CONTENT_BUCKET") ?? "www-websitecontent";
                 var renderer = new StaticPageRenderer(contentBucket, "us-west-2");
+
+                // Load the sitewide files (menu, header, site-meta, the two stylesheets) once
+                // rather than once per page -- on a 471-page site that is the difference between
+                // ~2,355 S3 reads of five identical objects and five.
+                var assets = await renderer.LoadSiteAssetsAsync(websiteId, siteName);
+
                 int publishedCount = 0, skippedCount = 0;
                 var errors = new List<string>();
                 foreach (var pg in served)
                 {
                     try
                     {
-                        var doc = await renderer.RenderAsync(pg, websiteId, siteName, upload: true);
+                        var doc = await renderer.RenderAsync(pg, siteName, upload: true, assets);
                         if (doc == null) skippedCount++; else publishedCount++;
                     }
                     catch (Exception ex) { errors.Add($"{pg.name}: {ex.Message}"); }

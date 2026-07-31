@@ -70,7 +70,9 @@ namespace WebApplicationArch
         /// <summary>
         /// Files that sit directly under "public/websites/{domain}/" and are BAKED INTO EVERY
         /// PAGE at render time. Writing one of these must re-render the whole site, or the
-        /// change is invisible on every page that already exists and nothing reports a problem.
+        /// change is invisible on every page that already exists and nothing reports a problem:
+        /// a new menu item shows up nowhere, a header edit shows on nothing, a site-meta title
+        /// change reaches no page.
         ///
         ///   sitemenu.json  -- the nav (StaticPageRenderer.BuildNav)
         ///   header.html    -- the site header, inlined above the article body
@@ -80,20 +82,30 @@ namespace WebApplicationArch
         /// article notification's filter is prefix=public/websites/ suffix=.html -- so every
         /// stray .html dropped in a site folder reaches this Lambda. Matching loosely would
         /// turn an unrelated upload into a 471-page render.
+        ///
+        /// To add one: put the filename here. Then check that S3 actually DELIVERS it -- the
+        /// notification filters allow one prefix and one suffix each, so a new extension needs
+        /// its own entry in scripts/configure-render-trigger.ps1. (.html and site-meta.json are
+        /// already covered by existing entries; sitemenu.json has its own.)
         /// </summary>
         private static readonly HashSet<string> SiteWideAssets =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                "sitemenu.json",
-                "header.html",
-                "site-meta.json",
+                "sitemenu.json",   // the nav
+                "header.html",     // the site header banner
+                "site-meta.json",  // public title + GA measurement id
             };
 
         /// <summary>
         /// Recognise "public/websites/{domain}/{site-wide asset}".
         ///
         /// Deliberately a separate parser from TryParseArticleKey, which must keep REJECTING
-        /// these keys -- a site-asset write is a whole-site render, not a one-page render.
+        /// these keys -- a site-asset write is a whole-site render, not a one-page render. The
+        /// exact-four-segments rule is what keeps the two mutually exclusive: an article is
+        /// always public/websites/{domain}/articles/... which is five or more.
+        ///
+        /// Reports WHICH asset matched, so the render log names the file that caused it rather
+        /// than repeating the whole key.
         /// </summary>
         public static bool TryParseSiteAssetKey(string key, out string domain, out string asset)
         {
@@ -112,6 +124,34 @@ namespace WebApplicationArch
 
             domain = parts[2];
             asset = parts[3];
+            return !string.IsNullOrWhiteSpace(domain);
+        }
+
+        /// <summary>
+        /// Recognise "public/assets/{domain}/themes/theme.css" -- the ThemeBuilder output, which
+        /// is inlined into every page just like the files above.
+        ///
+        /// It needs its own parser because it lives under a different prefix entirely
+        /// (public/assets/, not public/websites/), which also means its own S3 notification.
+        /// </summary>
+        public static bool TryParseThemeKey(string key, out string domain, out string asset)
+        {
+            domain = null;
+            asset = null;
+            if (string.IsNullOrWhiteSpace(key)) return false;
+
+            var decoded = Uri.UnescapeDataString(key.Replace("+", " "));
+            var parts = decoded.Split('/');
+
+            // public / assets / {domain} / themes / theme.css  -- exactly five segments.
+            if (parts.Length != 5) return false;
+            if (!string.Equals(parts[0], "public", StringComparison.OrdinalIgnoreCase)) return false;
+            if (!string.Equals(parts[1], "assets", StringComparison.OrdinalIgnoreCase)) return false;
+            if (!string.Equals(parts[3], "themes", StringComparison.OrdinalIgnoreCase)) return false;
+            if (!string.Equals(parts[4], "theme.css", StringComparison.OrdinalIgnoreCase)) return false;
+
+            domain = parts[2];
+            asset = parts[4];
             return !string.IsNullOrWhiteSpace(domain);
         }
 
@@ -143,10 +183,10 @@ namespace WebApplicationArch
                 return;
             }
 
-            // One admin drag-and-drop can write sitemenu.json several times, and S3 may deliver
-            // those writes in a single batch. A whole-site render is expensive, so collapse
-            // repeats: render each site at most once per invocation, however many site-wide
-            // assets changed.
+            // One admin drag-and-drop can write sitemenu.json several times, and a single batch
+            // may carry a menu AND a header write for the same site. A whole-site render is
+            // expensive, so collapse repeats: render each site at most once per invocation,
+            // however many site-wide assets changed.
             var siteRendered = new HashSet<int>();
 
             foreach (var record in evnt.Records)
@@ -154,12 +194,13 @@ namespace WebApplicationArch
                 var key = record?.S3?.Object?.Key;
                 try
                 {
-                    bool isSiteAsset = TryParseSiteAssetKey(key, out var domain, out var asset);
+                    bool isSiteWide = TryParseSiteAssetKey(key, out var domain, out var asset)
+                                      || TryParseThemeKey(key, out domain, out asset);
                     string articlePath = null;
 
-                    if (!isSiteAsset && !TryParseArticleKey(key, out domain, out articlePath))
+                    if (!isSiteWide && !TryParseArticleKey(key, out domain, out articlePath))
                     {
-                        context.Logger.Log($"Static render trigger: skipping non-article key '{key}'.");
+                        context.Logger.Log($"Static render trigger: skipping unrecognised key '{key}'.");
                         continue;
                     }
 
@@ -181,7 +222,7 @@ namespace WebApplicationArch
                         continue;
                     }
 
-                    if (isSiteAsset)
+                    if (isSiteWide)
                     {
                         if (!siteRendered.Add(websiteId))
                         {
@@ -204,15 +245,20 @@ namespace WebApplicationArch
         }
 
         /// <summary>
-        /// Re-render EVERY served page on the site. Driven by a write to any site-wide asset
-        /// (see SiteWideAssets), because those are baked into each page's HTML at render time
-        /// and a change to one is otherwise invisible on every page that already exists.
+        /// Re-render EVERY served page on the site. Driven by a write to any file that is baked
+        /// into every page (menu, header, site-meta, theme) -- see SiteWideAssets -- because a
+        /// change to one is otherwise invisible on every page that already exists.
         ///
         /// Rendered with bounded concurrency: ldsdoctrines is ~471 pages and each render does
         /// several S3 reads, so sequential rendering would run for many minutes and time the
         /// Lambda out. The work is I/O bound, so a modest fan-out is the whole fix.
         ///
-        /// This is why StaticRenderOnUploadFunction is 1024 MB / 900 s in serverless.template
+        /// The sitewide files are loaded ONCE here and shared by every page. Loading them per
+        /// page (which is what the single-page RenderAsync overload does, correctly, for a
+        /// one-off) meant five redundant S3 reads per page -- ~2,355 of them on ldsdoctrines --
+        /// plus rebuilding the identical nav string for every page.
+        ///
+        /// This is also why StaticRenderOnUploadFunction is 1024 MB / 900 s in serverless.template
         /// (it was 512 MB / 120 s, sized for a single-article render). The template is JSON and
         /// cannot carry a comment, so the reason lives here: the ceiling exists for THIS path.
         /// Lowering either value again will start timing out whole-site renders on the big
@@ -243,7 +289,9 @@ namespace WebApplicationArch
             context.Logger.Log($"Static render trigger: {reason} changed on {site.name} -- re-rendering {served.Count} page(s).");
 
             var renderer = new StaticPageRenderer(contentBucket, "us-west-2");
-            using var gate = new System.Threading.SemaphoreSlim(MenuRenderConcurrency);
+            var assets = await renderer.LoadSiteAssetsAsync(websiteId, site.name);
+
+            using var gate = new System.Threading.SemaphoreSlim(SiteRenderConcurrency);
             int ok = 0;
 
             var tasks = served.Select(async pg =>
@@ -251,7 +299,7 @@ namespace WebApplicationArch
                 await gate.WaitAsync();
                 try
                 {
-                    await renderer.RenderAsync(pg, websiteId, site.name, upload: true);
+                    await renderer.RenderAsync(pg, site.name, upload: true, assets);
                     System.Threading.Interlocked.Increment(ref ok);
                 }
                 catch (Exception ex)
@@ -270,11 +318,11 @@ namespace WebApplicationArch
         }
 
         /// <summary>
-        /// How many pages to render at once on a menu-driven whole-site render. Tuned against the
-        /// Lambda's memory: too high and the S3 client's connection pool and GC start costing more
-        /// than the parallelism buys.
+        /// How many pages to render at once on a whole-site render. Tuned against the Lambda's
+        /// memory: too high and the S3 client's connection pool and GC start costing more than
+        /// the parallelism buys.
         /// </summary>
-        private const int MenuRenderConcurrency = 8;
+        private const int SiteRenderConcurrency = 8;
 
         /// <summary>
         /// Find every served page on this site whose articles include the given articlePath, and

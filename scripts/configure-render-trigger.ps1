@@ -59,28 +59,44 @@ Set-StrictMode -Version Latest
 
 . "$PSScriptRoot\lib\SiteInfra.ps1"
 
-# Stable ids so re-running replaces our entries rather than stacking duplicates.
-$ConfigId     = 'static-render-on-article-upload'
-$Prefix       = 'public/websites/'
-$Suffix       = '.html'
-
-# Site-wide assets -- sitemenu.json, header.html, site-meta.json -- are baked into EVERY page
-# at render time, so writing one re-renders the whole site (ApiStaticRenderFunctions
-# .TryParseSiteAssetKey). S3 filter rules allow ONE prefix and ONE suffix per entry with no
-# wildcard in the middle, so each distinct suffix needs its own notification:
+# Every notification this script manages, with a stable id so re-running REPLACES our entries
+# rather than stacking duplicates. Anything on the bucket that is not in this table is left
+# alone -- so an entry added by hand survives, which is exactly how the environment drifted
+# from the repo once already.
 #
-#   header.html    already covered by the '.html' article entry above -- the Lambda's parser
-#                  is what tells it apart from an article, so no extra notification is needed.
-#   sitemenu.json  needs its own entry; '.html' never matches it.
-#   site-meta.json likewise.
-$MenuConfigId = 'static-render-on-menu-upload'
-$MenuSuffix   = 'sitemenu.json'
-$MetaConfigId = 'static-render-on-sitemeta-upload'
-$MetaSuffix   = 'site-meta.json'
+# S3 filter rules allow ONE prefix and ONE suffix per entry and no wildcard in the middle, so
+# each distinct file shape needs its own entry: '.html' never matches 'sitemenu.json', and
+# theme.css is not even under the same prefix.
+#
+# All of them target the SAME Lambda; the parsers in ApiStaticRenderFunctions tell them apart
+# and decide whether the write is a one-page render or a whole-site one.
+$Prefix = 'public/websites/'
+
+$OurEntries = @(
+    # Article HTML -> re-render the pages that embed it. The broad prefix is unavoidable
+    # (no mid-key wildcard), so TryParseArticleKey does the real filtering and rejects
+    # everything that is not under articles/.
+    #
+    # NOTE: this entry also delivers header.html, which is what makes the header re-render
+    # work with no notification of its own -- TryParseSiteAssetKey picks it up.
+    @{ Id = 'static-render-on-article-upload'; Prefix = $Prefix;          Suffix = '.html' }
+
+    # The nav. Without this a menu edit updates sitemenu.json and every already-rendered page
+    # keeps the old nav -- the new item is unreachable and nothing reports a problem.
+    @{ Id = 'static-render-on-menu-upload';    Prefix = $Prefix;          Suffix = 'sitemenu.json' }
+
+    # Public title + GA measurement id, written into every page's <head>.
+    @{ Id = 'static-render-on-sitemeta-upload'; Prefix = $Prefix;         Suffix = 'site-meta.json' }
+
+    # ThemeBuilder output, inlined into every page. Different prefix entirely:
+    # public/assets/{domain}/themes/theme.css.
+    @{ Id = 'static-render-on-theme-upload';   Prefix = 'public/assets/'; Suffix = 'theme.css' }
+)
 
 Write-Host 'Static re-render trigger' -ForegroundColor White
 Write-Host "  bucket  : s3://$ContentBucket"
-Write-Host "  prefix  : $Prefix ... /articles/*$Suffix"
+Write-Host "  entries : $($OurEntries.Count)"
+foreach ($e in $OurEntries) { Write-Host ("            {0}*{1}" -f $e.Prefix, $e.Suffix) }
 Write-Host "  profile : $AwsProfile"
 
 Test-AwsAuth -AwsProfile $AwsProfile -Region $Region | Out-Null
@@ -140,61 +156,28 @@ foreach ($c in $lambdaCfgs) {
 }
 
 # Drop only our own entries; everything else is preserved verbatim.
-$ourIds = @($ConfigId, $MenuConfigId, $MetaConfigId)
+$ourIds = @($OurEntries | ForEach-Object { $_.Id })
 $kept = @($lambdaCfgs | Where-Object { $ourIds -notcontains (Get-Prop $_ 'Id') })
-if ($kept.Count -ne $lambdaCfgs.Count) { Write-Note "replacing the existing '$ConfigId' / '$MenuConfigId' entries" }
+if ($kept.Count -ne $lambdaCfgs.Count) { Write-Note "replacing $($lambdaCfgs.Count - $kept.Count) existing entry/entries of ours" }
 
 # ------------------------------------------------------------------- build the new config
-Write-Step 3 $(if ($Remove) { 'Remove the trigger' } else { 'Add the trigger' })
+Write-Step 3 $(if ($Remove) { 'Remove the triggers' } else { 'Add the triggers' })
 
 $newLambdaCfgs = @($kept)
 if (-not $Remove) {
-    # Scoped to .html under any site's articles/ folder. S3 filter rules allow ONE prefix and
-    # ONE suffix, and no wildcard in the middle -- hence the broad prefix plus the parser in
-    # ApiStaticRenderFunctions.TryParseArticleKey, which rejects anything that is not an
-    # article (themes, images, header.html, sitemenu.json, folder markers).
-    $newLambdaCfgs += [pscustomobject]@{
-        Id                = $ConfigId
-        LambdaFunctionArn = $fnArn
-        Events            = @('s3:ObjectCreated:*')
-        Filter            = [pscustomobject]@{
-            Key = [pscustomobject]@{
-                FilterRules = @(
-                    [pscustomobject]@{ Name = 'prefix'; Value = $Prefix }
-                    [pscustomobject]@{ Name = 'suffix'; Value = $Suffix }
-                )
-            }
-        }
-    }
-
-    # Second entry: the nav. Without this a menu edit updates sitemenu.json and every
-    # already-rendered page keeps the old nav -- the new item is unreachable and nothing
-    # reports a problem. Routed to the same Lambda; TryParseSiteAssetKey tells them apart.
-    $newLambdaCfgs += [pscustomobject]@{
-        Id                = $MenuConfigId
-        LambdaFunctionArn = $fnArn
-        Events            = @('s3:ObjectCreated:*')
-        Filter            = [pscustomobject]@{
-            Key = [pscustomobject]@{
-                FilterRules = @(
-                    [pscustomobject]@{ Name = 'prefix'; Value = $Prefix }
-                    [pscustomobject]@{ Name = 'suffix'; Value = $MenuSuffix }
-                )
-            }
-        }
-    }
-
-    # Third entry: per-site title and analytics tag. Same reasoning as the menu.
-    $newLambdaCfgs += [pscustomobject]@{
-        Id                = $MetaConfigId
-        LambdaFunctionArn = $fnArn
-        Events            = @('s3:ObjectCreated:*')
-        Filter            = [pscustomobject]@{
-            Key = [pscustomobject]@{
-                FilterRules = @(
-                    [pscustomobject]@{ Name = 'prefix'; Value = $Prefix }
-                    [pscustomobject]@{ Name = 'suffix'; Value = $MetaSuffix }
-                )
+    foreach ($e in $OurEntries) {
+        Write-Note ("  + {0}  ({1}*{2})" -f $e.Id, $e.Prefix, $e.Suffix)
+        $newLambdaCfgs += [pscustomobject]@{
+            Id                = $e.Id
+            LambdaFunctionArn = $fnArn
+            Events            = @('s3:ObjectCreated:*')
+            Filter            = [pscustomobject]@{
+                Key = [pscustomobject]@{
+                    FilterRules = @(
+                        [pscustomobject]@{ Name = 'prefix'; Value = $e.Prefix }
+                        [pscustomobject]@{ Name = 'suffix'; Value = $e.Suffix }
+                    )
+                }
             }
         }
     }
@@ -229,17 +212,19 @@ $after = Invoke-Aws @('s3api', 'get-bucket-notification-configuration', '--bucke
 $afterCfgs = @()
 $raw = Get-Prop $after 'LambdaFunctionConfigurations'
 if ($null -ne $raw) { $afterCfgs = @($raw | Where-Object { $null -ne $_ }) }
-foreach ($check in @(
-        @{ Id = $ConfigId;     Label = 'article' },
-        @{ Id = $MenuConfigId; Label = 'menu' },
-        @{ Id = $MetaConfigId; Label = 'site-meta' })) {
-    $found = @($afterCfgs | Where-Object { (Get-Prop $_ 'Id') -eq $check.Id })
-    if ($found) { Write-Ok "$($check.Label) notification is in place" }
-    else        { throw "The $($check.Label) notification was written but is not present on read-back." }
+$missing = @()
+foreach ($e in $OurEntries) {
+    $found = @($afterCfgs | Where-Object { (Get-Prop $_ 'Id') -eq $e.Id })
+    if ($found) { Write-Ok "$($e.Id) is in place" }
+    else        { $missing += $e.Id }
+}
+if ($missing.Count -gt 0) {
+    throw "Written but not present on read-back: $($missing -join ', ')"
 }
 
-Write-Host "`nDone. Editing an article re-renders its static page; changing the menu," -ForegroundColor Green
-Write-Host 'header.html or site-meta.json re-renders the whole site.' -ForegroundColor Green
+Write-Host "`nDone. Editing an article in the admin now re-renders its static page." -ForegroundColor Green
+Write-Host 'Changing the menu, header, site-meta or theme re-renders the WHOLE site,' -ForegroundColor Green
+Write-Host 'because all four are baked into every page at render time.' -ForegroundColor Green
 Write-Host ''
 Write-Host '  header.html needs no notification of its own -- it already arrives via the' -ForegroundColor DarkGray
 Write-Host "  article entry's '.html' suffix, and the Lambda's parser routes it." -ForegroundColor DarkGray

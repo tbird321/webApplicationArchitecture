@@ -26,6 +26,36 @@ namespace WebApplicationArch.content
     }
 
     /// <summary>
+    /// Everything a render needs that is the SAME for every page on a site: the resolved
+    /// metadata, the header, the built nav, and the two stylesheets -- plus the S3 handles
+    /// they were read through.
+    ///
+    /// WHY THIS EXISTS
+    /// ---------------
+    /// A sitewide change (menu, header, site-meta, theme) re-renders EVERY page, and the
+    /// naive loop re-read all five of these files once per page: ~2,355 S3 GETs of five
+    /// identical objects on a 471-page site, plus re-parsing sitemenu.json and rebuilding
+    /// the same &lt;nav&gt; string 471 times. Loading them once per site makes a whole-site
+    /// render cost roughly one read and one write per page, which is the floor.
+    ///
+    /// Safe to share across concurrent renders: AmazonS3Storage wraps AmazonS3Client, which
+    /// is thread-safe, and every field here is set once at load and only read afterwards.
+    /// </summary>
+    public sealed class SiteAssets
+    {
+        public SiteMeta Site { get; set; }
+        public string HeaderHtml { get; set; }
+        /// <summary>Already built by BuildNav -- the JSON is parsed once, not once per page.</summary>
+        public string NavHtml { get; set; }
+        public string BaseStyles { get; set; }
+        public string ThemeCss { get; set; }
+        /// <summary>Content bucket handle, reused for each page's article reads.</summary>
+        public AmazonS3Storage Content { get; set; }
+        /// <summary>Public site bucket handle, reused for each page's upload.</summary>
+        public AmazonS3Storage Public { get; set; }
+    }
+
+    /// <summary>
     /// Renders a CMS page to a complete, crawlable static HTML document and (optionally)
     /// uploads it to the site's public bucket at a clean path ({slug}/index.html).
     ///
@@ -435,12 +465,11 @@ namespace WebApplicationArch.content
         }
 
         /// <summary>
-        /// Read the page's article HTML + site assets from the content bucket, assemble the
-        /// document, and (when upload=true) write it to the public bucket at {slug}/index.html.
-        /// Returns the generated HTML (so callers can preview without uploading), or null if
-        /// the page has no article content to publish.
+        /// Read the five files that are identical for every page on the site, and build the
+        /// nav once. Call this ONCE per whole-site render and hand the result to the
+        /// RenderAsync overload below; see SiteAssets for why.
         /// </summary>
-        public async Task<string> RenderAsync(PageModel page, int websiteId, string siteName, bool upload)
+        public async Task<SiteAssets> LoadSiteAssetsAsync(int websiteId, string siteName)
         {
             var content = new AmazonS3Storage(_contentBucket, _region);
             string basePath = $"public/websites/{siteName}";
@@ -456,7 +485,7 @@ namespace WebApplicationArch.content
             var site = await ResolveSiteMetaAsync(content, basePath, websiteId, siteName);
 
             // The PUBLIC site bucket holds BaseStyles.css, which the SPA build deploys to its
-            // root and compiles into the bundle.
+            // root and compiles into the bundle. It is also where rendered pages are uploaded.
             var pubAssets = new AmazonS3Storage($"www.{site.Domain}", _region);
 
             // Header comes from the CONTENT bucket only -- the single place the SPA looks
@@ -479,27 +508,63 @@ namespace WebApplicationArch.content
             // theme.css is the ThemeBuilder output. Genuinely absent for several sites.
             string themeCss = await TryRead(content, "theme.css", $"public/assets/{siteName}/themes");
 
+            return new SiteAssets
+            {
+                Site = site,
+                HeaderHtml = headerHtml,
+                NavHtml = BuildNav(menuJson, site.Domain),
+                BaseStyles = baseStyles,
+                ThemeCss = themeCss,
+                Content = content,
+                Public = pubAssets
+            };
+        }
+
+        /// <summary>
+        /// Read the page's article HTML + site assets from the content bucket, assemble the
+        /// document, and (when upload=true) write it to the public bucket at {slug}/index.html.
+        /// Returns the generated HTML (so callers can preview without uploading), or null if
+        /// the page has no article content to publish.
+        ///
+        /// Loads the sitewide assets itself, so it stands alone for a ONE-page render. A loop
+        /// over many pages should load them once and use the overload below instead.
+        /// </summary>
+        public async Task<string> RenderAsync(PageModel page, int websiteId, string siteName, bool upload)
+        {
+            var assets = await LoadSiteAssetsAsync(websiteId, siteName);
+            return await RenderAsync(page, siteName, upload, assets);
+        }
+
+        /// <summary>
+        /// Render one page against already-loaded sitewide assets. Identical output to the
+        /// overload above -- the only difference is who pays for the five shared reads.
+        /// </summary>
+        public async Task<string> RenderAsync(PageModel page, string siteName, bool upload, SiteAssets assets)
+        {
+            if (assets == null) throw new ArgumentNullException(nameof(assets));
+
+            var site = assets.Site;
+            string basePath = $"public/websites/{siteName}";
+
             var body = new StringBuilder();
             foreach (var a in (page.articles ?? new List<ArticleModel>()).OrderBy(x => x.sequence_no))
             {
                 if (string.IsNullOrEmpty(a.articlePath)) continue;
-                string html = await TryRead(content, a.articlePath, $"{basePath}/articles");
+                string html = await TryRead(assets.Content, a.articlePath, $"{basePath}/articles");
                 if (!string.IsNullOrWhiteSpace(html)) body.Append("<article>").Append(html).Append("</article>\n");
             }
             if (body.Length == 0) return null;
 
-            string nav = BuildNav(menuJson, site.Domain);
-            string doc = BuildDocument(page, site, body.ToString(), headerHtml, nav, themeCss, baseStyles);
+            string doc = BuildDocument(page, site, body.ToString(), assets.HeaderHtml, assets.NavHtml, assets.ThemeCss, assets.BaseStyles);
 
             if (upload)
             {
                 bool isHome = string.Equals(page.name, "Home", StringComparison.OrdinalIgnoreCase);
                 string slug = isHome ? "" : Slug(page.name);
-                var pub = new AmazonS3Storage($"www.{site.Domain}", _region);
                 var bytes = Encoding.UTF8.GetBytes(doc);
                 using var ms = new MemoryStream(bytes);
                 // key = {slug}/index.html (or index.html for home).
-                await pub.UploadFile(ms, "index.html", slug, "text/html; charset=utf-8", "public, max-age=300");
+                await assets.Public.UploadFile(ms, "index.html", slug, "text/html; charset=utf-8", "public, max-age=300");
             }
             return doc;
         }

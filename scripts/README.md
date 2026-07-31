@@ -398,72 +398,94 @@ before each visible one. Use that only after the first site has proven the proce
 >
 > **A correct sitemap is still not evidence that a page rendered** — those are separate
 > code paths. Spot-check one live URL after a batch of new pages.
+
+> **Trap 6 — a sitewide file change is a whole-site re-render, not a one-file edit.**
+> The nav is defined once in `sitemenu.json`, but the prerenderer **bakes a copy of it
+> into every page's HTML** at render time. Adding, removing, renaming, or reordering a
+> menu item therefore leaves every already-rendered page carrying the old nav — the new
+> entry is unreachable from anywhere except a direct URL or the sitemap, and nothing
+> reports a problem. Found on cesletter.info, 2026-07-29.
 >
-> **Trap 6 — site-wide assets are baked into every page, so changing one is a
-> whole-site re-render.** Three files live at `public/websites/{domain}/` and are copied
-> into every page's HTML at render time:
+> **The same is true of the header, the site metadata, and the theme** — all four are
+> inlined into every page. This is now handled automatically: a write to any of them
+> triggers a whole-site re-render. See the section below for the full list.
 >
-> | File | What it controls |
-> |---|---|
-> | `sitemenu.json` | the nav |
-> | `header.html` | the site header above the article body |
-> | `site-meta.json` | public title and GA tag |
->
-> Editing any of them leaves every already-rendered page carrying the old version, and
-> nothing reports a problem. `header.html` was the nastiest: its writes **already reached
-> the render Lambda** via the article notification's `.html` suffix, but `TryParseArticleKey`
+> `header.html` was the nastiest of the four: its writes **already reached the render
+> Lambda** via the article notification's `.html` suffix, but `TryParseArticleKey`
 > rejected the key and the Lambda logged "skipping non-article key" — so a header edit
-> looked saved and changed nothing. Found on cesletter.info 2026-07-29 (menu) and
-> 2026-07-30 (header).
->
-> **This is handled automatically as of 2026-07-30** — a `sitemenu.json` write triggers
-> a whole-site re-render, so a menu edit in the admin now propagates on its own. See
-> [automatic re-render on menu change](#automatic-re-render-on-menu-change) below.
-> You should not need the manual commands again; they are kept there for recovery.
+> looked saved and changed nothing. Found on cesletter.info 2026-07-30.
 
-### Automatic re-render on menu change
+### Sitewide files: a write to any of these re-renders the whole site
 
-**Live since 2026-07-30.** Writing `sitemenu.json` re-renders every served page on that
-site, because the nav is baked into each page's HTML at render time.
+Four files are baked into **every page** at render time, so changing one and doing
+nothing else leaves every already-rendered page carrying the old copy — silently.
+Each has an S3 notification pointing at the render Lambda:
 
-`configure-render-trigger.ps1` writes **three** notifications: articles (`.html`), the
-menu (`sitemenu.json`), and `site-meta.json`. S3 allows one prefix and one suffix per
-entry with no wildcard in the middle, so each distinct suffix needs its own entry —
-`.html` never matches `sitemenu.json`, which is why menu edits silently did nothing.
+| File | Location | What it controls |
+|---|---|---|
+| `sitemenu.json` | `public/websites/{domain}/` | the nav on every page |
+| `header.html` | `public/websites/{domain}/` | the header banner |
+| `site-meta.json` | `public/websites/{domain}/` | public title + GA measurement id |
+| `theme.css` | `public/assets/{domain}/themes/` | ThemeBuilder colours/fonts |
 
-`header.html` deliberately has **no entry of its own**: it already arrives via the
-article entry's `.html` suffix. That is also why
-`ApiStaticRenderFunctions.TryParseSiteAssetKey` matches an explicit **allowlist** rather
-than "any file in the site folder" — every stray `.html` dropped in a site folder reaches
-this Lambda, and matching loosely would turn an unrelated upload into a 471-page render.
+`ApiStaticRenderFunctions.TryParseSiteAssetKey` / `TryParseThemeKey` recognise these
+and route them to a whole-site render; `TryParseArticleKey` deliberately **rejects**
+them, since an article write is a one-page render. To add another sitewide file, put
+its name in the `SiteWideAssets` set — and check S3 actually delivers it, because
+filter rules allow one prefix and one suffix each.
 
-All three notifications target the same Lambda. Repeat writes in one S3 batch — which one
-admin drag-and-drop can produce — are collapsed to a single render per site.
+> **`BaseStyles.css` is deliberately NOT on this list.** It is inlined too, but it
+> lives in the *public* bucket — the same bucket the renderer writes into — so a
+> notification there is one careless suffix edit away from infinite recursion, and it
+> would fire on every SPA deploy. After editing it, re-render by hand:
+> `RegenerateAllStaticPages`, or `publish-static-pages.ps1 -Site X -Upload`.
 
-The render Lambda is **1024 MB / 900 s** and renders 8 pages at a time
-(`MenuRenderConcurrency`), since the work is I/O bound. Measured on cesletter.info:
-33 pages in **7.3 s**, peak memory 157 MB. That extrapolates to roughly 100 s for
-ldsdoctrines at 471 pages — well inside the ceiling. Memory does not grow with site
-size because concurrency is bounded; the 1024 MB is bought for the CPU that comes
-with it, not the RAM.
+Cost: a whole-site render is one read and one write per page. The sitewide files are
+loaded **once per site**, not once per page — before that fix a single menu edit on
+`ldsdoctrines` did ~2,355 redundant S3 reads of five identical objects. It is still
+471 pages of work, so batch sitewide edits rather than making them one at a time.
 
-> **A menu edit now rewrites the bucket root `index.html`**, because Home is one of the
+Deployed 2026-07-30. To re-apply after a change:
+
+```powershell
+# STATIC_PUBLISH_SITES is a template parameter re-applied on every deploy. If it is
+# unset in the shell, publishing turns OFF for every site at once -- set it first.
+$env:STATIC_PUBLISH_SITES = [Environment]::GetEnvironmentVariable('STATIC_PUBLISH_SITES','User')
+$env:STATIC_PUBLISH_SITES        # currently 'all' -- do not proceed if empty
+./scripts/deploy-lambda-no-rotate.ps1 -ProfileName tbirdcontractinggmailcom
+./scripts/configure-render-trigger.ps1
+```
+
+> **A sitewide edit rewrites the bucket root `index.html`**, because Home is one of the
 > pages re-rendered. That is correct — post-migration the root *is* the Home render —
 > but unlike `-Phase root` it takes no backup first. A broken Home article will
 > therefore reach the live homepage via a menu edit. `reflectiverealizations` (id 4) is
 > unaffected: it is in the server-side `NeverPublish` deny list, which outranks
 > `STATIC_PUBLISH_SITES` even when that is set to `all`.
 
-If it ever stops working, check in this order:
+The render Lambda runs at **1024 MB / 900 s** to cover the worst-case whole-site
+render, and renders pages 8-at-a-time (`SiteRenderConcurrency`) since the work is
+I/O bound. Measured on cesletter.info: 33 pages in **7.3 s**, peak memory 157 MB —
+extrapolating to roughly 100 s for ldsdoctrines at 471 pages, well inside the ceiling.
+Memory does not grow with site size because concurrency is bounded; the 1024 MB is
+bought for the CPU that comes with it, not the RAM. Verify:
 
 ```powershell
-./scripts/configure-render-trigger.ps1 -WhatIf     # both entries present? writes nothing
-aws logs tail /aws/lambda/<fn> --since 10m --profile tbirdcontractinggmailcom --region us-west-2
+./scripts/configure-render-trigger.ps1 -WhatIf     # shows all four entries, writes nothing
+aws logs tail /aws/lambda/<fn> --follow --profile tbirdcontractinggmailcom --region us-west-2
 ```
 
-The log line to look for is `menu changed on {domain} -- re-rendering N page(s)`,
-followed by `menu re-render touched N/N`. A count short of N means individual pages
-failed and the site is now half-updated — the per-page errors are logged above it.
+Then change one menu item and confirm an *unrelated* page picks up the new nav.
+
+> `configure-render-trigger.ps1` only manages the four ids in its `$OurEntries` table
+> and preserves anything else on the bucket verbatim. That is deliberate, but it means
+> a notification added by hand will not be cleaned up by a re-run — which is how the
+> environment drifted from the repo once already. Check `-WhatIf` output against the
+> live config if the two ever look out of step.
+
+The log line to look for is `'sitemenu.json' changed on {domain} -- re-rendering N page(s)`,
+followed by `'sitemenu.json' re-render touched N/N`. A count short of N means individual
+pages failed and the site is now half-updated — the per-page errors are logged above it.
 
 ### Rolling back
 
