@@ -385,55 +385,74 @@ before each visible one. Use that only after the first site has proven the proce
 > evidence that a page rendered** — those are separate code paths. Always spot-check
 > one live URL after a batch of new pages. Found on cesletter.info, 2026-07-29.
 >
-> **Trap 6 — a menu change is a whole-site re-render, not a one-file edit.** The nav
-> is defined once in `sitemenu.json`, but the prerenderer **bakes a copy of it into
-> every page's HTML** at render time. Adding, removing, renaming, or reordering a menu
-> item therefore leaves every already-rendered page carrying the old nav — the new
+> **Trap 6 — a sitewide file change is a whole-site re-render, not a one-file edit.**
+> The nav is defined once in `sitemenu.json`, but the prerenderer **bakes a copy of it
+> into every page's HTML** at render time. Adding, removing, renaming, or reordering a
+> menu item therefore leaves every already-rendered page carrying the old nav — the new
 > entry is unreachable from anywhere except a direct URL or the sitemap, and nothing
 > reports a problem. Found on cesletter.info, 2026-07-29.
 >
-> This is now handled automatically — a `sitemenu.json` write triggers a whole-site
-> re-render — but **only once the pending deploy below has run.** Until then, do it by
-> hand after any menu change:
->
-> ```powershell
-> ./scripts/publish-static-pages.ps1 -Site X -Upload -ExcludeHome
-> ./scripts/publish-static-pages.ps1 -Site X -Upload -Slug Home     # the root
-> ```
->
-> Then invalidate. Either way, on a large site (`ldsdoctrines`, 471 pages) a single
-> menu edit costs a full re-render — so batch menu changes rather than making them one
-> at a time.
+> **The same is true of the header, the site metadata, and the theme** — all four are
+> inlined into every page. This is now handled automatically: a write to any of them
+> triggers a whole-site re-render. See the section below for the full list.
 
-### Pending: automatic re-render on menu change
+### Sitewide files: a write to any of these re-renders the whole site
 
-Written and unit-tested, **not yet deployed** as of 2026-07-30. Two commands, in this
-order:
+Four files are baked into **every page** at render time, so changing one and doing
+nothing else leaves every already-rendered page carrying the old copy — silently.
+Each has an S3 notification pointing at the render Lambda:
+
+| File | Location | What it controls |
+|---|---|---|
+| `sitemenu.json` | `public/websites/{domain}/` | the nav on every page |
+| `header.html` | `public/websites/{domain}/` | the header banner |
+| `site-meta.json` | `public/websites/{domain}/` | public title + GA measurement id |
+| `theme.css` | `public/assets/{domain}/themes/` | ThemeBuilder colours/fonts |
+
+`ApiStaticRenderFunctions.TryParseSiteAssetKey` / `TryParseThemeKey` recognise these
+and route them to a whole-site render; `TryParseArticleKey` deliberately **rejects**
+them, since an article write is a one-page render. To add another sitewide file, put
+its name in the `SiteWideAssets` set — and check S3 actually delivers it, because
+filter rules allow one prefix and one suffix each.
+
+> **`BaseStyles.css` is deliberately NOT on this list.** It is inlined too, but it
+> lives in the *public* bucket — the same bucket the renderer writes into — so a
+> notification there is one careless suffix edit away from infinite recursion, and it
+> would fire on every SPA deploy. After editing it, re-render by hand:
+> `RegenerateAllStaticPages`, or `publish-static-pages.ps1 -Site X -Upload`.
+
+Cost: a whole-site render is one read and one write per page. The sitewide files are
+loaded **once per site**, not once per page — before that fix a single menu edit on
+`ldsdoctrines` did ~2,355 redundant S3 reads of five identical objects. It is still
+471 pages of work, so batch sitewide edits rather than making them one at a time.
+
+Deployed 2026-07-30. To re-apply after a change:
 
 ```powershell
 # STATIC_PUBLISH_SITES is a template parameter re-applied on every deploy. If it is
 # unset in the shell, publishing turns OFF for every site at once -- set it first.
 $env:STATIC_PUBLISH_SITES = [Environment]::GetEnvironmentVariable('STATIC_PUBLISH_SITES','User')
-$env:STATIC_PUBLISH_SITES        # expect: 1,8,5,6,2,4  -- do not proceed if empty
+$env:STATIC_PUBLISH_SITES        # currently 'all' -- do not proceed if empty
 ./scripts/deploy-lambda-no-rotate.ps1 -ProfileName tbirdcontractinggmailcom
 ./scripts/configure-render-trigger.ps1
 ```
 
-`configure-render-trigger.ps1` now writes **two** notifications — one for articles
-(`.html`) and one for the menu (`sitemenu.json`). S3 allows a single prefix and suffix
-per entry, so the menu cannot share the article filter. Both target the same Lambda;
-`ApiStaticRenderFunctions.TryParseMenuKey` tells them apart.
-
-The render Lambda moves to **1024 MB / 900 s** to cover the worst-case whole-site
-render, and renders pages 8-at-a-time (`MenuRenderConcurrency`) since the work is
-I/O bound. Verify after deploying:
+The render Lambda runs at **1024 MB / 900 s** to cover the worst-case whole-site
+render, and renders pages 8-at-a-time (`SiteRenderConcurrency`) since the work is
+I/O bound. Verify:
 
 ```powershell
-./scripts/configure-render-trigger.ps1 -WhatIf     # shows both entries, writes nothing
+./scripts/configure-render-trigger.ps1 -WhatIf     # shows all four entries, writes nothing
 aws logs tail /aws/lambda/<fn> --follow --profile tbirdcontractinggmailcom --region us-west-2
 ```
 
-Then change one menu item and confirm an unrelated page picks up the new nav.
+Then change one menu item and confirm an *unrelated* page picks up the new nav.
+
+> `configure-render-trigger.ps1` only manages the four ids in its `$OurEntries` table
+> and preserves anything else on the bucket verbatim. That is deliberate, but it means
+> a notification added by hand will not be cleaned up by a re-run — which is how the
+> environment drifted from the repo once already. Check `-WhatIf` output against the
+> live config if the two ever look out of step.
 
 ### Rolling back
 

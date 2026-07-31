@@ -1039,11 +1039,13 @@
     },
     "StaticRenderOnUploadFunction": {
       "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Comment": "1024MB/900s sized for the WHOLE-SITE render that a sitemenu.json, header.html, site-meta.json or theme.css write triggers -- ldsdoctrines is ~471 pages. A single-article render needs a fraction of this; the ceiling only has to cover the worst case. More memory also means more CPU, which the render loop is bound by. NOTE: this note lives in Metadata, not Properties -- JSON has no comment syntax and SAM rejects unknown keys under Properties, so a '_comment' there fails 'sam validate' outright."
+      },
       "Properties": {
         "Handler": "WebApplicationArch::WebApplicationArch.ApiStaticRenderFunctions::RenderOnArticleUpload",
         "Runtime": "dotnet8",
         "CodeUri": ".",
-        "_comment": "1024MB/900s sized for the WHOLE-SITE render a sitemenu.json write triggers -- ldsdoctrines is ~471 pages. A single-article render needs a fraction of this; the ceiling only has to cover the worst case. More memory also means more CPU, which the render loop is bound by.",
         "MemorySize": 1024,
         "Timeout": 900,
         "Policies": [

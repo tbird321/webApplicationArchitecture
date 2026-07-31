@@ -21,6 +21,15 @@ The path to the Lambda project folder, relative to the repo root.
 .PARAMETER SkipPublishSitesCheck
 Skip the guard that refuses to silently shrink STATIC_PUBLISH_SITES. Only for the case
 where you deliberately intend to turn static publishing off for a site.
+
+.PARAMETER AssumeYes
+Answer the final "proceed with deploy?" confirmation automatically, so the script can run
+in a non-interactive shell (CI, an agent, a scheduled task) where Read-Host reads EOF and
+would otherwise always cancel.
+
+This deliberately does NOT skip the STATIC_PUBLISH_SITES shrink guard -- that prompt still
+blocks, and still defaults to No on an empty answer. -AssumeYes means "yes, deploy the
+settings you just printed", not "yes to anything".
 #>
 param(
     [string]$StackName = 'webapplicationarch',
@@ -29,7 +38,8 @@ param(
     [string]$ProjectPath = 'api/WebApplicationArch',
     [string]$ProfileName = '',
     [string]$Region = 'us-west-2',
-    [switch]$SkipPublishSitesCheck
+    [switch]$SkipPublishSitesCheck,
+    [switch]$AssumeYes
 )
 
 $repoRoot = Resolve-Path "$PSScriptRoot\.."
@@ -182,10 +192,15 @@ Write-Host "  Region      = $Region"
 Write-Host "  PublishSites= '$staticPublishSites'"
 Write-Host ''
 
-$confirmation = Read-Host 'Proceed with deploy using these values? (Y/N)'
-if ($confirmation -notin @('Y','y','Yes','yes')) {
-    Write-Host 'Deployment cancelled.'
-    exit 0
+if ($AssumeYes) {
+    Write-Host 'Proceed with deploy using these values? (Y/N) -> Y (-AssumeYes)' -ForegroundColor Yellow
+}
+else {
+    $confirmation = Read-Host 'Proceed with deploy using these values? (Y/N)'
+    if ($confirmation -notin @('Y','y','Yes','yes')) {
+        Write-Host 'Deployment cancelled.'
+        exit 0
+    }
 }
 
 $profileArg = @()
