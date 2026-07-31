@@ -69,32 +69,41 @@ public class StaticRenderTriggerTests
         Assert.False(ApiStaticRenderFunctions.TryParseArticleKey("about-us/index.html", out _, out _));
     }
 
-    // ---------------------------------------------------------------- menu key parsing
+    // ------------------------------------------------------------ site-wide asset parsing
     //
-    // The nav is baked into every page's HTML at render time, so a sitemenu.json write has to
-    // re-render the WHOLE site. Misparse it in one direction and menu edits silently stop
-    // propagating; in the other, an unrelated upload kicks off a 471-page render.
+    // sitemenu.json, header.html and site-meta.json are baked into EVERY page at render time,
+    // so writing one has to re-render the whole site. Misparse in one direction and those edits
+    // silently stop propagating; in the other, a stray upload kicks off a 471-page render.
+    //
+    // header.html is the reason the allowlist is explicit: the article notification filters on
+    // suffix ".html", so every loose .html in a site folder already reaches this Lambda.
 
     [Theory]
-    [InlineData("public/websites/cesletter.info/sitemenu.json", "cesletter.info")]
-    [InlineData("public/websites/ldsdoctrines.com/sitemenu.json", "ldsdoctrines.com")]
-    [InlineData("public/websites/ldsfaithincrisis.com/sitemenu.json", "ldsfaithincrisis.com")]
+    [InlineData("public/websites/cesletter.info/sitemenu.json", "cesletter.info", "sitemenu.json")]
+    [InlineData("public/websites/ldsdoctrines.com/sitemenu.json", "ldsdoctrines.com", "sitemenu.json")]
+    [InlineData("public/websites/ldsapologetics.com/header.html", "ldsapologetics.com", "header.html")]
+    [InlineData("public/websites/ldsfaithincrisis.com/site-meta.json", "ldsfaithincrisis.com", "site-meta.json")]
     // Casing of the filename is not guaranteed across writers.
-    [InlineData("public/websites/cesletter.info/SiteMenu.json", "cesletter.info")]
-    public void Parses_MenuKeys(string key, string expectedDomain)
+    [InlineData("public/websites/cesletter.info/SiteMenu.json", "cesletter.info", "SiteMenu.json")]
+    [InlineData("public/websites/cesletter.info/Header.HTML", "cesletter.info", "Header.HTML")]
+    public void Parses_SiteAssetKeys(string key, string expectedDomain, string expectedAsset)
     {
-        Assert.True(ApiStaticRenderFunctions.TryParseMenuKey(key, out var domain), $"should have parsed '{key}'");
+        Assert.True(ApiStaticRenderFunctions.TryParseSiteAssetKey(key, out var domain, out var asset), $"should have parsed '{key}'");
         Assert.Equal(expectedDomain, domain);
+        Assert.Equal(expectedAsset, asset);
     }
 
     [Theory]
     // Articles are a per-page render, never a whole-site one.
     [InlineData("public/websites/cesletter.info/articles/bom-dna.html")]
-    // Other per-site metadata files must not trigger a full render.
-    [InlineData("public/websites/cesletter.info/header.html")]
-    [InlineData("public/websites/cesletter.info/site-meta.json")]
-    // A menu nested deeper, or shallower, than the real location.
+    // A stray .html in the site folder reaches this Lambda via the article filter. It must NOT
+    // be mistaken for a site-wide asset and trigger a full re-render.
+    [InlineData("public/websites/cesletter.info/scratch.html")]
+    [InlineData("public/websites/cesletter.info/old-header.html")]
+    [InlineData("public/websites/cesletter.info/header.html.bak")]
+    // Nested deeper, or shallower, than the real location.
     [InlineData("public/websites/cesletter.info/articles/sitemenu.json")]
+    [InlineData("public/websites/cesletter.info/sub/header.html")]
     [InlineData("public/websites/sitemenu.json")]
     // Near-misses on the filename.
     [InlineData("public/websites/cesletter.info/sitemenu.json.bak")]
@@ -104,23 +113,24 @@ public class StaticRenderTriggerTests
     [InlineData("sitemenu.json")]
     [InlineData("")]
     [InlineData(null)]
-    public void Rejects_NonMenuKeys(string key)
+    public void Rejects_NonSiteAssetKeys(string key)
     {
-        Assert.False(ApiStaticRenderFunctions.TryParseMenuKey(key, out _), $"should NOT have parsed '{key}'");
+        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey(key, out _, out _), $"should NOT have parsed '{key}'");
     }
 
-    [Fact]
-    public void MenuAndArticleParsers_AreMutuallyExclusive()
+    [Theory]
+    [InlineData("public/websites/cesletter.info/sitemenu.json")]
+    [InlineData("public/websites/cesletter.info/header.html")]
+    [InlineData("public/websites/cesletter.info/site-meta.json")]
+    public void SiteAssetAndArticleParsers_AreMutuallyExclusive(string siteAsset)
     {
-        // The handler tries the menu parser first and falls through to the article one. If a key
-        // ever satisfied both, a menu write would also be treated as an article write.
-        const string menu = "public/websites/cesletter.info/sitemenu.json";
+        // The handler tries the site-asset parser first and falls through to the article one.
+        // If a key ever satisfied both, a header edit would also be treated as an article write.
+        Assert.True(ApiStaticRenderFunctions.TryParseSiteAssetKey(siteAsset, out _, out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseArticleKey(siteAsset, out _, out _));
+
         const string article = "public/websites/cesletter.info/articles/bom-dna.html";
-
-        Assert.True(ApiStaticRenderFunctions.TryParseMenuKey(menu, out _));
-        Assert.False(ApiStaticRenderFunctions.TryParseArticleKey(menu, out _, out _));
-
         Assert.True(ApiStaticRenderFunctions.TryParseArticleKey(article, out _, out _));
-        Assert.False(ApiStaticRenderFunctions.TryParseMenuKey(article, out _));
+        Assert.False(ApiStaticRenderFunctions.TryParseSiteAssetKey(article, out _, out _));
     }
 }

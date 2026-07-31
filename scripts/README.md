@@ -71,8 +71,15 @@ $S = 'reflectiverealizations'
 #    lines separately is how ldsdiscussions got left out: the User value said '1,8,5'
 #    while the shell said '1,8,5,6', the deploy took the User one, and the site was
 #    migrated-but-frozen with nothing reporting a problem.
-$PUBLISH = '1,8,5,6,2,4'    # <-- ADD this site's id.  1=faithincrisis 8=cesletter
-                        #     5=apologetics 6=discussions 2=doctrines 4=reflective
+$PUBLISH = 'all'        # <-- the live value. Now that every applicable site is
+                        #     migrated, "all" is the normal setting and the
+                        #     per-site list below is only an escape hatch.
+                        #     1=faithincrisis 8=cesletter 5=apologetics
+                        #     6=discussions 2=doctrines 4=reflective
+                        # Maintaining the list BY HAND is itself the hazard -- a site
+                        # left off is migrated-but-frozen with nothing reporting it.
+                        # "all" cannot destroy reflectiverealizations: id 4 is in the
+                        # server-side NeverPublish deny list, which outranks this var.
 [Environment]::SetEnvironmentVariable('STATIC_PUBLISH_SITES', $PUBLISH, 'User')
 $env:STATIC_PUBLISH_SITES = $PUBLISH
 ./scripts/deploy-lambda-no-rotate.ps1 -ProfileName tbirdcontractinggmailcom
@@ -375,65 +382,88 @@ before each visible one. Use that only after the first site has proven the proce
 > **Trap 4 — sitemap last (step 8).** A sitemap full of URLs that 404 teaches
 > crawlers to distrust the site.
 >
-> **Trap 5 — a newly created page does not render until the article is saved twice.**
-> The MCP `create_page_with_article` tool writes the article HTML to S3 *before* the
-> page link exists, so the render trigger fires with no slug to resolve and skips the
-> page. It reports success, `regenerate_sitemap` happily lists the new URL, and the
-> live URL 404s. Nothing logs an error. Fix by calling `set_article_content` on the
-> same article id a second time with identical HTML, or by running
-> `publish-static-pages.ps1 -Site X -Upload -ExcludeHome`. **A correct sitemap is not
-> evidence that a page rendered** — those are separate code paths. Always spot-check
-> one live URL after a batch of new pages. Found on cesletter.info, 2026-07-29.
+> **Trap 5 — order of writes decides whether a new page renders at all.** *(Fixed
+> 2026-07-30 — kept because the constraint still governs any code that creates pages.)*
+> Writing article HTML to S3 is what fires the render trigger, and the handler only
+> re-renders **served pages that already reference that article path**. So the page must
+> exist, be linked, and be published *before* the content upload. `create_page_with_article`
+> used to upload content second of five steps — the trigger fired against a page that did
+> not exist yet, found nothing, and skipped. The tool reported success,
+> `regenerate_sitemap` listed the new URL, and the live URL 404'd until someone happened
+> to save the article again. Nothing errored.
 >
-> **Trap 6 — a menu change is a whole-site re-render, not a one-file edit.** The nav
-> is defined once in `sitemenu.json`, but the prerenderer **bakes a copy of it into
-> every page's HTML** at render time. Adding, removing, renaming, or reordering a menu
-> item therefore leaves every already-rendered page carrying the old nav — the new
-> entry is unreachable from anywhere except a direct URL or the sitemap, and nothing
-> reports a problem. Found on cesletter.info, 2026-07-29.
+> The tool now uploads content **last**; see the comment block in
+> `api/mcp/src/tools/composite.js`, which explains why the order is load-bearing.
+> If you write any other page-creation path, preserve that order.
 >
-> This is now handled automatically — a `sitemenu.json` write triggers a whole-site
-> re-render — but **only once the pending deploy below has run.** Until then, do it by
-> hand after any menu change:
+> **A correct sitemap is still not evidence that a page rendered** — those are separate
+> code paths. Spot-check one live URL after a batch of new pages.
 >
-> ```powershell
-> ./scripts/publish-static-pages.ps1 -Site X -Upload -ExcludeHome
-> ./scripts/publish-static-pages.ps1 -Site X -Upload -Slug Home     # the root
-> ```
+> **Trap 6 — site-wide assets are baked into every page, so changing one is a
+> whole-site re-render.** Three files live at `public/websites/{domain}/` and are copied
+> into every page's HTML at render time:
 >
-> Then invalidate. Either way, on a large site (`ldsdoctrines`, 471 pages) a single
-> menu edit costs a full re-render — so batch menu changes rather than making them one
-> at a time.
+> | File | What it controls |
+> |---|---|
+> | `sitemenu.json` | the nav |
+> | `header.html` | the site header above the article body |
+> | `site-meta.json` | public title and GA tag |
+>
+> Editing any of them leaves every already-rendered page carrying the old version, and
+> nothing reports a problem. `header.html` was the nastiest: its writes **already reached
+> the render Lambda** via the article notification's `.html` suffix, but `TryParseArticleKey`
+> rejected the key and the Lambda logged "skipping non-article key" — so a header edit
+> looked saved and changed nothing. Found on cesletter.info 2026-07-29 (menu) and
+> 2026-07-30 (header).
+>
+> **This is handled automatically as of 2026-07-30** — a `sitemenu.json` write triggers
+> a whole-site re-render, so a menu edit in the admin now propagates on its own. See
+> [automatic re-render on menu change](#automatic-re-render-on-menu-change) below.
+> You should not need the manual commands again; they are kept there for recovery.
 
-### Pending: automatic re-render on menu change
+### Automatic re-render on menu change
 
-Written and unit-tested, **not yet deployed** as of 2026-07-30. Two commands, in this
-order:
+**Live since 2026-07-30.** Writing `sitemenu.json` re-renders every served page on that
+site, because the nav is baked into each page's HTML at render time.
+
+`configure-render-trigger.ps1` writes **three** notifications: articles (`.html`), the
+menu (`sitemenu.json`), and `site-meta.json`. S3 allows one prefix and one suffix per
+entry with no wildcard in the middle, so each distinct suffix needs its own entry —
+`.html` never matches `sitemenu.json`, which is why menu edits silently did nothing.
+
+`header.html` deliberately has **no entry of its own**: it already arrives via the
+article entry's `.html` suffix. That is also why
+`ApiStaticRenderFunctions.TryParseSiteAssetKey` matches an explicit **allowlist** rather
+than "any file in the site folder" — every stray `.html` dropped in a site folder reaches
+this Lambda, and matching loosely would turn an unrelated upload into a 471-page render.
+
+All three notifications target the same Lambda. Repeat writes in one S3 batch — which one
+admin drag-and-drop can produce — are collapsed to a single render per site.
+
+The render Lambda is **1024 MB / 900 s** and renders 8 pages at a time
+(`MenuRenderConcurrency`), since the work is I/O bound. Measured on cesletter.info:
+33 pages in **7.3 s**, peak memory 157 MB. That extrapolates to roughly 100 s for
+ldsdoctrines at 471 pages — well inside the ceiling. Memory does not grow with site
+size because concurrency is bounded; the 1024 MB is bought for the CPU that comes
+with it, not the RAM.
+
+> **A menu edit now rewrites the bucket root `index.html`**, because Home is one of the
+> pages re-rendered. That is correct — post-migration the root *is* the Home render —
+> but unlike `-Phase root` it takes no backup first. A broken Home article will
+> therefore reach the live homepage via a menu edit. `reflectiverealizations` (id 4) is
+> unaffected: it is in the server-side `NeverPublish` deny list, which outranks
+> `STATIC_PUBLISH_SITES` even when that is set to `all`.
+
+If it ever stops working, check in this order:
 
 ```powershell
-# STATIC_PUBLISH_SITES is a template parameter re-applied on every deploy. If it is
-# unset in the shell, publishing turns OFF for every site at once -- set it first.
-$env:STATIC_PUBLISH_SITES = [Environment]::GetEnvironmentVariable('STATIC_PUBLISH_SITES','User')
-$env:STATIC_PUBLISH_SITES        # expect: 1,8,5,6,2,4  -- do not proceed if empty
-./scripts/deploy-lambda-no-rotate.ps1 -ProfileName tbirdcontractinggmailcom
-./scripts/configure-render-trigger.ps1
+./scripts/configure-render-trigger.ps1 -WhatIf     # both entries present? writes nothing
+aws logs tail /aws/lambda/<fn> --since 10m --profile tbirdcontractinggmailcom --region us-west-2
 ```
 
-`configure-render-trigger.ps1` now writes **two** notifications — one for articles
-(`.html`) and one for the menu (`sitemenu.json`). S3 allows a single prefix and suffix
-per entry, so the menu cannot share the article filter. Both target the same Lambda;
-`ApiStaticRenderFunctions.TryParseMenuKey` tells them apart.
-
-The render Lambda moves to **1024 MB / 900 s** to cover the worst-case whole-site
-render, and renders pages 8-at-a-time (`MenuRenderConcurrency`) since the work is
-I/O bound. Verify after deploying:
-
-```powershell
-./scripts/configure-render-trigger.ps1 -WhatIf     # shows both entries, writes nothing
-aws logs tail /aws/lambda/<fn> --follow --profile tbirdcontractinggmailcom --region us-west-2
-```
-
-Then change one menu item and confirm an unrelated page picks up the new nav.
+The log line to look for is `menu changed on {domain} -- re-rendering N page(s)`,
+followed by `menu re-render touched N/N`. A count short of N means individual pages
+failed and the site is now half-updated — the per-page errors are logged above it.
 
 ### Rolling back
 
@@ -555,6 +585,28 @@ Records created for an admin subdomain:
 |---|---|---|---|
 | CNAME | `_xxxx.admin` | `_yyyy.acm-validations.aws` | ACM certificate validation |
 | CNAME | `admin` | `dxxxxx.cloudfront.net` | Point the subdomain at CloudFront |
+
+### Checking apex / www / http behaviour
+
+**Do not use `Invoke-WebRequest -MaximumRedirection 0` for this.** PowerShell 5.1 throws
+`Operation is not valid due to the current state of the object` on a redirect, which is
+indistinguishable from a TLS failure in the catch block — it produced a false "apex is
+broken with a TLS error" report for `ldsdoctrines.com` when the apex was in fact
+redirecting correctly. Use `curl`, which reports the status and `Location` plainly:
+
+```bash
+for d in ldsfaithincrisis.com ldsdoctrines.com ldsapologetics.com ldsdiscussions.info cesletter.info; do
+  for u in "http://$d/" "https://$d/" "http://www.$d/" "https://www.$d/"; do
+    curl -sS -o /dev/null -m 20 -w "$u %{http_code} %{redirect_url}\n" "$u"
+  done
+done
+```
+
+Note `curl -I` (HEAD) is misleading against GoDaddy forwarding, which answers **405** to
+HEAD while answering 301 to GET. Always use GET for the apex.
+
+Expected shape, verified 2026-07-30: `http://www` → 301 → `https://www` → 200 on every
+site. The apex is a separate problem — see below.
 
 ### The apex limitation
 

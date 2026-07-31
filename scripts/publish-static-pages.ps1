@@ -239,14 +239,30 @@ function Get-HtmlEncoded {
     return ($Text -replace '&', '&amp;' -replace '<', '&lt;' -replace '>', '&gt;' -replace '"', '&quot;')
 }
 
+# Markup -> plain text: strip tags, THEN resolve entities.
+#
+# The decode matters. Article HTML follows the house style in CLAUDE.md, which uses
+# &mdash; / &ldquo; / &rdquo; liberally. Stripping tags leaves those as literal text and
+# the later HTML-encode escapes their ampersand, so an <h1> of "A &mdash; B" shipped a
+# <title> of "A &amp;mdash; B" -- which renders as the visible characters "A &mdash; B"
+# in the browser tab and in search results. Decoding first means the encoder sees a real
+# em dash, which needs no escaping.
+#
+# MUST MIRROR StaticPageRenderer.PlainText in the C# renderer. The Lambda re-renders on
+# every article save; this script does the bulk backfill. If the two disagree, pages
+# silently change appearance depending on which one last touched them.
+function ConvertTo-PlainText {
+    param([string]$Markup)
+    if ([string]::IsNullOrEmpty($Markup)) { return '' }
+    $stripped = [regex]::Replace($Markup, '(?s)<[^>]+>', '')
+    return [System.Net.WebUtility]::HtmlDecode($stripped)
+}
+
 function Get-FirstH1 {
     param([string]$Html)
     if ([string]::IsNullOrEmpty($Html)) { return '' }
     $m = [regex]::Match($Html, '(?is)<h1[^>]*>(.*?)</h1>')
-    if ($m.Success) {
-        $t = [regex]::Replace($m.Groups[1].Value, '(?s)<[^>]+>', '') # strip inner tags
-        return $t.Trim()
-    }
+    if ($m.Success) { return (ConvertTo-PlainText $m.Groups[1].Value).Trim() }
     return ''
 }
 
@@ -256,10 +272,21 @@ function Get-MetaDescription {
     if ([string]::IsNullOrWhiteSpace($d)) {
         # Fall back to first paragraph's text.
         $m = [regex]::Match($Html, '(?is)<p[^>]*>(.*?)</p>')
-        if ($m.Success) { $d = [regex]::Replace($m.Groups[1].Value, '(?s)<[^>]+>', '') }
+        if ($m.Success) { $d = $m.Groups[1].Value }
     }
+    # Applied to the CMS description too -- descriptions are authored alongside the HTML
+    # and pick up the same entities. Decode BEFORE truncating, or "&mdash;" spends 7 of
+    # the 160 characters instead of 1.
+    $d = ConvertTo-PlainText $d
     $d = ($d -replace '\s+', ' ').Trim()
-    if ($d.Length -gt 160) { $d = $d.Substring(0, 157).TrimEnd() + '...' }
+    if ($d.Length -gt 160) {
+        # Truncate on a word boundary -- cutting mid-word produced live descriptions
+        # ending "...f...".
+        $cut = $d.Substring(0, 157)
+        $lastSpace = $cut.LastIndexOf(' ')
+        if ($lastSpace -gt 100) { $cut = $cut.Substring(0, $lastSpace) }
+        $d = $cut.TrimEnd(' ', ',', ';', ':', '-', [char]0x2014) + '...'
+    }
     return $d
 }
 

@@ -64,11 +64,19 @@ $ConfigId     = 'static-render-on-article-upload'
 $Prefix       = 'public/websites/'
 $Suffix       = '.html'
 
-# S3 filter rules allow ONE prefix and ONE suffix per entry and no wildcard in the middle, so
-# the menu needs its own notification -- '.html' never matches 'sitemenu.json'. A menu write
-# re-renders the WHOLE site, because the nav is baked into every page's HTML at render time.
+# Site-wide assets -- sitemenu.json, header.html, site-meta.json -- are baked into EVERY page
+# at render time, so writing one re-renders the whole site (ApiStaticRenderFunctions
+# .TryParseSiteAssetKey). S3 filter rules allow ONE prefix and ONE suffix per entry with no
+# wildcard in the middle, so each distinct suffix needs its own notification:
+#
+#   header.html    already covered by the '.html' article entry above -- the Lambda's parser
+#                  is what tells it apart from an article, so no extra notification is needed.
+#   sitemenu.json  needs its own entry; '.html' never matches it.
+#   site-meta.json likewise.
 $MenuConfigId = 'static-render-on-menu-upload'
 $MenuSuffix   = 'sitemenu.json'
+$MetaConfigId = 'static-render-on-sitemeta-upload'
+$MetaSuffix   = 'site-meta.json'
 
 Write-Host 'Static re-render trigger' -ForegroundColor White
 Write-Host "  bucket  : s3://$ContentBucket"
@@ -132,7 +140,7 @@ foreach ($c in $lambdaCfgs) {
 }
 
 # Drop only our own entries; everything else is preserved verbatim.
-$ourIds = @($ConfigId, $MenuConfigId)
+$ourIds = @($ConfigId, $MenuConfigId, $MetaConfigId)
 $kept = @($lambdaCfgs | Where-Object { $ourIds -notcontains (Get-Prop $_ 'Id') })
 if ($kept.Count -ne $lambdaCfgs.Count) { Write-Note "replacing the existing '$ConfigId' / '$MenuConfigId' entries" }
 
@@ -161,7 +169,7 @@ if (-not $Remove) {
 
     # Second entry: the nav. Without this a menu edit updates sitemenu.json and every
     # already-rendered page keeps the old nav -- the new item is unreachable and nothing
-    # reports a problem. Routed to the same Lambda; TryParseMenuKey tells the two apart.
+    # reports a problem. Routed to the same Lambda; TryParseSiteAssetKey tells them apart.
     $newLambdaCfgs += [pscustomobject]@{
         Id                = $MenuConfigId
         LambdaFunctionArn = $fnArn
@@ -171,6 +179,21 @@ if (-not $Remove) {
                 FilterRules = @(
                     [pscustomobject]@{ Name = 'prefix'; Value = $Prefix }
                     [pscustomobject]@{ Name = 'suffix'; Value = $MenuSuffix }
+                )
+            }
+        }
+    }
+
+    # Third entry: per-site title and analytics tag. Same reasoning as the menu.
+    $newLambdaCfgs += [pscustomobject]@{
+        Id                = $MetaConfigId
+        LambdaFunctionArn = $fnArn
+        Events            = @('s3:ObjectCreated:*')
+        Filter            = [pscustomobject]@{
+            Key = [pscustomobject]@{
+                FilterRules = @(
+                    [pscustomobject]@{ Name = 'prefix'; Value = $Prefix }
+                    [pscustomobject]@{ Name = 'suffix'; Value = $MetaSuffix }
                 )
             }
         }
@@ -206,15 +229,20 @@ $after = Invoke-Aws @('s3api', 'get-bucket-notification-configuration', '--bucke
 $afterCfgs = @()
 $raw = Get-Prop $after 'LambdaFunctionConfigurations'
 if ($null -ne $raw) { $afterCfgs = @($raw | Where-Object { $null -ne $_ }) }
-$ours     = @($afterCfgs | Where-Object { (Get-Prop $_ 'Id') -eq $ConfigId })
-$oursMenu = @($afterCfgs | Where-Object { (Get-Prop $_ 'Id') -eq $MenuConfigId })
-if ($ours)     { Write-Ok 'article notification is in place' }
-else           { throw 'The article notification was written but is not present on read-back.' }
-if ($oursMenu) { Write-Ok 'menu notification is in place' }
-else           { throw 'The menu notification was written but is not present on read-back.' }
+foreach ($check in @(
+        @{ Id = $ConfigId;     Label = 'article' },
+        @{ Id = $MenuConfigId; Label = 'menu' },
+        @{ Id = $MetaConfigId; Label = 'site-meta' })) {
+    $found = @($afterCfgs | Where-Object { (Get-Prop $_ 'Id') -eq $check.Id })
+    if ($found) { Write-Ok "$($check.Label) notification is in place" }
+    else        { throw "The $($check.Label) notification was written but is not present on read-back." }
+}
 
-Write-Host "`nDone. Editing an article in the admin now re-renders its static page," -ForegroundColor Green
-Write-Host 'and changing the menu re-renders the whole site.' -ForegroundColor Green
+Write-Host "`nDone. Editing an article re-renders its static page; changing the menu," -ForegroundColor Green
+Write-Host 'header.html or site-meta.json re-renders the whole site.' -ForegroundColor Green
+Write-Host ''
+Write-Host '  header.html needs no notification of its own -- it already arrives via the' -ForegroundColor DarkGray
+Write-Host "  article entry's '.html' suffix, and the Lambda's parser routes it." -ForegroundColor DarkGray
 Write-Host ''
 Write-Host '  Only sites listed in STATIC_PUBLISH_SITES are re-rendered -- the trigger fires for' -ForegroundColor DarkGray
 Write-Host '  every site, and the Lambda skips any that has not been cut over.' -ForegroundColor DarkGray

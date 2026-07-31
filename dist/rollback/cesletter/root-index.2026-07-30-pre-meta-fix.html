@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CES Letter | CES Letter</title>
+<meta name="description" content="CES Letter — Examined &amp;amp; Answered">
+<link rel="canonical" href="https://www.cesletter.info/">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CES Letter">
+<meta property="og:description" content="CES Letter — Examined &amp;amp; Answered">
+<meta property="og:url" content="https://www.cesletter.info/">
+<meta property="og:site_name" content="CES Letter">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CES Letter">
+<meta name="twitter:description" content="CES Letter — Examined &amp;amp; Answered">
+<style>/* ===========================================================================
+   Structural stylesheet for PUBLIC STATIC PAGES.
+
+   SINGLE SOURCE OF TRUTH. Three things read this file:
+     1. StaticPageRenderer  (C#, embedded resource)  -- the on-save re-render
+     2. publish-static-pages.ps1                     -- the bulk backfill
+     3. StaticLayoutCssTests                         -- drift detection
+   Edit it here and nowhere else.
+
+   WHY IT EXISTS
+   The site's appearance is entirely CSS driven: a page's `layout` value becomes
+   a class ("2, 1 Grid" -> "layout-2-1") on the article container, and CSS grid
+   rules do the rest. Those rules live in
+   react/baseProject/src/sitecontent/content/PageContainer.css, and the menu's
+   rules in reactcomponents/.../NestedDynamicMenu.css -- both compiled into the
+   SPA bundle.
+
+   A pre-rendered static page never loads that bundle. It inlines the site's
+   theme.css, but theme.css is the ThemeBuilder output (colours, fonts) and
+   contains none of this. Without this file every static page loses its
+   .articleContents padding and every grid and menu rule.
+
+   SELECTOR NOTE
+   PageContainer.css targets "> div:nth-child(...)" because the SPA wraps each
+   article in a <div>. The static renderer emits <article>. The child element
+   name is therefore dropped here -- "> :nth-child(...)" matches both, so these
+   rules stay correct for either markup.
+
+   KEEPING IN SYNC
+   Add a layout to PageContainer.css and you must mirror it here, or pages using
+   it render as a plain vertical stack. StaticLayoutCssTests fails when they
+   drift apart.
+   =========================================================================== */
+
+/* ---- document baseline ---------------------------------------------------
+   Copied from react/baseProject/src/index.css, which is compiled into the SPA
+   bundle and therefore never reaches a static page. Without it every page falls
+   back to the browser default -- Times New Roman instead of the system sans
+   stack, plus the default 8px body margin and no font smoothing.
+
+   This is the FIRST thing in the file so a per-site BaseStyles.css or theme.css
+   can still override the font (cesletter sets Open Sans, for instance). */
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+code{font-family:source-code-pro,Menlo,Monaco,Consolas,'Courier New',monospace}
+
+/* ---- navigation ----------------------------------------------------------
+   The SPA renders <div class="nested-dynamic-menu"> with DynamicMenu children.
+   The static renderer emits semantic <nav class="menuContents"><ul>...</ul>
+   instead: better for crawlers, and it works with JavaScript disabled. These
+   rules give that markup the same horizontal bar + hover dropdown. The SPA's
+   dropdown is pure CSS :hover (not JS state), so nothing is lost by going
+   static. :focus-within is added so the menu is keyboard operable, which the
+   SPA version is not. */
+.menuContents{position:relative;z-index:1000;max-width:100%}
+.menuContents ul{list-style:none;margin:0;padding:0}
+.menuContents > ul{display:flex;flex-wrap:wrap}
+.menuContents > ul > li{position:relative;flex:1 1 auto;white-space:nowrap}
+/* Top-level entries: a link when the item points at a page, a plain heading when it is
+   only a group label. Both need the same box so the bar does not jump between them. */
+.menuContents .nav-section{display:block;padding:10px;cursor:default}
+.menuContents > ul > li > a{display:block;padding:10px;text-decoration:none;color:inherit}
+.menuContents > ul > li > a:hover,.menuContents > ul > li > a:focus{text-decoration:underline}
+.menuContents > ul > li > ul{display:none;position:absolute;left:0;background-color:#f9f9f9;min-width:160px;box-shadow:0 8px 16px 0 rgba(0,0,0,.2);z-index:1}
+.menuContents > ul > li:hover > ul,.menuContents > ul > li:focus-within > ul{display:block}
+.menuContents > ul > li > ul a{color:#000;padding:12px 16px;text-decoration:none;display:block;white-space:nowrap}
+.menuContents > ul > li > ul a:hover,.menuContents > ul > li > ul a:focus{background-color:#f1f1f1}
+
+/* ---- article container --------------------------------------------------- */
+.articleContents{padding-left:15%;padding-right:15%}
+.articleContents::after{content:"";display:block;clear:both}
+
+@media (max-width:480px){.layout-2-1{grid-template-columns:1fr !important}.articleContents{padding-left:0;padding-right:0}}
+@media (max-width:768px){.layout-2-1{grid-template-columns:1fr !important}.articleContents{padding-left:0;padding-right:0}}
+
+/* ---- layouts ------------------------------------------------------------- */
+.layout-standard{display:grid;grid-template-columns:1fr;gap:10px}
+
+.layout-1 > :nth-child(1n + 1){grid-column:1 / -1}
+
+.layout-1-1_3-2_3{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto;gap:10px}
+.layout-1-1_3-2_3 > :nth-child(5n + 1){grid-column:1 / -1}
+.layout-1-1_3-2_3 > :nth-child(5n + 2){grid-column:1 / 2}
+.layout-1-1_3-2_3 > :nth-child(5n + 3){grid-column:2 / 4}
+.layout-1-1_3-2_3 > :nth-child(5n + 4){grid-column:1 / 3}
+.layout-1-1_3-2_3 > :nth-child(5n + 5){grid-column:3 / 4}
+
+.layout-1-1_3{display:grid;grid-template-columns:1fr 2fr;grid-template-rows:auto;gap:10px}
+.layout-1-1_3 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-1_3 > :nth-child(3n + 2){grid-column:1 / 2}
+.layout-1-1_3 > :nth-child(3n + 3){grid-column:2 / 3}
+
+.layout-1-2-3{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:auto;gap:10px}
+.layout-1-2-3 > :nth-child(6n + 1){grid-column:1 / -1}
+.layout-1-2-3 > :nth-child(6n + 2),.layout-1-2-3 > :nth-child(6n + 3){grid-column:span 3}
+.layout-1-2-3 > :nth-child(6n + 4),.layout-1-2-3 > :nth-child(6n + 5),.layout-1-2-3 > :nth-child(6n + 6){grid-column:span 2}
+
+.layout-1-2_3-1_3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-1-2_3-1_3 > :nth-child(5n + 1){grid-column:1 / -1}
+.layout-1-2_3-1_3 > :nth-child(5n + 2){grid-column:1 / 3}
+.layout-1-2_3-1_3 > :nth-child(5n + 3){grid-column:3 / 4}
+.layout-1-2_3-1_3 > :nth-child(5n + 4){grid-column:1 / 2}
+.layout-1-2_3-1_3 > :nth-child(5n + 5){grid-column:2 / 4}
+
+.layout-1-2_3{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.layout-1-2_3 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-2_3 > :nth-child(3n + 2){grid-column:1 / 2}
+.layout-1-2_3 > :nth-child(3n + 3){grid-column:2 / 3}
+
+.layout-1-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.layout-1-2 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-2 > :nth-child(3n + 2),.layout-1-2 > :nth-child(3n + 3){grid-column:auto}
+
+.layout-1-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-1-3 > :nth-child(4n + 1){grid-column:1 / -1}
+.layout-1-3 > :nth-child(4n + 2),.layout-1-3 > :nth-child(4n + 3),.layout-1-3 > :nth-child(4n + 4){grid-column:auto}
+
+.layout-1_3{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.layout-1_3 > :nth-child(2n + 1){grid-column:1 / 2}
+.layout-1_3 > :nth-child(2n + 2){grid-column:2 / 3}
+
+.layout-1_3-1{display:grid;grid-template-columns:1fr 2fr;grid-auto-rows:auto;gap:10px}
+.layout-1_3-1 > :nth-child(3n + 1){grid-column:1 / 2}
+.layout-1_3-1 > :nth-child(3n + 2){grid-column:2 / 3}
+.layout-1_3-1 > :nth-child(3n + 3){grid-column:1 / -1}
+
+.layout-1_3-2_3{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;gap:10px}
+.layout-1_3-2_3 > :nth-child(4n + 1){grid-column:1 / span 1}
+.layout-1_3-2_3 > :nth-child(4n + 2){grid-column:2 / span 2}
+.layout-1_3-2_3 > :nth-child(4n + 3){grid-column:1 / span 2}
+.layout-1_3-2_3 > :nth-child(4n + 4){grid-column:3 / span 1}
+
+.layout-2-1{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.layout-2-1 > :nth-child(3n + 1),.layout-2-1 > :nth-child(3n + 2){grid-column:auto}
+.layout-2-1 > :nth-child(3n + 3){grid-row:auto;grid-column:1 / -1}
+
+.layout-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.layout-2 > :nth-child(2n - 1),.layout-2 > :nth-child(2n){grid-column:auto}
+
+.layout-2-3{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.layout-2-3 > :nth-child(5n + 1),.layout-2-3 > :nth-child(5n + 2){grid-column:span 3}
+.layout-2-3 > :nth-child(5n + 3),.layout-2-3 > :nth-child(5n + 4),.layout-2-3 > :nth-child(5n + 5){grid-column:span 2}
+
+.layout-2_3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-2_3-1 > :nth-child(3n + 1){grid-column:1 / span 2}
+.layout-2_3-1 > :nth-child(3n + 2){grid-column:3 / span 1}
+.layout-2_3-1 > :nth-child(3n + 3){grid-column:1 / -1}
+
+.layout-2_3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-2_3 > :nth-child(2n + 1){grid-column:1 / span 2}
+.layout-2_3 > :nth-child(2n + 2){grid-column:3 / span 1}
+
+.layout-3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-3-1 > :nth-child(4n + 1),.layout-3-1 > :nth-child(4n + 2),.layout-3-1 > :nth-child(4n + 3){grid-column:span 1}
+.layout-3-1 > :nth-child(4n + 4){grid-column:1 / -1}
+
+.layout-3-2{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.layout-3-2 > :nth-child(5n + 1),.layout-3-2 > :nth-child(5n + 2),.layout-3-2 > :nth-child(5n + 3){grid-column:span 2}
+.layout-3-2 > :nth-child(5n + 4),.layout-3-2 > :nth-child(5n + 5){grid-column:span 3}
+
+.layout-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-3 > *{grid-column:span 1}
+</style>
+<style>/* ============================================================
+   cesletter.info — Base Styles
+   Academic documentation layout mirroring read.cesletter.org
+   Brand red: #f93724 | Text: #2c3e50 | Font: Open Sans
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap');
+
+body {
+    background-color: #ffffff;
+    color: #2c3e50;
+    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+/* --- Header --- */
+.headerContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #ffffff;
+    width: 100%;
+    padding: 0;
+}
+
+/* --- Navigation — white bar with red accents like read.cesletter.org --- */
+.menuContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    background-color: #ffffff;
+    width: 100%;
+    border-top: 1px solid #eaecef;
+    border-bottom: 1px solid #eaecef;
+    min-height: 3.6rem;
+}
+
+.parent-menu-button {
+    min-width: unset !important;
+    color: #2c3e50 !important;
+    font-family: "Open Sans", sans-serif !important;
+    font-size: 0.875rem !important;
+    text-transform: none !important;
+    padding: 10px 16px !important;
+    border-radius: 0 !important;
+    font-weight: 500 !important;
+}
+
+.parent-menu-button:hover {
+    background-color: #fff5f5 !important;
+    color: #f93724 !important;
+}
+
+/* Active / open menu section */
+.parent-menu-button.active,
+.parent-menu-button[aria-expanded="true"] {
+    color: #f93724 !important;
+    border-bottom: 2px solid #f93724 !important;
+}
+
+/* --- Dropdown menu items --- */
+.child-menu-button {
+    color: #2c3e50 !important;
+    font-family: "Open Sans", sans-serif !important;
+    font-size: 0.875rem !important;
+    font-weight: 400 !important;
+}
+
+.child-menu-button:hover {
+    color: #f93724 !important;
+    background-color: #fff5f5 !important;
+}
+
+/* --- Body / content area --- */
+.bodyStyle {
+    margin-left: 8%;
+    margin-right: 8%;
+    max-width: 960px;
+    font-size: 1rem;
+    font-family: "Open Sans", sans-serif;
+    line-height: 1.7;
+    color: #2c3e50;
+}
+
+/* --- Main content wrapper --- */
+.mainContent {
+    padding-top: 30px;
+    padding-bottom: 60px;
+}
+
+/* --- Headings --- */
+h1 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #2c3e50;
+    margin: 0 0 0.5rem 0;
+}
+
+h2 {
+    font-size: 1.65rem;
+    font-weight: 600;
+    color: #2c3e50;
+    border-bottom: 1px solid #eaecef;
+    padding-bottom: 0.3rem;
+    margin: 2rem 0 1rem 0;
+}
+
+h3 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 1.5rem 0 0.75rem 0;
+}
+
+.question {
+    font-weight: 600;
+    font-size: 1.4em;
+    padding-bottom: 16px;
+    color: #2c3e50;
+    font-family: "Open Sans", sans-serif;
+}
+
+/* --- Links --- */
+a {
+    color: #377dff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+a:hover {
+    color: #f93724;
+    text-decoration: underline;
+}
+
+/* --- Blockquotes --- */
+blockquote {
+    border-left: 4px solid #f93724;
+    background: #fff8f7;
+    margin: 20px 0;
+    padding: 12px 20px;
+    color: #2c3e50;
+    font-style: italic;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+/* --- Tables --- */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1rem 0 1.5rem 0;
+    font-size: 0.9rem;
+}
+
+th {
+    background-color: #f93724;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.6em 1em;
+    border: 1px solid #dfe2e5;
+    text-align: left;
+}
+
+td {
+    padding: 0.6em 1em;
+    border: 1px solid #dfe2e5;
+    color: #2c3e50;
+    vertical-align: top;
+}
+
+tr:nth-child(2n) {
+    background-color: #f6f8fa;
+}
+
+/* --- Red title bar (mirrors CES Letter chapter headers) --- */
+.red-title-bar {
+    background-color: #f93724;
+    color: #ffffff;
+    padding: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: "Open Sans", sans-serif;
+    margin: 0 0 1.5rem 0;
+}
+
+/* --- Placeholder / coming soon --- */
+.comingSoon {
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: 700;
+    font-family: "Open Sans", sans-serif;
+    color: #f93724;
+    padding: 60px 0;
+}
+
+/* --- Horizontal rules --- */
+hr {
+    border: none;
+    border-top: 1px solid #eaecef;
+    margin: 2rem 0;
+}
+
+/* --- Code --- */
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+    background-color: #f6f8fa;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.875em;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .bodyStyle {
+        margin-left: 4%;
+        margin-right: 4%;
+    }
+
+    .menuContents {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    h1 { font-size: 1.9rem; }
+    h2 { font-size: 1.4rem; }
+}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"CES Letter","description":"CES Letter — Examined \u0026amp; Answered","inLanguage":"en","mainEntityOfPage":"https://www.cesletter.info/","url":"https://www.cesletter.info/","publisher":{"@type":"Organization","name":"CES Letter","url":"https://www.cesletter.info/"}}</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z4XDMTTGRN"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-Z4XDMTTGRN');</script>
+</head>
+<body>
+<div class="pageContents">
+<header class="headerContents"></header>
+<nav class="menuContents" aria-label="Site navigation"><ul>
+<li><a href="https://www.cesletter.info/">Home</a>
+</li>
+<li><span class="nav-section">Reading the Letter</span>
+<ul>
+<li><a href="https://www.cesletter.info/letter-method/">How the CES Letter Works</a></li>
+<li><a href="https://www.cesletter.info/letter-origins/">Where the CES Letter Came From</a></li>
+<li><a href="https://www.cesletter.info/letter-context/">Why It Spread in 2013</a></li>
+<li><a href="https://www.cesletter.info/letter-responses/">Other Responses to the CES Letter</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Book of Mormon</span>
+<ul>
+<li><a href="https://www.cesletter.info/bom-archaeology/">No Archaeological Evidence? Examining the Claims</a></li>
+<li><a href="https://www.cesletter.info/bom-overview/">The Book of Mormon — Overview Response</a></li>
+<li><a href="https://www.cesletter.info/bom-sources/">View of the Hebrews and Literary Borrowing</a></li>
+<li><a href="https://www.cesletter.info/bom-dna/">DNA Evidence and the Book of Mormon</a></li>
+<li><a href="https://www.cesletter.info/bom-translation/">The Book of Mormon Translation Method</a></li>
+<li><a href="https://www.cesletter.info/bom-anachronisms/">Anachronisms — Horses, Steel, Wheat, Elephants</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Book of Abraham</span>
+<ul>
+<li><a href="https://www.cesletter.info/boa-papyri/">The Papyri — What the Egyptologists Actually Say</a></li>
+<li><a href="https://www.cesletter.info/boa-facsimiles/">The Facsimiles — Responding to the Misidentifications</a></li>
+<li><a href="https://www.cesletter.info/boa-cosmology/">Abraham, Kolob, and Responding to the Cosmology Objections</a></li>
+</ul>
+</li>
+<li><span class="nav-section">First Vision</span>
+<ul>
+<li><a href="https://www.cesletter.info/fv-accounts/">The Four First Vision Accounts — What They Actually Show</a></li>
+<li><a href="https://www.cesletter.info/fv-context/">The 1820 Revival and Historical Context</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Polygamy &amp; Polyandry</span>
+<ul>
+<li><a href="https://www.cesletter.info/pol-overview/">Joseph Smith's Polygamy — Context and Evidence</a></li>
+<li><a href="https://www.cesletter.info/pol-polyandry/">Polyandry and the Youngest Wives — Examining the Record</a></li>
+<li><a href="https://www.cesletter.info/pol-denials/">Joseph Smith's Denials — What the Record Actually Shows</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Prophets</span>
+<ul>
+<li><a href="https://www.cesletter.info/pro-doctrines/">Adam-God, Blood Atonement, and the Priesthood Ban</a></li>
+<li><a href="https://www.cesletter.info/pro-hofmann/">Mark Hofmann and Prophetic Discernment</a></li>
+<li><a href="https://www.cesletter.info/pro-pattern/">The Pattern of Prophecy — When Prophets Err</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Church History</span>
+<ul>
+<li><a href="https://www.cesletter.info/ch-priesthood/">The Priesthood Restoration — Historical Timeline</a></li>
+<li><a href="https://www.cesletter.info/ch-witnesses/">The Book of Mormon Witnesses — What They Actually Claimed</a></li>
+<li><a href="https://www.cesletter.info/ch-kinderhook/">The Kinderhook Plates — What Joseph Smith Actually Said</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Testimony &amp; The Spirit</span>
+<ul>
+<li><a href="https://www.cesletter.info/test-spirit/">Spiritual Witnesses — The Epistemological Question</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Temples &amp; Masonry</span>
+<ul>
+<li><a href="https://www.cesletter.info/tem-masonry/">Freemasonry and the Temple Endowment</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Science</span>
+<ul>
+<li><a href="https://www.cesletter.info/sci-death/">Death Before the Fall — Pre-Adamic Life and LDS Theology</a></li>
+<li><a href="https://www.cesletter.info/sci-flood/">Noah's Flood and the Tower of Babel</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Other Concerns</span>
+<ul>
+<li><a href="https://www.cesletter.info/oth-finances/">Church Finances and Transparency</a></li>
+<li><a href="https://www.cesletter.info/oth-history/">Church History and Selective Disclosure</a></li>
+<li><a href="https://www.cesletter.info/oth-discipline/">Discipline, Dissent, and the September Six</a></li>
+</ul>
+</li>
+<li><a href="https://www.cesletter.info/about/">About</a>
+</li>
+</ul></nav>
+
+<main class="articleContents layout-standard">
+<article><h1 style="font-size:2.2rem; font-weight:600; color:#2c3e50; line-height:1.25; margin:0 0 0.5rem 0; font-family:'Open Sans',sans-serif;">CES Letter</h1>
+<p style="font-size:1.05rem; font-style:italic; color:#2c3e50; margin:0 0 0.25rem 0; font-family:'Open Sans',sans-serif;">My Search for Answers to my Mormon Doubts</p>
+<p style="font-size:0.9rem; color:#666; margin:0 0 2rem 0; font-family:'Open Sans',sans-serif;">by Jeremy Runnells</p>
+
+<p style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 1rem 0; font-family:'Open Sans',sans-serif;">CES Letter is one Latter-day Saint&rsquo;s honest quest to get official answers from the LDS Church on its troubling origins, history, and practices. Jeremy Runnells was offered an opportunity to discuss his own doubts with a director of the Church Educational System (CES) and was assured that his doubts could be resolved. After reading Jeremy&rsquo;s letter, the director promised him a response.</p>
+
+<p style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 1.5rem 0; font-family:'Open Sans',sans-serif;">He is still waiting. Well &mdash; we&rsquo;re giving him one.</p>
+
+<div style="background:#f93724; color:#ffffff; padding:1rem 1.5rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; font-family:'Open Sans',sans-serif; margin:0 0 1.5rem 0;">This Site Is a Refutation of His Claims</div>
+
+<p style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 2rem 0; font-family:'Open Sans',sans-serif;">Every question Jeremy raises has an answer. Every claim is addressed here, point by point, drawing on the best available evidence from LDS scholarship, archaeology, biblical studies, and church history. This is not a dismissal of his questions &mdash; it is a direct, evidence-based response to each one. The questions are real. So are the answers.</p>
+
+<div style="background:#f93724; color:#ffffff; padding:1rem 1.5rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; font-family:'Open Sans',sans-serif; margin:0 0 1.5rem 0;">This Site Is Also the Response He Was Promised</div>
+
+<p style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 1rem 0; font-family:'Open Sans',sans-serif;">The CES Letter raises real questions. They deserve real answers &mdash; not dismissal, not platitudes, and not silence. This site provides a point-by-point response to every claim in the CES Letter, drawing on the best available scholarship in LDS history, archaeology, biblical studies, and theology.</p>
+
+<p style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 1rem 0; font-family:'Open Sans',sans-serif;">The standard here is simple: engage the strongest version of each argument. Cite primary sources. Follow the evidence wherever it leads. Do not pretend the questions are easier than they are &mdash; and do not pretend the answers don&rsquo;t exist.</p>
+
+<p style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 2rem 0; font-family:'Open Sans',sans-serif;">They do exist. This is where you find them.</p>
+
+<div style="background:#f93724; color:#ffffff; padding:1rem 1.5rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; font-family:'Open Sans',sans-serif; margin:0 0 1.5rem 0;">How to Use This Site</div>
+
+<p style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 1rem 0; font-family:'Open Sans',sans-serif;">The menu above mirrors the structure of the CES Letter itself. Each section of Jeremy&rsquo;s letter has a corresponding response page here. Start anywhere &mdash; go to the specific claim that brought you to this site, or read straight through from the beginning.</p>
+
+<p style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 1rem 0; font-family:'Open Sans',sans-serif;">Every page on this site follows the same format:</p>
+
+<ul style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 2rem 0; padding-left:1.5rem; font-family:'Open Sans',sans-serif;">
+    <li style="margin-bottom:0.5rem;"><strong>The Claim</strong> &mdash; Jeremy&rsquo;s argument, stated fairly and in full</li>
+    <li style="margin-bottom:0.5rem;"><strong>The Evidence</strong> &mdash; what the historical and scholarly record actually shows</li>
+    <li style="margin-bottom:0.5rem;"><strong>The Response</strong> &mdash; why the claim fails, or what the more complete picture looks like</li>
+    <li style="margin-bottom:0.5rem;"><strong>The Verdict</strong> &mdash; an honest assessment of where the evidence lands</li>
+</ul>
+
+<p style="font-size:1rem; line-height:1.7; color:#2c3e50; margin:0 0 1rem 0; font-family:'Open Sans',sans-serif;">Jeremy Runnells asked good questions. The Gospel of Jesus Christ has good answers. Both things are true.</p></article>
+
+</main>
+</div>
+</body>
+</html>

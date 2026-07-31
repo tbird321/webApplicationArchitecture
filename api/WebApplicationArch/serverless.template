@@ -1043,7 +1043,6 @@
         "Handler": "WebApplicationArch::WebApplicationArch.ApiStaticRenderFunctions::RenderOnArticleUpload",
         "Runtime": "dotnet8",
         "CodeUri": ".",
-        "_comment": "1024MB/900s sized for the WHOLE-SITE render a sitemenu.json write triggers -- ldsdoctrines is ~471 pages. A single-article render needs a fraction of this; the ceiling only has to cover the worst case. More memory also means more CPU, which the render loop is bound by.",
         "MemorySize": 1024,
         "Timeout": 900,
         "Policies": [

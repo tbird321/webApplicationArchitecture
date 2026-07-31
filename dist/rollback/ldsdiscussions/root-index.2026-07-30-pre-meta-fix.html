@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LDS Discussions &amp;mdash; Done the Right Way | LDS Discussions</title>
+<meta name="description" content="Root Page">
+<link rel="canonical" href="https://www.ldsdiscussions.info/">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LDS Discussions &amp;mdash; Done the Right Way">
+<meta property="og:description" content="Root Page">
+<meta property="og:url" content="https://www.ldsdiscussions.info/">
+<meta property="og:site_name" content="LDS Discussions">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LDS Discussions &amp;mdash; Done the Right Way">
+<meta name="twitter:description" content="Root Page">
+<style>/* ===========================================================================
+   Structural stylesheet for PUBLIC STATIC PAGES.
+
+   SINGLE SOURCE OF TRUTH. Three things read this file:
+     1. StaticPageRenderer  (C#, embedded resource)  -- the on-save re-render
+     2. publish-static-pages.ps1                     -- the bulk backfill
+     3. StaticLayoutCssTests                         -- drift detection
+   Edit it here and nowhere else.
+
+   WHY IT EXISTS
+   The site's appearance is entirely CSS driven: a page's `layout` value becomes
+   a class ("2, 1 Grid" -> "layout-2-1") on the article container, and CSS grid
+   rules do the rest. Those rules live in
+   react/baseProject/src/sitecontent/content/PageContainer.css, and the menu's
+   rules in reactcomponents/.../NestedDynamicMenu.css -- both compiled into the
+   SPA bundle.
+
+   A pre-rendered static page never loads that bundle. It inlines the site's
+   theme.css, but theme.css is the ThemeBuilder output (colours, fonts) and
+   contains none of this. Without this file every static page loses its
+   .articleContents padding and every grid and menu rule.
+
+   SELECTOR NOTE
+   PageContainer.css targets "> div:nth-child(...)" because the SPA wraps each
+   article in a <div>. The static renderer emits <article>. The child element
+   name is therefore dropped here -- "> :nth-child(...)" matches both, so these
+   rules stay correct for either markup.
+
+   KEEPING IN SYNC
+   Add a layout to PageContainer.css and you must mirror it here, or pages using
+   it render as a plain vertical stack. StaticLayoutCssTests fails when they
+   drift apart.
+   =========================================================================== */
+
+/* ---- document baseline ---------------------------------------------------
+   Copied from react/baseProject/src/index.css, which is compiled into the SPA
+   bundle and therefore never reaches a static page. Without it every page falls
+   back to the browser default -- Times New Roman instead of the system sans
+   stack, plus the default 8px body margin and no font smoothing.
+
+   This is the FIRST thing in the file so a per-site BaseStyles.css or theme.css
+   can still override the font (cesletter sets Open Sans, for instance). */
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+code{font-family:source-code-pro,Menlo,Monaco,Consolas,'Courier New',monospace}
+
+/* ---- navigation ----------------------------------------------------------
+   The SPA renders <div class="nested-dynamic-menu"> with DynamicMenu children.
+   The static renderer emits semantic <nav class="menuContents"><ul>...</ul>
+   instead: better for crawlers, and it works with JavaScript disabled. These
+   rules give that markup the same horizontal bar + hover dropdown. The SPA's
+   dropdown is pure CSS :hover (not JS state), so nothing is lost by going
+   static. :focus-within is added so the menu is keyboard operable, which the
+   SPA version is not. */
+.menuContents{position:relative;z-index:1000;max-width:100%}
+.menuContents ul{list-style:none;margin:0;padding:0}
+.menuContents > ul{display:flex;flex-wrap:wrap}
+.menuContents > ul > li{position:relative;flex:1 1 auto;white-space:nowrap}
+/* Top-level entries: a link when the item points at a page, a plain heading when it is
+   only a group label. Both need the same box so the bar does not jump between them. */
+.menuContents .nav-section{display:block;padding:10px;cursor:default}
+.menuContents > ul > li > a{display:block;padding:10px;text-decoration:none;color:inherit}
+.menuContents > ul > li > a:hover,.menuContents > ul > li > a:focus{text-decoration:underline}
+.menuContents > ul > li > ul{display:none;position:absolute;left:0;background-color:#f9f9f9;min-width:160px;box-shadow:0 8px 16px 0 rgba(0,0,0,.2);z-index:1}
+.menuContents > ul > li:hover > ul,.menuContents > ul > li:focus-within > ul{display:block}
+.menuContents > ul > li > ul a{color:#000;padding:12px 16px;text-decoration:none;display:block;white-space:nowrap}
+.menuContents > ul > li > ul a:hover,.menuContents > ul > li > ul a:focus{background-color:#f1f1f1}
+
+/* ---- article container --------------------------------------------------- */
+.articleContents{padding-left:15%;padding-right:15%}
+.articleContents::after{content:"";display:block;clear:both}
+
+@media (max-width:480px){.layout-2-1{grid-template-columns:1fr !important}.articleContents{padding-left:0;padding-right:0}}
+@media (max-width:768px){.layout-2-1{grid-template-columns:1fr !important}.articleContents{padding-left:0;padding-right:0}}
+
+/* ---- layouts ------------------------------------------------------------- */
+.layout-standard{display:grid;grid-template-columns:1fr;gap:10px}
+
+.layout-1 > :nth-child(1n + 1){grid-column:1 / -1}
+
+.layout-1-1_3-2_3{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto;gap:10px}
+.layout-1-1_3-2_3 > :nth-child(5n + 1){grid-column:1 / -1}
+.layout-1-1_3-2_3 > :nth-child(5n + 2){grid-column:1 / 2}
+.layout-1-1_3-2_3 > :nth-child(5n + 3){grid-column:2 / 4}
+.layout-1-1_3-2_3 > :nth-child(5n + 4){grid-column:1 / 3}
+.layout-1-1_3-2_3 > :nth-child(5n + 5){grid-column:3 / 4}
+
+.layout-1-1_3{display:grid;grid-template-columns:1fr 2fr;grid-template-rows:auto;gap:10px}
+.layout-1-1_3 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-1_3 > :nth-child(3n + 2){grid-column:1 / 2}
+.layout-1-1_3 > :nth-child(3n + 3){grid-column:2 / 3}
+
+.layout-1-2-3{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:auto;gap:10px}
+.layout-1-2-3 > :nth-child(6n + 1){grid-column:1 / -1}
+.layout-1-2-3 > :nth-child(6n + 2),.layout-1-2-3 > :nth-child(6n + 3){grid-column:span 3}
+.layout-1-2-3 > :nth-child(6n + 4),.layout-1-2-3 > :nth-child(6n + 5),.layout-1-2-3 > :nth-child(6n + 6){grid-column:span 2}
+
+.layout-1-2_3-1_3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-1-2_3-1_3 > :nth-child(5n + 1){grid-column:1 / -1}
+.layout-1-2_3-1_3 > :nth-child(5n + 2){grid-column:1 / 3}
+.layout-1-2_3-1_3 > :nth-child(5n + 3){grid-column:3 / 4}
+.layout-1-2_3-1_3 > :nth-child(5n + 4){grid-column:1 / 2}
+.layout-1-2_3-1_3 > :nth-child(5n + 5){grid-column:2 / 4}
+
+.layout-1-2_3{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.layout-1-2_3 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-2_3 > :nth-child(3n + 2){grid-column:1 / 2}
+.layout-1-2_3 > :nth-child(3n + 3){grid-column:2 / 3}
+
+.layout-1-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.layout-1-2 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-2 > :nth-child(3n + 2),.layout-1-2 > :nth-child(3n + 3){grid-column:auto}
+
+.layout-1-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-1-3 > :nth-child(4n + 1){grid-column:1 / -1}
+.layout-1-3 > :nth-child(4n + 2),.layout-1-3 > :nth-child(4n + 3),.layout-1-3 > :nth-child(4n + 4){grid-column:auto}
+
+.layout-1_3{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.layout-1_3 > :nth-child(2n + 1){grid-column:1 / 2}
+.layout-1_3 > :nth-child(2n + 2){grid-column:2 / 3}
+
+.layout-1_3-1{display:grid;grid-template-columns:1fr 2fr;grid-auto-rows:auto;gap:10px}
+.layout-1_3-1 > :nth-child(3n + 1){grid-column:1 / 2}
+.layout-1_3-1 > :nth-child(3n + 2){grid-column:2 / 3}
+.layout-1_3-1 > :nth-child(3n + 3){grid-column:1 / -1}
+
+.layout-1_3-2_3{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;gap:10px}
+.layout-1_3-2_3 > :nth-child(4n + 1){grid-column:1 / span 1}
+.layout-1_3-2_3 > :nth-child(4n + 2){grid-column:2 / span 2}
+.layout-1_3-2_3 > :nth-child(4n + 3){grid-column:1 / span 2}
+.layout-1_3-2_3 > :nth-child(4n + 4){grid-column:3 / span 1}
+
+.layout-2-1{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.layout-2-1 > :nth-child(3n + 1),.layout-2-1 > :nth-child(3n + 2){grid-column:auto}
+.layout-2-1 > :nth-child(3n + 3){grid-row:auto;grid-column:1 / -1}
+
+.layout-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.layout-2 > :nth-child(2n - 1),.layout-2 > :nth-child(2n){grid-column:auto}
+
+.layout-2-3{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.layout-2-3 > :nth-child(5n + 1),.layout-2-3 > :nth-child(5n + 2){grid-column:span 3}
+.layout-2-3 > :nth-child(5n + 3),.layout-2-3 > :nth-child(5n + 4),.layout-2-3 > :nth-child(5n + 5){grid-column:span 2}
+
+.layout-2_3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-2_3-1 > :nth-child(3n + 1){grid-column:1 / span 2}
+.layout-2_3-1 > :nth-child(3n + 2){grid-column:3 / span 1}
+.layout-2_3-1 > :nth-child(3n + 3){grid-column:1 / -1}
+
+.layout-2_3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-2_3 > :nth-child(2n + 1){grid-column:1 / span 2}
+.layout-2_3 > :nth-child(2n + 2){grid-column:3 / span 1}
+
+.layout-3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-3-1 > :nth-child(4n + 1),.layout-3-1 > :nth-child(4n + 2),.layout-3-1 > :nth-child(4n + 3){grid-column:span 1}
+.layout-3-1 > :nth-child(4n + 4){grid-column:1 / -1}
+
+.layout-3-2{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.layout-3-2 > :nth-child(5n + 1),.layout-3-2 > :nth-child(5n + 2),.layout-3-2 > :nth-child(5n + 3){grid-column:span 2}
+.layout-3-2 > :nth-child(5n + 4),.layout-3-2 > :nth-child(5n + 5){grid-column:span 3}
+
+.layout-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-3 > *{grid-column:span 1}
+</style>
+<style>/* ============================================================
+   ldsdiscussions.info — Base Styles
+   Clean white academic layout mirroring ldsdiscussions.com
+   ============================================================ */
+
+body {
+    background-color: #ffffff;
+    color: #1a1a1a;
+}
+
+/* --- Header — no background, let the image show --- */
+.headerContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #ffffff;
+    width: 100%;
+    padding: 0;
+}
+
+/* --- Navigation — light gray bar like ldsdiscussions.com --- */
+.menuContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    background-color: #f5f5f5;
+    width: 100%;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.parent-menu-button {
+    min-width: unset !important;
+    color: #333333 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 0.9em !important;
+    text-transform: none !important;
+    padding: 10px 16px !important;
+    border-radius: 0 !important;
+    font-weight: normal !important;
+}
+
+.parent-menu-button:hover {
+    background-color: #e8e8e8 !important;
+    color: #1e3a5f !important;
+}
+
+/* --- Body / content area --- */
+.bodyStyle {
+    margin-left: 8%;
+    margin-right: 8%;
+    max-width: 960px;
+    font-size: 1em;
+    font-family: Georgia, 'Times New Roman', serif;
+    line-height: 1.75;
+    color: #1a1a1a;
+}
+
+/* --- Main content wrapper --- */
+.mainContent {
+    padding-top: 30px;
+    padding-bottom: 40px;
+}
+
+/* --- Section headings --- */
+.question {
+    font-weight: bold;
+    font-size: 1.4em;
+    padding-bottom: 16px;
+    color: #1a1a1a;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* --- Links --- */
+a {
+    color: #1e3a5f;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #c8a84b;
+}
+
+/* --- Blockquotes --- */
+blockquote {
+    border-left: 3px solid #c8a84b;
+    background: #fafafa;
+    margin: 20px 0;
+    padding: 12px 20px;
+    color: #444444;
+    font-style: italic;
+    font-size: 0.97em;
+}
+
+/* --- Placeholder --- */
+.comingSoon {
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: bolder;
+    font-family: Georgia, serif;
+    color: #333333;
+    padding: 60px 0;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .bodyStyle {
+        margin-left: 4%;
+        margin-right: 4%;
+    }
+
+    .menuContents {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
+<style>/* ldsdiscussions.info — Theme */
+body {
+    background-color: #ffffff;
+    color: #1a1f2e;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+a { color: #1e3a5f; }
+a:hover { color: #c8a84b; }
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"LDS Discussions \u0026mdash; Done the Right Way","description":"Root Page","inLanguage":"en","mainEntityOfPage":"https://www.ldsdiscussions.info/","url":"https://www.ldsdiscussions.info/","publisher":{"url":"https://www.ldsdiscussions.info/","name":"LDS Discussions","@type":"Organization"}}</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G8VH9TBRNR"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-G8VH9TBRNR');</script>
+</head>
+<body>
+<div class="pageContents">
+<header class="headerContents"><div style="text-align: center; cursor: pointer;">
+  <img style="display: block; margin-left: auto; margin-right: auto;" src="https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdiscussions.info/images/headerImage.jpg" alt="LDS Discussions — A Faithful Response" width="auto" height="120">
+</div>
+</header>
+<nav class="menuContents" aria-label="Site navigation"><ul>
+<li><a href="https://www.ldsdiscussions.info/">Home</a>
+<ul>
+<li><a href="https://www.ldsdiscussions.info/church-historical-topics-summary/">Summary of Church Historical Topics</a></li>
+<li><a href="https://www.ldsdiscussions.info/book-of-mormon-study-guide/">Book of Mormon Study Guide</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Overview Project</span>
+<ul>
+<li><a href="https://www.ldsdiscussions.info/overview-project/">Overview Project — All 39 Topics</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Blog</span>
+<ul>
+<li><a href="https://www.ldsdiscussions.info/please-dont-look-under-hood/">Please Don't Look Under the Hood</a></li>
+<li><a href="https://www.ldsdiscussions.info/prophets-new-clothes/">The Prophet's New Clothes</a></li>
+<li><a href="https://www.ldsdiscussions.info/navigating-doubts-fear/">Navigating Doubts Through Fear (Renlund)</a></li>
+<li><a href="https://www.ldsdiscussions.info/rasband-doubts-suicide/">Rasband Devotional on Doubts and Suicide</a></li>
+<li><a href="https://www.ldsdiscussions.info/fair-mormon-homewreckers/">FAIR Mormon: Homewreckers for Profit</a></li>
+<li><a href="https://www.ldsdiscussions.info/rebranding-revelation/">Rebranding Revelation in the LDS Church</a></li>
+<li><a href="https://www.ldsdiscussions.info/church-lgbt-reversal/">About the Church's LGBT Reversal</a></li>
+<li><a href="https://www.ldsdiscussions.info/not-blind-faith-big-faith/">Not Blind Faith, but Big Faith (BYU-I)</a></li>
+<li><a href="https://www.ldsdiscussions.info/joseph-smith-now-you-know/">The Joseph Smith 'Now You Know' Video</a></li>
+<li><a href="https://www.ldsdiscussions.info/ensign-peak-tithing/">Ensign Peak Investment Fund and Tithing</a></li>
+<li><a href="https://www.ldsdiscussions.info/follow-the-footnotes/">Follow the Footnotes</a></li>
+<li><a href="https://www.ldsdiscussions.info/its-ok-to-let-go/">It's OK To Let Go</a></li>
+<li><a href="https://www.ldsdiscussions.info/doubts-not-dangerous/">Doubts Are Not Dangerous</a></li>
+<li><a href="https://www.ldsdiscussions.info/thank-you-nelson-lgbt/">Thank You President Nelson (LGBT Policy)</a></li>
+<li><a href="https://www.ldsdiscussions.info/am-i-true-byu-idaho/">Am I True? BYU Idaho Devotional Recap</a></li>
+<li><a href="https://www.ldsdiscussions.info/favorite-podcasts-mormonism/">Our Favorite Podcasts on Mormonism</a></li>
+<li><a href="https://www.ldsdiscussions.info/church-does-not-take-position/">The Church Does Not Take a Position</a></li>
+<li><a href="https://www.ldsdiscussions.info/tad-callister-strawman/">Tad Callister: Strawman Slayer</a></li>
+<li><a href="https://www.ldsdiscussions.info/faith-crisis-mormon-report/">Faith Crisis in the Mormon Church Report</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Book of Mormon</span>
+<ul>
+<li><a href="https://www.ldsdiscussions.info/treasure-digging-response/">Joseph Smith and Treasure Digging (Part 1)</a></li>
+<li><a href="https://www.ldsdiscussions.info/gold-plates-response/">Book of Mormon Overview: The Gold Plates (Part 2)</a></li>
+<li><a href="https://www.ldsdiscussions.info/translation-response/">Book of Mormon Overview: The Translation (Part 3)</a></li>
+<li><a href="https://www.ldsdiscussions.info/lost-116-pages-response/">Book of Mormon Overview: The Lost 116 Pages (Part 4)</a></li>
+<li><a href="https://www.ldsdiscussions.info/dna-lamanites-response/">Book of Mormon Overview: DNA and the BoM (Part 5)</a></li>
+<li><a href="https://www.ldsdiscussions.info/surrounding-influences-response/">Book of Mormon Overview: Surrounding Influences (Part 6)</a></li>
+<li><a href="https://www.ldsdiscussions.info/anachronisms-response/">Book of Mormon Overview: Anachronisms (Part 7)</a></li>
+<li><a href="https://www.ldsdiscussions.info/tight-loose-translation-response/">Book of Mormon Overview: Tight vs Loose Translation (Part 8)</a></li>
+<li><a href="https://www.ldsdiscussions.info/bom-authorship-response/">Book of Mormon Overview: How the BoM was Composed (Part 9)</a></li>
+<li><a href="https://www.ldsdiscussions.info/lds-essay-translation-response/">LDS Expanded Essay — Translation (Annotated)</a></li>
+<li><a href="https://www.ldsdiscussions.info/lds-essay-dna-response/">LDS Expanded Essay — DNA Studies (Annotated)</a></li>
+<li><a href="https://www.ldsdiscussions.info/bom-geography-response/">Book of Mormon Geography (Annotated Essay)</a></li>
+<li><a href="https://www.ldsdiscussions.info/faith-promoting-stories-response/">Faith Promoting Stories</a></li>
+<li><a href="https://www.ldsdiscussions.info/seer-stone-video-response/">Official Seer Stone 'Now You Know' Video Response</a></li>
+<li><a href="https://www.ldsdiscussions.info/fair-mormon-seer-stones/">FAIR Mormon: LOL Seer Stones Are Awesome (Response)</a></li>
+<li><a href="https://www.ldsdiscussions.info/gold-plates-video-response/">Official Gold Plates 'Now You Know' Video Response</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Biblical Scholarship</span>
+<ul>
+<li><a href="https://www.ldsdiscussions.info/adam-eve-bom-response/">The Book of Mormon and Adam and Eve</a></li>
+<li><a href="https://www.ldsdiscussions.info/global-flood-response/">The Global Flood and Mormonism</a></li>
+<li><a href="https://www.ldsdiscussions.info/tower-babel-response/">The Book of Mormon and Tower of Babel</a></li>
+<li><a href="https://www.ldsdiscussions.info/kjv-bom-response/">The King James Bible and the Book of Mormon</a></li>
+<li><a href="https://www.ldsdiscussions.info/sermon-mount-response/">The Sermon on the Mount and the Book of Mormon</a></li>
+<li><a href="https://www.ldsdiscussions.info/long-ending-mark-response/">The Long Ending of Mark and the Book of Mormon</a></li>
+<li><a href="https://www.ldsdiscussions.info/deutero-isaiah-response/">Deutero-Isaiah and the Book of Mormon</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Polygamy</span>
+<ul>
+<li><a href="https://www.ldsdiscussions.info/polygamy-overview-part1/">Overview of Polygamy, Part 1: Background and D&amp;C 132</a></li>
+<li><a href="https://www.ldsdiscussions.info/polygamy-overview-part2/">Overview of Polygamy, Part 2: Proposals and Key Marriages</a></li>
+<li><a href="https://www.ldsdiscussions.info/polygamy-overview-part3/">Overview of Polygamy, Part 3: Spiritual Wifery and Conclusion</a></li>
+<li><a href="https://www.ldsdiscussions.info/lds-essay-polygamy-kirtland-nauvoo/">LDS Expanded Essay — Polygamy in Kirtland and Nauvoo (Annotated)</a></li>
+<li><a href="https://www.ldsdiscussions.info/lds-essay-polygamy-utah/">LDS Expanded Essay — Polygamy in Utah (Annotated)</a></li>
+<li><a href="https://www.ldsdiscussions.info/dc132-revelation-response/">What D&amp;C 132 Reveals About Revelation</a></li>
+<li><a href="https://www.ldsdiscussions.info/happiness-letter-response/">Joseph Smith and the Happiness Letter</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Book of Abraham / JST / D&amp;amp;C</span>
+<ul>
+<li><a href="https://www.ldsdiscussions.info/book-of-abraham-part1/">Book of Abraham Overview, Part 1: Translation and Source Materials</a></li>
+<li><a href="https://www.ldsdiscussions.info/book-of-abraham-part2/">Book of Abraham Overview, Part 2: The Text</a></li>
+<li><a href="https://www.ldsdiscussions.info/word-of-wisdom-response/">Overview of the Word of Wisdom</a></li>
+<li><a href="https://www.ldsdiscussions.info/dc-changes-response/">Overview of Changes to Revelations in the D&amp;C</a></li>
+<li><a href="https://www.ldsdiscussions.info/kinderhook-plates-response/">Overview of the Kinderhook Plates</a></li>
+<li><a href="https://www.ldsdiscussions.info/joseph-smith-translations-response/">Overview of Joseph Smith's Translations</a></li>
+<li><a href="https://www.ldsdiscussions.info/temple-endowment-masonry-response/">Overview of the Temple Endowment and Masonry</a></li>
+<li><a href="https://www.ldsdiscussions.info/lds-essay-book-of-abraham/">LDS Expanded Essay — Book of Abraham (Annotated)</a></li>
+<li><a href="https://www.ldsdiscussions.info/fair-mormon-boa-ces-letter/">FAIR Mormon: Book of Abraham vs the CES Letter (Response)</a></li>
+<li><a href="https://www.ldsdiscussions.info/jst-problems-response/">Joseph Smith Translation Problems</a></li>
+<li><a href="https://www.ldsdiscussions.info/saints-standard-truth-review/">Saints: The Standard of Truth? (Chapter-by-Chapter Review)</a></li>
+<li><a href="https://www.ldsdiscussions.info/masonry-temple-video-response/">Masonry and the Temple 'Now You Know' Video Response</a></li>
+<li><a href="https://www.ldsdiscussions.info/cannot-read-sealed-book/">I Cannot Read a Sealed Book</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Church History</span>
+<ul>
+<li><a href="https://www.ldsdiscussions.info/first-vision-overview/">Overview of First Vision Accounts</a></li>
+<li><a href="https://www.ldsdiscussions.info/priesthood-restoration-overview/">Overview of the Priesthood Restoration</a></li>
+<li><a href="https://www.ldsdiscussions.info/race-mormon-scriptures/">Overview of Race in Mormon Scriptures</a></li>
+<li><a href="https://www.ldsdiscussions.info/spiritual-witnesses-testimonies/">Overview of Spiritual Witnesses and Testimonies</a></li>
+<li><a href="https://www.ldsdiscussions.info/church-handles-doubt/">Overview of How the Church Handles Doubt</a></li>
+<li><a href="https://www.ldsdiscussions.info/revelation-backdating-prophecy/">Revelation Overview, Part 1: Backdating Prophecy</a></li>
+<li><a href="https://www.ldsdiscussions.info/revelation-joseph-smith/">Revelation Overview, Part 2: Joseph Smith's Revelations</a></li>
+<li><a href="https://www.ldsdiscussions.info/revelation-after-joseph-smith/">Revelation Overview, Part 3: After Joseph Smith</a></li>
+<li><a href="https://www.ldsdiscussions.info/revelation-personal/">Revelation Overview, Part 4: Personal Revelation</a></li>
+<li><a href="https://www.ldsdiscussions.info/transfiguration-brigham-young/">The Transfiguration of Brigham Young</a></li>
+<li><a href="https://www.ldsdiscussions.info/nelson-miracle-stories/">Russell M. Nelson's Miracle Stories</a></li>
+<li><a href="https://www.ldsdiscussions.info/apologetics-overview/">Overview of Apologetics within Mormonism</a></li>
+<li><a href="https://www.ldsdiscussions.info/if-joseph-got-it-right/">Overview: If Joseph Smith Got It Right, Then Who Got It Wrong?</a></li>
+<li><a href="https://www.ldsdiscussions.info/final-summary-mormonism/">Overview: Final Summary on Mormonism and What Now?</a></li>
+<li><a href="https://www.ldsdiscussions.info/lds-essay-first-vision/">LDS Expanded Essay — First Vision Accounts (Annotated)</a></li>
+<li><a href="https://www.ldsdiscussions.info/first-vision-video-response/">The First Vision 'Now You Know' Video Response</a></li>
+<li><a href="https://www.ldsdiscussions.info/first-vision-church-news/">First Vision Accounts: Church News Response</a></li>
+<li><a href="https://www.ldsdiscussions.info/lds-essay-race-priesthood/">LDS Expanded Essay — Race and the Priesthood (Annotated)</a></li>
+<li><a href="https://www.ldsdiscussions.info/lds-scriptures-race-today/">What LDS Scriptures Teach About Race Today</a></li>
+<li><a href="https://www.ldsdiscussions.info/come-follow-me-dark-skin/">Come Follow Me: The Curse of Dark Skin</a></li>
+<li><a href="https://www.ldsdiscussions.info/priesthood-ban-timeline/">Timeline and Quotes on the Priesthood Ban</a></li>
+<li><a href="https://www.ldsdiscussions.info/skin-doesnt-mean-skin/">What if Skin Doesn't Mean Skin? (Response)</a></li>
+</ul>
+</li>
+</ul></nav>
+
+<main class="articleContents layout-standard">
+<article><h1 style="font-size:1.8em;font-weight:bold;color:#1a1f2e;margin:0 0 8px 0;font-family:Georgia,serif">LDS Discussions &mdash; Done the Right Way</h1>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><strong>NEW:</strong> For those looking for our response to the Overview Project at ldsdiscussions.com, we have created an <a href="?page=Overview-Project" style="color:#1e3a5f;">Overview Response landing page</a> that addresses all 39 of their topic overviews with evidence-based, scholarly refutations drawn from the best available apologetic literature.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif">Thank you for visiting LDS Discussions &mdash; Done the Right Way. Our goal is to explore the various topics of Mormonism from a historical perspective using mostly LDS and peer-reviewed sources &mdash; the same sources ldsdiscussions.com uses, and the substantial body of scholarship they omit. The material on this site has been written by members of the LDS church who have studied these issues deeply and found that the evidence, properly examined, supports the faith. Every claim is cited. Every citation is real. We engage their strongest arguments and answer them with the best available scholarship from FAIR Latter-day Saints, the Interpreter Foundation, BYU Studies, the Maxwell Institute, and the broader world of Latter-day Saint academic research.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif">We have gone through and taken the official <a href="?page=LDS-Essay-Translation-Response" style="color:#1e3a5f;">LDS Gospel Topics Essay on Book of Mormon Translation</a>, the <a href="?page=LDS-Essay-DNA-Response" style="color:#1e3a5f;">Essay on DNA and the Book of Mormon</a>, the <a href="?page=LDS-Essay-Book-of-Abraham" style="color:#1e3a5f;">Essay on the Book of Abraham</a>, the <a href="?page=LDS-Essay-Race-Priesthood" style="color:#1e3a5f;">Essay on Race and the Priesthood</a>, the <a href="?page=LDS-Essay-First-Vision" style="color:#1e3a5f;">Essay on First Vision Accounts</a>, and the <a href="?page=LDS-Essay-Polygamy-Kirtland-Nauvoo" style="color:#1e3a5f;">Essays on Polygamy</a> and provided scholarly responses to ldsdiscussions.com&rsquo;s annotations of those essays. While ldsdiscussions.com argues that the Church is not being truthful, a careful reading of those same essays &mdash; alongside the broader scholarly literature they do not cite &mdash; tells a very different story.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif">In response to ldsdiscussions.com&rsquo;s chapter-by-chapter review of the LDS Church&rsquo;s <em>Saints: The Standard of Truth</em>, we have completed our own examination &mdash; reviewing whether their historical claims hold up under scrutiny from primary sources and peer-reviewed scholarship. Read our <a href="?page=Saints-Standard-Truth-Review" style="color:#1e3a5f;">Saints: The Standard of Truth? response</a>.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 28px 0;font-family:Georgia,serif">We have also launched a <a href="?page=Please-Dont-Look-Under-Hood" style="color:#1e3a5f;">Blog section</a> with shorter responses to current Church topics, General Conference addresses, institutional statements, and historical issues &mdash; including responses to the specific blog posts at ldsdiscussions.com.</p>
+
+<h2 style="font-size:1.3em;font-weight:bold;color:#1a1f2e;border-bottom:2px solid #c8a84b;padding-bottom:6px;margin:24px 0 14px 0">Latest Responses</h2>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><a href="?page=Final-Summary-Mormonism" style="color:#1e3a5f;"><strong>A Final Response to the Final Summary on Mormonism and What Now?</strong></a> &mdash; ldsdiscussions.com&rsquo;s closing argument claims the evidence &ldquo;without any doubt&rdquo; shows the Church is not what it claims. We demonstrate that this certainty inflation misrepresents the evidential situation, ignores the strongest apologetic responses, and applies an unfalsifiable standard to only one side of the question.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><a href="?page=If-Joseph-Got-It-Right" style="color:#1e3a5f;"><strong>If Joseph Smith Got It Right, Then Who Got It Wrong?</strong></a> &mdash; We respond to the claim that LDS truth claims require rejecting modern science. We show that the LDS framework is not in conflict with genuine scientific findings, and that ldsdiscussions.com systematically overstates the certainty of contested scholarly positions.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><a href="?page=Apologetics-Overview" style="color:#1e3a5f;"><strong>Overview of Apologetics within Mormonism &mdash; Response</strong></a> &mdash; A response to ldsdiscussions.com&rsquo;s characterization of LDS apologetics as inherently deceptive. We document the academic credentials and institutional legitimacy of FAIR, the Maxwell Institute, the Interpreter Foundation, and BYU Studies, and turn the &ldquo;cherry-picking&rdquo; charge back on the critics.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><a href="?page=Transfiguration-Brigham-Young" style="color:#1e3a5f;"><strong>The Transfiguration of Brigham Young</strong></a> &mdash; Van Wagoner&rsquo;s social contagion theory cannot explain 129 independent testimonies from witnesses as geographically dispersed as Idaho to Tahiti. We document the early accounts, including Wilford Woodruff&rsquo;s own 1845 letter supporting the event &mdash; which ldsdiscussions.com never cites despite citing his journal against it.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><a href="?page=Revelation-Personal" style="color:#1e3a5f;"><strong>Revelation Overview, Part 4: Personal Revelation</strong></a> &mdash; ldsdiscussions.com&rsquo;s critique of LDS personal revelation relies on a scientistic epistemology it never defends. We respond with Plantinga&rsquo;s properly basic belief framework, Calvin&rsquo;s testimonium internum, and Moroni 7&rsquo;s own three-criteria discernment filter &mdash; which the site omits entirely.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><a href="?page=Revelation-After-Joseph-Smith" style="color:#1e3a5f;"><strong>Revelation Overview, Part 3: After Joseph Smith</strong></a> &mdash; We respond to the claim that post-Joseph revelation has been &ldquo;watered down.&rdquo; McConkie&rsquo;s post-1978 reversal testimony &mdash; from the apostle with the strongest prior against that change &mdash; is the most compelling evidence of a genuine prophetic experience that ldsdiscussions.com cannot explain away.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><a href="?page=Church-Handles-Doubt" style="color:#1e3a5f;"><strong>Overview of How the Church Handles Doubt</strong></a> &mdash; Uchtdorf&rsquo;s October 2013 General Conference address &ldquo;Come, Join with Us&rdquo; &mdash; the most prominent official treatment of doubt in modern Church history &mdash; is entirely absent from ldsdiscussions.com&rsquo;s suppression narrative. We document the Church&rsquo;s increasing transparency and the Gospel Topics Essays as evidence against the concealment thesis.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><a href="?page=Revelation-Backdating-Prophecy" style="color:#1e3a5f;"><strong>Revelation Overview, Part 1: Backdating Prophecy</strong></a> &mdash; Eight independent manuscript copies of the Civil War prophecy exist, including an 1857 newspaper that ridiculed it as unfulfilled &mdash; followed by Fort Sumter in 1861. We document the full evidential record that ldsdiscussions.com ignores.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><a href="?page=Spiritual-Witnesses-Testimonies" style="color:#1e3a5f;"><strong>Overview of Spiritual Witnesses and Testimonies</strong></a> &mdash; We respond to the cognitive bias catalogue with William Alston&rsquo;s <em>Perceiving God</em> and Plantinga&rsquo;s Reformed epistemology. Cross-religious divergence in spiritual experience no more invalidates LDS testimony than conflicting perceptions invalidate sight &mdash; and the same critique, applied consistently, would invalidate the author&rsquo;s own confident disbelief.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 14px 0;font-family:Georgia,serif"><a href="?page=Temple-Endowment-Masonry-Response" style="color:#1e3a5f;"><strong>Overview of the Temple Endowment and Masonry</strong></a> &mdash; Eddington&rsquo;s 2025 <em>Interpreter</em> quantitative analysis found only 9.7&ndash;17% conceptual overlap between the endowment and Masonic ritual &mdash; and the endowment shares more vocabulary with the Pearl of Great Price (18.4%) than with Masonic texts (10.8%). We document the ancient origins that predate Masonry by millennia.</p>
+
+<p style="font-size:0.97em;line-height:1.8;color:#1a1a1a;margin:0 0 28px 0;font-family:Georgia,serif">We will be posting new responses as we go. If you have a specific ldsdiscussions.com argument you would like addressed, use the navigation above to find the corresponding response, or contact us.</p></article>
+
+</main>
+</div>
+</body>
+</html>
