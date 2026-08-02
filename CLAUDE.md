@@ -185,7 +185,44 @@ Use `margin: 0 0 28px 0` on the last paragraph before a new section to add extra
 
 ## MCP Server Setup (run once after cloning)
 
-The `webcms` MCP server is a local Node.js stdio process that Claude Code launches automatically via `.mcp.json`. It calls the deployed Lambda API using environment variables.
+There are **two ways to reach the same MCP server**, and a fresh clone only gets the second one:
+
+| | `webcms` (recommended) | `webcms-local` (fallback) |
+|---|---|---|
+| Runs | Deployed as `McpFunction`, reached over HTTPS | Local Node process from this repo |
+| Configured in | `~/.claude.json` — **per machine, NOT in the repo** | `.mcp.json` — committed |
+| Site | Per call, via a `websiteId` argument on any tool | Fixed by the `WEBSITE_ID` env var |
+| Switching sites | No restart | Change the env var, restart VS Code |
+| Picking up code changes | Requires a deploy | Just restart |
+| Tool prefix | `mcp__webcms__*` | `mcp__webcms-local__*` |
+
+`webcms` is not in `.mcp.json` because its config carries the API key, and because Claude Code does **not** expand `${VAR}` in an HTTP server's `url` or `headers` — only in a stdio server's `env`/`args`. Putting it there produces a server whose URL is the literal string `${...}`, which fails to connect with no error message.
+
+### A. Register the deployed server (do this on every machine)
+
+```powershell
+$profile = 'your-aws-profile-name'
+
+# ENDPOINT_KEY is the TokenSecret stack parameter — this is the header value the endpoint wants
+$mcpFn = (aws cloudformation list-stack-resources --stack-name webapplicationarch --profile $profile --region us-west-2 --query "StackResourceSummaries[?LogicalResourceId=='McpFunction'].PhysicalResourceId" --output text)
+$key   = (aws lambda get-function-configuration --function-name $mcpFn --profile $profile --region us-west-2 --query "Environment.Variables.ENDPOINT_KEY" --output text)
+$api   = (aws cloudformation describe-stacks --stack-name webapplicationarch --profile $profile --region us-west-2 --query "Stacks[0].Outputs[?OutputKey=='ApiURL'].OutputValue" --output text).TrimEnd('/') -replace '/Prod$', '/prod'
+
+claude mcp add --transport http --scope local webcms "$api/mcp?websiteId=5" --header "x-api-key: $key"
+```
+
+The `websiteId` in the URL is only the **default** — any tool call may pass `websiteId` to act on a different site without a restart.
+
+Two gotchas:
+- The CLI echoes the URL truncated at the `?`. The query string *is* stored — check `~/.claude.json` rather than believing the echo.
+- `~/.claude.json` can hold **two entries for the same repo differing only by drive-letter case** (`e:/…` and `E:/…`). `claude mcp add` writes to one; if your session resolves to the other, the server silently never appears — and unlike a failed connection it will not even be listed. Verify with:
+  ```powershell
+  node -e "const c=require(require('os').homedir()+'/.claude.json');for(const k of Object.keys(c.projects).filter(k=>/webApplicationArch/i.test(k)))console.log(k,Object.keys(c.projects[k].mcpServers||{}))"
+  ```
+
+Confirm with `claude mcp list` — you want `webcms … ✔ Connected`.
+
+### B. The local fallback (optional, useful when changing MCP code)
 
 **1. Install dependencies:**
 ```powershell
@@ -214,13 +251,15 @@ $env:LAMBDA_API_BASE_URL = $url
 $env:WEBSITE_ID = '2'
 ```
 
-**3. Restart VS Code** — Claude Code reads `.mcp.json` at the repo root and starts the `webcms` server automatically. No further configuration needed.
+**3. Restart VS Code** — Claude Code reads `.mcp.json` at the repo root and starts `webcms-local` automatically.
+
+Note the local server is a **development convenience**: it runs the working tree, so an MCP code change takes effect on restart instead of requiring a deploy. It is pinned to one site by `WEBSITE_ID` and does not support the per-call `websiteId` switch that the deployed server does.
 
 ---
 
 ## MCP Server
 
-The `webcms` MCP server manages content for multiple sites. The active site is controlled by `WEBSITE_ID`:
+The `webcms` MCP server manages content for multiple sites. Pass `websiteId` on any tool call to choose the site (deployed server only); otherwise the server's configured default applies — the query string for `webcms`, the `WEBSITE_ID` env var for `webcms-local`:
 
 | ID | Site |
 |----|------|
