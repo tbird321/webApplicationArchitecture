@@ -139,6 +139,142 @@ WORDS AND PHRASES TO AVOID:
   - Theatrical or poetic flourishes ("the dawn breaks over the valley of...")
 
 ================================================================================
+STYLOMETRY — MATCH THE OWNER'S MEASURED VOICE (IN TEACHING MODE)
+================================================================================
+
+Source: theron_corpus.jsonl at the repo root — 10,171 records (8,989 non-
+duplicate), tagged into 20 topic buckets. GITIGNORED (~43MB): it is generated
+from the Facebook archive at E:\FacebookDownload\facebook-TheronBird-2025-04-
+11-jkcNtL2U\ and will NOT be present on a fresh clone. If it is missing,
+regenerate it from that archive before writing — do not proceed on memory of
+the owner's voice. Figures below come from the 986
+pieces of 250+ words (521,495 words of prose). Query this file before writing
+any page; it is the owner's actual argument inventory, and it replaces the
+library/*.md files referenced in older plans, which do not exist on disk.
+
+MEASURED TARGETS — write to these, not to a general feel:
+
+  Mean sentence length          18 words (median 16)
+  Sentences under 8 words       ~22%  — one in five lands as a short beat
+  Sentences over 30 words       ~14%  — careful explanation is real
+  Questions                     ~10% of sentences
+  ALL-CAPS emphasis             ~7 per 1,000 words — SPARINGLY on this site
+
+The defining rhythm is ALTERNATION: a long build-up, then a short sentence
+that lands it. Uniform medium-length sentences are the biggest tell that a
+draft is not in his voice. This holds in teaching mode as much as in
+apologetic mode — it is a rhythm, not a temperature.
+
+SIGNATURE MOVES THAT TRANSFER DIRECTLY:
+
+  - Ask, then answer immediately. Never leave the question hanging for
+    effect. "Why? Because the ordinance had not been received."
+  - Bare scripture chains. Stack eight to twelve references and let the
+    volume carry the point. On the site these become linked, with book
+    names spelled out correctly.
+  - Contrastive scaffolding. "What grace is / What grace is not" — a
+    two-column frame that does the work of three paragraphs.
+  - "For..." at sentence start, carrying the argument in biblical register.
+  - Short declarative landings after a long explanatory passage.
+
+SIGNATURE MOVES THAT MUST BE SOFTENED FOR THIS SITE:
+
+The corpus is debate prose written to win an exchange. ldsdoctrines.com
+teaches a reader who came willingly. Keep the substance, drop the edge:
+
+  - ALL CAPS: the corpus runs ~7 per 1,000 words. Cut that to a handful per
+    article, on genuinely load-bearing words only. On a teaching page it
+    reads as raised voice far faster than it does in a comment thread.
+  - Reductio with teeth ("then God is surely a sadistic demon") — keep the
+    logic, lose the insult. "That reading makes God arbitrary, and Alma 42
+    will not allow it" makes the same point.
+  - "No..." as a one-word rebuttal — fine against an idea, never against a
+    person or tradition.
+  - Ellipses (3,771 in the corpus) mark where he pauses. In published prose
+    a dash or a paragraph break carries the same beat and reads cleaner.
+
+DO NOT CARRY OVER FROM THE CORPUS:
+
+  - Encoding damage and stripped markdown links: [2 Nephi 25:23]( with an
+    empty URL
+  - Thread artifacts: opening with an opponent's name, answering in
+    fragments, assuming the post above
+  - "Math" for "Matthew" and similar shorthand
+  - Any second-person combat aimed at a named individual
+
+THE CORPUS IS ARGUMENT INVENTORY, NOT DRAFT COPY. Mine it for the argument,
+the scripture chain, and the rhythm — then rewrite for a reader who arrived
+from a search engine with no context and no fight to pick.
+
+THE CORPUS GOVERNS VOICE, NOT VERDICT
+-------------------------------------
+
+The corpus is AUTHORITATIVE for how the owner writes and only ADVISORY for
+what the argument should be. These are live comment threads written at speed
+against a named opponent, not researched positions. Never ship a weaker
+explanation than the evidence supports just because that is the version in
+the archive.
+
+For every argument taken from the corpus, do all four:
+
+  1. VALIDATE. Check the claim against primary sources first. Does the verse
+     say what the thread says it says? Read the surrounding chapter, not the
+     proof text. Rapid-fire scripture chains often include loose fits —
+     references that support the point in spirit but not in text. Cut them.
+     Eight verses that all land beat twelve where three are challengeable.
+
+  2. ELUCIDATE. The thread version assumes context the reader lacks. Supply
+     the premise, define the term, and state the opposing position fairly and
+     at full strength before answering it.
+
+  3. STRENGTHEN. Answer the best version of the concern, not the sloppiest
+     one an opponent happened to type. If a better source exists — the actual
+     conference talk, the real text of the creed, the current Church
+     statement — use it instead of the paraphrase.
+
+  4. REPLACE. If the corpus argument is weak, circular, or factually wrong,
+     DO NOT USE IT. Write the better one. Being in the owner's voice does not
+     excuse being wrong, and frequency in the corpus is evidence of
+     conviction, not of correctness.
+
+NEVER reproduce a citation error because it appears in the archive. The
+corpus holds ~3,950 quoted spans of 40+ characters and only 43 carry an
+attribution; a prior audit of these sites surfaced fabricated quotations.
+Verify every quote against the primary text. If it cannot be verified, it
+does not ship.
+
+On this site there is an additional filter: an argument may be sound and
+still be wrong for ldsdoctrines.com because it is combative. Teaching mode
+outranks winning. If the corpus answer only works as a rebuttal, rebuild it
+as an explanation.
+
+REPORT SUBSTANTIVE CHANGES. When an argument is replaced or materially
+reworked rather than merely rewritten for a cold reader, say so in the
+session report: what the corpus argued, why it was insufficient, and what
+replaced it. The owner needs to know when his position has been changed on
+his behalf.
+
+QUERYING IT:
+
+  import json
+  recs = [json.loads(l) for l in open('theron_corpus.jsonl', encoding='utf-8')]
+  recs = [d for d in recs if not d.get('duplicate')]
+  hits = [d for d in recs if 'plan-of-salvation' in (d.get('topics') or [])
+          and (d.get('word_count') or 0) >= 250]
+
+  Topic buckets: bom-doctrine, christology-atonement, baptism,
+  grace-faith-works, testimony-epistemology, salvation-afterlife,
+  priesthood-authority, plan-of-salvation, plates-translation, joseph-smith,
+  church-history, are-mormons-christian, temple, bom-evidence, deification,
+  sola-scriptura, polygamy, nature-of-god, book-of-abraham,
+  revelation-prophets
+
+  Fields: id, date, source, group, addressee, self_reply, is_post,
+  word_count, quoted_words, duplicate, text, text_full, quoted_scripture,
+  topics. Note quoted_scripture is a STRING, not a list — do not iterate it
+  expecting references.
+
+================================================================================
 INTENT — WHAT EVERY ARTICLE IS TRYING TO ACCOMPLISH
 ================================================================================
 

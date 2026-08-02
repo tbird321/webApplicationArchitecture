@@ -146,6 +146,76 @@ Verdict structure always: *This is what Jesus taught. This is what Peter/Paul wr
 
 ---
 
+### STYLOMETRY — MATCH THE OWNER'S MEASURED VOICE
+
+Source: `theron_corpus.jsonl` at the repo root — 10,171 records (8,989 non-duplicate), 1,546 posts and 8,625 comments, tagged into 20 topic buckets. **Gitignored (~43 MB) — it is generated from the Facebook archive at `E:\FacebookDownload\facebook-TheronBird-2025-04-11-jkcNtL2U\`, so it will not be present on a fresh clone. If it is missing, regenerate it from that archive before writing; do not proceed on memory of the owner's voice.** The figures below come from the 986 pieces of 250+ words (521,495 words of connected prose). **Query this file before writing any page** — it is the owner's actual argument inventory, and it replaces the `library/*.md` files referenced in older plans, which do not exist on disk.
+
+**Measured targets — write to these, not to a general "punchy" feel:**
+
+| Metric | Target | Note |
+|---|---|---|
+| Mean sentence length | **18 words** | median 16 |
+| Sentences under 8 words | **~22%** | roughly one in five is a hammer-blow |
+| Sentences over 30 words | **~14%** | long build-ups are real; don't flatten everything |
+| Questions | **~10% of sentences** | one question per ten sentences, minimum |
+| ALL-CAPS emphasis | **~7 per 1,000 words** | load-bearing words only |
+
+The defining rhythm is **alternation**: a long build-up, then a short sentence that lands it. Uniform medium-length sentences are the single biggest tell that a draft is not in his voice.
+
+**Signature moves to reproduce:**
+
+- **Ask, then answer immediately.** "Why? Because he had not received the ORDINANCE required for that gift." The question is never left hanging for effect.
+- **ALL CAPS on the pivot word**, not the whole clause — *ORDINANCE*, *CONSTANT*, *NO OTHER*, *CHOOSE*, *GOD DIDN'T*. About seven per thousand words. More than that reads as shouting.
+- **Bare scripture chains.** Stack eight to twelve references with no commentary between them and let the volume carry the point: "Math 7:13-14, Math 16:24-25, John 7:17, Romans 6:16, 1 Cor 10:13, Phil 2:12-13, James 4:7-8…" On the site these become linked, and book names are spelled correctly.
+- **Contrastive scaffolding.** "What Grace is:" / "What Grace is not:" — a two-column frame that does the work of three paragraphs of argument.
+- **"No..." as a one-word rebuttal**, then the correction. Also "For..." at sentence start, carrying the argument in biblical register.
+- **Reductio with teeth.** "then God is surely a sadistic demon, and not a perfectly merciful and Just God." Follow the opponent's premise to where it actually goes.
+- **Ellipses as breath marks** — 3,771 of them in the corpus. Use sparingly in published prose (they read as informal), but they mark where he pauses; a dash or a paragraph break usually carries the same beat.
+
+**Do NOT carry over from the corpus:**
+
+- Encoding damage (`�`) and stripped markdown links — `[2 Nephi 25:23](` with an empty URL
+- Thread artifacts: opening with an opponent's name, answering in fragments, assuming the post above
+- `Math` for `Matthew`, and other shorthand
+- Direct second-person combat aimed at a named individual — the site addresses a reader, not an opponent
+
+**The corpus is argument inventory, not draft copy.** Every piece was written to win an exchange with a specific person. Mine it for the argument, the scripture chain, and the rhythm — then rewrite for someone who arrived from Google with no context.
+
+#### THE CORPUS GOVERNS VOICE, NOT VERDICT
+
+This is the part that is easy to get wrong. The corpus is **authoritative for how the owner writes** and only **advisory for what the argument should be.** These are live-fire comment threads written at speed against a named opponent — not researched positions. A page must never ship a weaker argument than the evidence supports merely because that is the version in the archive.
+
+For every argument taken from the corpus, do all four:
+
+1. **VALIDATE.** Check the claim against primary sources before reuse. Does the verse say what the thread says it says? Read the surrounding chapter, not the proof text. Is the historical claim right, correctly dated, correctly attributed? Rapid-fire scripture chains in particular tend to include loose fits — a reference that supports the point in spirit but not in text. Cut those; a chain of eight verses that all land is stronger than twelve where three are challengeable.
+
+2. **ELUCIDATE.** The thread version assumes context the reader does not have. Supply the premise, define the term, and state the opposing position at full strength before answering it. An argument that only works against the opponent's sloppiest phrasing is not finished.
+
+3. **STRENGTHEN.** Find the best counter-argument that exists — not the one the Facebook opponent actually made — and answer that one. If the corpus argument survives, it is now genuinely stronger. If a better supporting source exists (an earlier father, the actual creed text, the real statistic), use it instead of the paraphrase.
+
+4. **REPLACE.** If the corpus argument is weak, circular, factually wrong, or rests on a misquotation, **do not use it.** Write the better argument. A page under this domain is the definitive answer on its topic; being in the owner's voice does not excuse being wrong. This applies to arguments the owner has clearly made many times — frequency in the corpus is evidence of conviction, not of correctness.
+
+**Never reproduce a citation error because it appears in the archive.** The corpus holds roughly 3,950 quoted spans of 40+ characters with only 43 carrying attribution, and a prior audit of these sites already surfaced fabricated quotations. Every quote that ships must be verified against the primary text. If it cannot be verified, it does not go in — no exceptions, and no "as commonly quoted."
+
+**Report substantive changes.** When an argument is replaced or materially reworked rather than merely rewritten for a cold reader, say so in the session report: what the corpus argued, why it was insufficient, and what replaced it. The owner needs to know when his position on a topic has been changed on his behalf.
+
+**Querying it:**
+```python
+import json
+recs = [json.loads(l) for l in open('theron_corpus.jsonl', encoding='utf-8')]
+recs = [d for d in recs if not d.get('duplicate')]
+# topic buckets: bom-doctrine, christology-atonement, baptism, grace-faith-works,
+# testimony-epistemology, salvation-afterlife, priesthood-authority, plan-of-salvation,
+# plates-translation, joseph-smith, church-history, are-mormons-christian, temple,
+# bom-evidence, deification, sola-scriptura, polygamy, nature-of-god,
+# book-of-abraham, revelation-prophets
+hits = [d for d in recs if 'grace-faith-works' in (d.get('topics') or [])
+        and (d.get('word_count') or 0) >= 250]
+```
+Fields: `id, date, source, group, addressee, self_reply, is_post, word_count, quoted_words, duplicate, text, text_full, quoted_scripture, topics`. Note `quoted_scripture` is a **string**, not a list — do not iterate it expecting references.
+
+---
+
 ### SOURCE MATERIAL
 
 Research every page using ALL applicable source categories below. Do not write from memory alone — WebFetch the actual pages and quote directly.
