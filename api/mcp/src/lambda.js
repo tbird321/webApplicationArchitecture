@@ -1,4 +1,5 @@
 import { setWebsiteId } from './apiClient.js';
+import { validateArgs } from './validate.js';
 import { pageTools } from './tools/pages.js';
 import { articleTools } from './tools/articles.js';
 import { navigationTools } from './tools/navigation.js';
@@ -65,7 +66,11 @@ export const handler = async (event) => {
             });
         }
         try {
-            const result = await tool.handler(params.arguments || {});
+            // Same central coercion/validation as the stdio server (index.js). Both entry
+            // points share the tool modules, so both must gate on this or the HTTP transport
+            // silently keeps the old unvalidated behaviour.
+            const args = validateArgs(tool.name, tool.inputSchema, params.arguments);
+            const result = await tool.handler(args);
             return reply(200, {
                 jsonrpc: '2.0', id,
                 result: { content: [{ type: 'text', text: typeof result === 'string' ? result : JSON.stringify(result, null, 2) }] }

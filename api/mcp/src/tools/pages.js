@@ -1,4 +1,5 @@
 import { apiGet, apiPost, apiDelete, websiteId, websiteIdAsNumber } from '../apiClient.js';
+import { assertSameSite, describeChange } from '../safety.js';
 
 export const pageTools = [
     {
@@ -87,7 +88,11 @@ export const pageTools = [
         handler: async (args) => {
             // Fetch the current page so we can merge rather than overwrite
             const current = await apiGet(`/page/${args.id}/${websiteId()}`);
-            const base = current || {};
+            if (!current || current.id == null) {
+                throw new Error(`Refused: page ${args.id} not found on website ${websiteId()}. Nothing was written.`);
+            }
+            assertSameSite(current, 'page', args.id);
+            const base = current;
 
             // articles may arrive as a JSON string (or double-encoded string) from the MCP harness — parse until we get an array
             let articleRefs = args.articles;
@@ -114,7 +119,7 @@ export const pageTools = [
                 articles = base.articles ?? [];
             }
 
-            return apiPost('/page', {
+            const result = await apiPost('/page', {
                 id: args.id,
                 name: args.name ?? base.name ?? '',
                 description: args.description ?? base.description ?? '',
@@ -127,6 +132,15 @@ export const pageTools = [
                 websiteId: websiteIdAsNumber(),
                 status: base.status ?? 'draft'
             });
+
+            const changed = ['name', 'description', 'layout', 'keywords', 'topics']
+                .filter(k => args[k] !== undefined && JSON.stringify(args[k]) !== JSON.stringify(base[k]));
+            if (articleRefs !== undefined) changed.push('articles');
+
+            return {
+                page: result,
+                summary: describeChange('page', args.id, changed, 'Status and layout id were preserved.')
+            };
         }
     },
     {

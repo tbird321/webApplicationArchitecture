@@ -2,6 +2,9 @@
   "name": "webcms-mcp",
   "version": "0.1.0",
   "type": "module",
+  "scripts": {
+    "test": "node --test test/"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "node-fetch": "^3.3.2"

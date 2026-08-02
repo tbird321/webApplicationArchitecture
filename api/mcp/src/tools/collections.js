@@ -1,4 +1,5 @@
 import { apiGet, apiPost, apiDelete, websiteId, websiteIdAsNumber } from '../apiClient.js';
+import { readModifyWrite, describeChange } from '../safety.js';
 
 export const collectionTools = [
     {
@@ -25,24 +26,45 @@ export const collectionTools = [
     },
     {
         name: 'upsert_collection',
-        description: 'Create or update a collection.',
+        description:
+            'Create a collection (omit id) or update an existing one (pass id). ' +
+            'On update, fields you omit are read from the stored record and preserved rather than blanked.',
         inputSchema: {
             type: 'object',
             properties: {
-                id: { type: 'number' },
+                id: { type: 'number', description: 'Omit to create a new collection; pass to update an existing one.' },
                 name: { type: 'string' },
                 description: { type: 'string' },
                 type: { type: 'string', enum: ['standard', 'gallery'] }
             },
             required: ['name']
         },
-        handler: async (args) => apiPost('/collection', {
-            id: args.id ?? null,
-            name: args.name,
-            description: args.description || '',
-            type: args.type || 'standard',
-            websiteId: websiteIdAsNumber()
-        })
+        handler: async (args) => {
+            // Create path — nothing to preserve.
+            if (args.id == null) {
+                return apiPost('/collection', {
+                    id: null,
+                    name: args.name,
+                    description: args.description || '',
+                    type: args.type || 'standard',
+                    websiteId: websiteIdAsNumber()
+                });
+            }
+
+            // Update path — merge over the stored record so omitted fields survive.
+            const { id, ...patch } = args;
+            const { merged, changed } = await readModifyWrite(`/collection/${id}`, patch, {
+                kind: 'collection',
+                id,
+                defaults: { description: '', type: 'standard' }
+            });
+
+            // `pages` belongs to the association endpoints, not the collection upsert.
+            const { pages, ...record } = merged;
+
+            const result = await apiPost('/collection', { ...record, id, websiteId: websiteIdAsNumber() });
+            return { collection: result, summary: describeChange('collection', id, changed) };
+        }
     },
     {
         name: 'add_page_to_collection',

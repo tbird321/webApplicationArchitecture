@@ -275,6 +275,14 @@ namespace MySQLConnector
             articleModel.topics = reader.SafeRead<string>("article_topics")?.Split(',')?.ToList() ?? new List<string>();
             articleModel.keywords = reader.SafeRead<string>("article_keywords")?.Split(',')?.ToList() ?? new List<string>();
             articleModel.websiteId = reader.SafeRead<int>("websiteid");
+            // status must be read back, not just written. UpsertArticle writes
+            // `article.status ?? "draft"` unconditionally, so any caller that reads a record,
+            // edits a field and writes it back would silently unpublish it if the read did not
+            // return the current status. Column name differs between the view and the base
+            // table; SafeRead returns default for a column that is not present, so trying both
+            // is safe regardless of which one this reader exposes.
+            articleModel.status = reader.SafeRead<string>("article_status")
+                                  ?? reader.SafeRead<string>("status");
             return articleModel;
         }
 
