@@ -245,6 +245,71 @@ namespace WebApplicationArch.content
             return System.Net.WebUtility.HtmlDecode(stripped);
         }
 
+        /// <summary>
+        /// Repairs in-body links whose leading slash was stripped.
+        ///
+        /// The admin editor (TinyMCE) ran for a long time on its default convert_urls /
+        /// relative_urls settings, which rewrite an authored "/some-page/" into a path relative
+        /// to the page being edited -- "some-page/", or "../../some-page/". Rendered pages live
+        /// at /{slug}/, so a relative href resolves *underneath* the current article and 404s.
+        /// Nothing surfaces the breakage: the nav is rebuilt from sitemenu.json on every render
+        /// with absolute URLs, so only in-body links rot, and they rot silently.
+        ///
+        /// The editor default is now overridden, but articles saved before that still carry the
+        /// damage and any future editor could reintroduce it, so the render normalises too.
+        ///
+        /// Left strictly alone -- these must never be rewritten:
+        ///   * anything carrying a URI scheme (http:, https:, mailto:, tel:, data:, javascript:)
+        ///   * protocol-relative "//host/path", which is external
+        ///   * fragment-only "#section" and query-only "?x=1"
+        ///   * hrefs already rooted at "/"
+        /// Only a scheme-less, non-rooted path is touched. Leading "./" and "../" segments are
+        /// dropped before rooting, because "../../some-page/" was authored as "/some-page/".
+        /// </summary>
+        public static string NormalizeInternalLinks(string html)
+        {
+            if (string.IsNullOrEmpty(html)) return html;
+            if (html.IndexOf("href", StringComparison.OrdinalIgnoreCase) < 0) return html;
+
+            return Regex.Replace(
+                html,
+                @"(?is)(<a\b[^>]*?\bhref\s*=\s*)(""([^""]*)""|'([^']*)')",
+                m =>
+                {
+                    bool single = m.Groups[4].Success;
+                    string href = single ? m.Groups[4].Value : m.Groups[3].Value;
+                    string rooted = RootInternalHref(href);
+                    if (string.Equals(rooted, href, StringComparison.Ordinal)) return m.Value;
+                    string quote = single ? "'" : "\"";
+                    return m.Groups[1].Value + quote + rooted + quote;
+                });
+        }
+
+        /// <summary>
+        /// Returns the href unchanged unless it is a scheme-less, non-rooted path, in which case
+        /// it is rooted at "/". See <see cref="NormalizeInternalLinks"/> for why.
+        /// </summary>
+        private static string RootInternalHref(string href)
+        {
+            if (string.IsNullOrWhiteSpace(href)) return href;
+
+            var h = href.Trim();
+
+            // A leading '/' covers both site-rooted "/page/" and protocol-relative "//host/path".
+            // Both are already correct as authored; neither may be touched.
+            if (h[0] == '/' || h[0] == '#' || h[0] == '?') return href;
+
+            // Any URI scheme at all -- http:, https:, mailto:, tel:, data:, javascript:.
+            if (Regex.IsMatch(h, @"^[a-zA-Z][a-zA-Z0-9+.\-]*:")) return href;
+
+            // Whatever "./" or "../" prefix the editor introduced is not part of the author's
+            // intent; the target is a top-level page slug.
+            var trimmed = Regex.Replace(h, @"^(?:\.{1,2}/)+", "");
+            if (trimmed.Length == 0) return href;
+
+            return "/" + trimmed;
+        }
+
         private static string FirstH1(string html)
         {
             if (string.IsNullOrEmpty(html)) return "";
@@ -551,7 +616,8 @@ namespace WebApplicationArch.content
             {
                 if (string.IsNullOrEmpty(a.articlePath)) continue;
                 string html = await TryRead(assets.Content, a.articlePath, $"{basePath}/articles");
-                if (!string.IsNullOrWhiteSpace(html)) body.Append("<article>").Append(html).Append("</article>\n");
+                if (!string.IsNullOrWhiteSpace(html))
+                    body.Append("<article>").Append(NormalizeInternalLinks(html)).Append("</article>\n");
             }
             if (body.Length == 0) return null;
 

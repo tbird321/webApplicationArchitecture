@@ -148,7 +148,24 @@ Verdict structure always: *This is what Jesus taught. This is what Peter/Paul wr
 
 ### STYLOMETRY — MATCH THE OWNER'S MEASURED VOICE
 
-Source: `theron_corpus.jsonl` at the repo root — 10,171 records (8,989 non-duplicate), 1,546 posts and 8,625 comments, tagged into 20 topic buckets. **Gitignored (~43 MB) — it is generated from the Facebook archive at `E:\FacebookDownload\facebook-TheronBird-2025-04-11-jkcNtL2U\`, so it will not be present on a fresh clone. If it is missing, regenerate it from that archive before writing; do not proceed on memory of the owner's voice.** The figures below come from the 986 pieces of 250+ words (521,495 words of connected prose). **Query this file before writing any page** — it is the owner's actual argument inventory, and it replaces the `library/*.md` files referenced in older plans, which do not exist on disk.
+Source: `theron_corpus.jsonl` at the repo root — 10,171 records (8,989 non-duplicate), 1,546 posts and 8,625 comments, tagged into 20 topic buckets. Gitignored (~43 MB), so it will not be present on a fresh clone. The figures below come from the 986 pieces of 250+ words (521,495 words of connected prose).
+
+#### THIS IS MANDATORY, NOT ADVISORY
+
+**Query the corpus before writing or adjusting ANY content, and match the measured voice. There is exactly one acceptable excuse for not doing so: `theron_corpus.jsonl` is not on disk.**
+
+If it is missing: **do NOT regenerate it.** Do not rebuild it from the Facebook archive, do not approximate it, and do not proceed on memory of the owner's voice. Say plainly that the corpus is absent, and ask.
+
+"I read the corpus earlier in this session" is not an excuse — re-query it for each topic. "The draft sounds about right" is not an excuse; *about right* is precisely the failure mode. Content that reads as machine-written is a defect on the same level as a broken link or a fabricated quotation, and it is rejected the same way.
+
+**Before publishing, measure the draft:**
+
+```
+node scripts/check-stylometry.js path/to/draft.html
+node scripts/check-stylometry.js --s3 ldsapologetics.com Born-Again.html   # an already-published page
+```
+
+It reports every metric below against target and flags known machine-written tells. It exits non-zero on a miss. **A page that misses targets gets revised before it ships, not explained.**
 
 **Measured targets — write to these, not to a general "punchy" feel:**
 
@@ -161,6 +178,16 @@ Source: `theron_corpus.jsonl` at the repo root — 10,171 records (8,989 non-dup
 | ALL-CAPS emphasis | **~7 per 1,000 words** | load-bearing words only |
 
 The defining rhythm is **alternation**: a long build-up, then a short sentence that lands it. Uniform medium-length sentences are the single biggest tell that a draft is not in his voice.
+
+**Machine-written tells — these are what an AI draft actually looks like here.** Measured against real pages from this site, the misses cluster in the same three places every time:
+
+| Tell | What it looks like | Fix |
+|---|---|---|
+| **No questions** | Drafts land at 0–1% against a ~10% target. This is the #1 miss. | He asks, then answers immediately. Put the question in the prose, not just in headings. |
+| **Repeated structural formulas** | The same section skeleton on every page — "The Attack — Stated Fairly", a Verdict built on "This is what X… This is what Y…" five or six times over. | Vary the architecture per page. A formula reused across a batch is more obviously machine-made than any single sentence. |
+| **Too-even prose** | Balanced, polished, every paragraph the same length, every concession the same shape ("Grant the strong part, because it is strong"). | Break it. Fragments. One-word rebuttals. Let a paragraph run three sentences and the next run twelve. |
+
+Other giveaways: "not merely", "it's not just X, it's Y", "let's be clear", "it's worth noting", *delve / tapestry / nuanced / multifaceted / underscore*, and em-dashes at a density no human sustains.
 
 **Signature moves to reproduce:**
 

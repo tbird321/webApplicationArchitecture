@@ -143,14 +143,48 @@ STYLOMETRY — MATCH THE OWNER'S MEASURED VOICE (IN TEACHING MODE)
 ================================================================================
 
 Source: theron_corpus.jsonl at the repo root — 10,171 records (8,989 non-
-duplicate), tagged into 20 topic buckets. GITIGNORED (~43MB): it is generated
-from the Facebook archive at E:\FacebookDownload\facebook-TheronBird-2025-04-
-11-jkcNtL2U\ and will NOT be present on a fresh clone. If it is missing,
-regenerate it from that archive before writing — do not proceed on memory of
-the owner's voice. Figures below come from the 986
-pieces of 250+ words (521,495 words of prose). Query this file before writing
-any page; it is the owner's actual argument inventory, and it replaces the
-library/*.md files referenced in older plans, which do not exist on disk.
+duplicate), tagged into 20 topic buckets. GITIGNORED (~43MB), so it will NOT
+be present on a fresh clone. Figures below come from the 986 pieces of 250+
+words (521,495 words of prose). It is the owner's actual argument inventory,
+and it replaces the library/*.md files referenced in older plans, which do
+not exist on disk.
+
+THIS IS MANDATORY, NOT ADVISORY
+-------------------------------
+Query the corpus before writing or adjusting ANY content, and match the
+measured voice. There is exactly ONE acceptable excuse for not doing so:
+theron_corpus.jsonl is not on disk.
+
+If it is missing: DO NOT REGENERATE IT. Do not rebuild it from the Facebook
+archive, do not approximate it, and do not write from memory of the owner's
+voice. Say plainly that the corpus is absent, and ask.
+
+"I read it earlier this session" is not an excuse — re-query per topic.
+"It sounds about right" is not an excuse; about right IS the failure mode.
+Content that reads as machine-written is a defect on the level of a broken
+link or a fabricated quotation, and it is rejected the same way.
+
+BEFORE PUBLISHING, MEASURE THE DRAFT:
+
+  node scripts/check-stylometry.js path/to/draft.html
+  node scripts/check-stylometry.js --s3 ldsdoctrines.com Found-Grace.html
+
+It reports every metric below against target, flags known machine-written
+tells, and exits non-zero on a miss. A page that misses gets REVISED before
+it ships — not explained.
+
+THE THREE MISSES THAT ACTUALLY HAPPEN (measured on real pages):
+  1. No questions. Drafts land at 0-1% against a ~10% target. Biggest tell.
+     He asks, then answers immediately — in the prose, not just in headings.
+  2. Repeated structural formulas. The same section skeleton on every page,
+     the same closing anaphora five or six times. A formula reused across a
+     batch is more obviously machine-made than any single sentence.
+  3. Too-even prose. Every paragraph the same length, every concession the
+     same shape. Break it. Fragments. Let one paragraph run three sentences
+     and the next run twelve.
+
+Other giveaways: "not merely", "it's not just X, it's Y", "let's be clear",
+"it's worth noting", delve / tapestry / nuanced / multifaceted / underscore.
 
 MEASURED TARGETS — write to these, not to a general feel:
 

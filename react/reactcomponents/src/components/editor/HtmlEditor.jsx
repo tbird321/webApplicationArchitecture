@@ -107,6 +107,14 @@ const HtmlEditor = ({ initialHtml, onSave, filePickerCallback, imagesUploadHandl
                         automatic_uploads={false}
                         init={{
                             menubar: true,
+                            // TinyMCE rewrites URLs on save by default (convert_urls/relative_urls
+                            // are both true). That turns an absolute internal link such as
+                            // "/sola-fide-false/" into "sola-fide-false/", which then resolves
+                            // relative to the article's own URL on the prerendered site and 404s.
+                            // Leave hrefs exactly as the author wrote them.
+                            convert_urls: false,
+                            relative_urls: false,
+                            remove_script_host: false,
                             fontsize_formats: "8pt 10pt 12pt 14pt 18pt 24pt 36pt",
                             font_formats: tinyMCEFontFormats,
                             block_formats: blockFormats,

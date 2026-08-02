@@ -170,6 +170,59 @@ function Get-ArticleContent {
     return $t
 }
 
+# Repairs in-body links whose leading slash was stripped.
+#
+# The admin editor (TinyMCE) ran for a long time on its default convert_urls /
+# relative_urls settings, which rewrite an authored "/some-page/" into a path relative to
+# the page being edited -- "some-page/", or "../../some-page/". Pages are served at
+# /{slug}/, so a relative href resolves UNDERNEATH the current article and 404s. Nothing
+# surfaces it: the nav is rebuilt from sitemenu.json with absolute URLs on every render,
+# so only article bodies rot.
+#
+# StaticPageRenderer.NormalizeInternalLinks does exactly this inside the Lambda. This
+# script is the bulk-backfill twin of that renderer, so it MUST apply the same repair --
+# a backfill run with the unpatched logic would silently re-break every page it wrote,
+# undoing the Lambda's work. Keep the two in step; the C# side is pinned by
+# StaticRenderLinkTests.cs.
+#
+# Left strictly alone -- these must never be rewritten:
+#   * anything carrying a URI scheme (http:, https:, mailto:, tel:, data:, javascript:)
+#   * protocol-relative "//host/path", which is external
+#   * fragment-only "#section" and query-only "?x=1"
+#   * hrefs already rooted at "/"
+function ConvertTo-RootedLinks {
+    param([string]$Html)
+
+    if ([string]::IsNullOrEmpty($Html)) { return $Html }
+    if ($Html.IndexOf('href', [System.StringComparison]::OrdinalIgnoreCase) -lt 0) { return $Html }
+
+    $evaluator = {
+        param($m)
+
+        $single = $m.Groups[4].Success
+        if ($single) { $href = $m.Groups[4].Value } else { $href = $m.Groups[3].Value }
+
+        if ([string]::IsNullOrWhiteSpace($href)) { return $m.Value }
+
+        $h = $href.Trim()
+
+        # A leading '/' covers both site-rooted "/page/" and protocol-relative "//host".
+        if ($h[0] -eq '/' -or $h[0] -eq '#' -or $h[0] -eq '?') { return $m.Value }
+
+        # Any URI scheme at all.
+        if ($h -match '^[a-zA-Z][a-zA-Z0-9+.\-]*:') { return $m.Value }
+
+        # Whatever "./" or "../" prefix the editor introduced is not the author's intent.
+        $trimmed = [regex]::Replace($h, '^(?:\.{1,2}/)+', '')
+        if ($trimmed.Length -eq 0) { return $m.Value }
+
+        if ($single) { $q = "'" } else { $q = '"' }
+        return $m.Groups[1].Value + $q + '/' + $trimmed + $q
+    }
+
+    return [regex]::Replace($Html, '(?is)(<a\b[^>]*?\bhref\s*=\s*)("([^"]*)"|''([^'']*)'')', $evaluator)
+}
+
 # Read a text object out of the CONTENT bucket using AWS credentials.
 #
 # This used to fetch over plain HTTP from the bucket's public URL. That bucket is not
@@ -584,7 +637,11 @@ foreach ($s in $selected) {
             foreach ($a in $arts) {
                 if ($a.articlePath) {
                     $html = Get-ArticleContent -Id $a.id
-                    if ($html) { [void]$bodySb.AppendLine("<article>$html</article>") }
+                    # Must match StaticPageRenderer.NormalizeInternalLinks -- see above.
+                    if ($html) {
+                        $html = ConvertTo-RootedLinks -Html $html
+                        [void]$bodySb.AppendLine("<article>$html</article>")
+                    }
                 }
             }
             $bodyHtml = $bodySb.ToString()
