@@ -130,4 +130,50 @@ test('update_page refuses rather than writing a partial record if an article re-
     assert.equal(posted.find(p => p.url === '/page'), undefined, 'nothing should have been written');
 });
 
+// --- per-call site selection ----------------------------------------------------------
+// One MCP registration serves every site: `websiteId` on any call overrides the server's
+// configured default for that call only. No second server, no restart to switch.
+
+test('every tool advertises the optional websiteId parameter', async () => {
+    const { listTools } = await import('../src/dispatch.js');
+    const missing = listTools().filter(t => !t.inputSchema?.properties?.websiteId);
+    assert.deepEqual(missing.map(t => t.name), [], 'these tools do not accept websiteId');
+});
+
+test('websiteId is applied to the call it is passed on', async () => {
+    posted.length = 0;
+    // PAGE is website 2; the stub serves /page/164/<site>, so the requested site shows up in
+    // the URL the handler builds.
+    const r = await callTool('get_page', { id: 164, websiteId: 2 });
+    assert.equal(r.isError, false, r.content?.[0]?.text);
+});
+
+test('websiteId is NOT forwarded into the record a handler saves', async () => {
+    posted.length = 0;
+    await callTool('update_page', { id: 164, description: 'x', websiteId: 2 });
+    const save = posted.find(p => p.url === '/page');
+    assert.ok(save, 'no save posted');
+    // The saved page carries the site it belongs to, not a stray copy of the selection arg,
+    // and no nested article picked one up either.
+    assert.equal(save.body.websiteId, 2);
+    for (const a of save.body.articles) {
+        assert.equal(a.websiteId, 2, `article ${a.id} got the wrong websiteId`);
+    }
+});
+
+test('the configured site is restored after an overridden call', async () => {
+    const { setWebsiteId, websiteId } = await import('../src/apiClient.js');
+    setWebsiteId('2');
+    await callTool('get_page', { id: 164, websiteId: 7 });
+    assert.equal(websiteId(), '2', 'an override must not leak into subsequent calls');
+});
+
+test('a non-numeric websiteId is rejected before any request is made', async () => {
+    posted.length = 0;
+    const r = await callTool('get_page', { id: 164, websiteId: 'ldsdoctrines' });
+    assert.equal(r.isError, true);
+    assert.match(r.content[0].text, /websiteId: expected a number/);
+    assert.equal(posted.length, 0, 'nothing should have been sent');
+});
+
 test.after(() => server.close());
