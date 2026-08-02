@@ -100,24 +100,36 @@ export const pageTools = [
                 try { articleRefs = JSON.parse(articleRefs); } catch (_) { articleRefs = undefined; break; }
             }
 
-            // If article refs were provided, fetch full article details so that
-            // UpsertArticle does not overwrite existing article data with nulls.
-            let articles;
-            if (Array.isArray(articleRefs) && articleRefs.length > 0) {
-                articles = await Promise.all(articleRefs.map(async (ref) => {
-                    try {
-                        const full = await apiGet(`/article/${ref.id}`);
-                        if (full) {
-                            return { ...full, sequence_no: ref.sequence_no ?? full.sequence_no };
-                        }
-                    } catch (_) { /* fall through to ref */ }
-                    return ref;
-                }));
-            } else if (articleRefs !== undefined) {
-                articles = articleRefs;
-            } else {
-                articles = base.articles ?? [];
-            }
+            // Saving a page RE-UPSERTS every article attached to it, and the article upsert
+            // writes every column. The article list nested inside a page read is a partial
+            // projection — it omits websiteId and status — so handing it straight back would
+            // rewrite each article with websiteId 0 and status 'draft', orphaning it from the
+            // site and unpublishing it.
+            //
+            // So whichever source the list comes from, always re-read each article in full by
+            // id and carry only the sequence number from the caller.
+            const refs = Array.isArray(articleRefs)
+                ? articleRefs
+                : (articleRefs !== undefined ? [] : (base.articles ?? []));
+
+            const articles = await Promise.all(refs.map(async (ref) => {
+                const full = await apiGet(`/article/${ref.id}`).catch(() => null);
+                if (!full || full.id == null) {
+                    throw new Error(
+                        `Refused: could not re-read article ${ref.id} while updating page ${args.id}. ` +
+                        `Saving the page would rewrite that article from an incomplete record. Nothing was written.`
+                    );
+                }
+                return { ...full, sequence_no: ref.sequence_no ?? full.sequence_no ?? 5 };
+            }));
+
+            // UpsertPage writes `status ?? "draft"` unconditionally, so an update must carry the
+            // page's current status or it silently unpublishes a live page. If the read did not
+            // return a status we must NOT guess "draft" — that is the destructive direction.
+            // Fall back to "published", then re-assert it explicitly below, so the worst case is
+            // a redundant publish rather than a page disappearing from the site.
+            const statusKnown = typeof base.status === 'string' && base.status.length > 0;
+            const statusToWrite = statusKnown ? base.status : 'published';
 
             const result = await apiPost('/page', {
                 id: args.id,
@@ -130,16 +142,26 @@ export const pageTools = [
                 style: base.style ?? '',
                 layoutid: base.layoutid ?? null,
                 websiteId: websiteIdAsNumber(),
-                status: base.status ?? 'draft'
+                status: statusToWrite
             });
+
+            // Belt and braces: re-assert the status we intended, so that even if the upsert
+            // coerced it we end up where we started rather than silently off the site.
+            if (statusToWrite === 'published') {
+                try { await apiPost(`/page/${args.id}/publish`, {}); } catch (_) { /* non-fatal */ }
+            }
 
             const changed = ['name', 'description', 'layout', 'keywords', 'topics']
                 .filter(k => args[k] !== undefined && JSON.stringify(args[k]) !== JSON.stringify(base[k]));
             if (articleRefs !== undefined) changed.push('articles');
 
+            const note = statusKnown
+                ? `Status (${statusToWrite}) and layout id were preserved.`
+                : `The stored record returned no status, so the page was kept PUBLISHED rather than risk unpublishing it.`;
+
             return {
                 page: result,
-                summary: describeChange('page', args.id, changed, 'Status and layout id were preserved.')
+                summary: describeChange('page', args.id, changed, note)
             };
         }
     },

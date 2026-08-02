@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "webcms": {
+    "webcms-local": {
       "command": "node",
       "args": ["api/mcp/src/index.js"],
       "env": {

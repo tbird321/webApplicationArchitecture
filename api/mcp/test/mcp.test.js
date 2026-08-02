@@ -135,6 +135,60 @@ test('describeChange reports a no-op honestly', () => {
     assert.match(describeChange('article', 7, []), /no fields changed/);
 });
 
+// ---------------------------------------------------------------------------
+// dispatch — the single path both transports now share
+// ---------------------------------------------------------------------------
+
+const { listTools, callTool, hasTool, toolNames } = await import('../src/dispatch.js');
+
+test('listTools exposes every tool with a name, description and schema', () => {
+    const tools = listTools();
+    assert.ok(tools.length >= 30, `expected the full tool set, got ${tools.length}`);
+    for (const t of tools) {
+        assert.ok(t.name, 'tool missing name');
+        assert.ok(t.description, `${t.name} missing description`);
+        assert.ok(t.inputSchema, `${t.name} missing inputSchema`);
+    }
+});
+
+test('every tool name is unique', () => {
+    const names = listTools().map(t => t.name);
+    assert.equal(new Set(names).size, names.length);
+});
+
+test('callTool returns isError for an unknown tool instead of throwing', async () => {
+    const r = await callTool('no_such_tool', {});
+    assert.equal(r.isError, true);
+    assert.match(r.content[0].text, /Unknown tool: no_such_tool/);
+    assert.match(r.content[0].text, /Available tools:/);
+});
+
+test('callTool validates arguments before invoking the handler', async () => {
+    // A typo'd parameter must be rejected without any network call being attempted.
+    const r = await callTool('update_article', { id: 1, artcilePath: 'typo.html' });
+    assert.equal(r.isError, true);
+    assert.match(r.content[0].text, /unknown parameter\(s\): artcilePath/);
+});
+
+test('callTool reports a missing required argument', async () => {
+    const r = await callTool('update_article', { name: 'no id' });
+    assert.equal(r.isError, true);
+    assert.match(r.content[0].text, /id is required/);
+});
+
+test('callTool never throws — errors come back as isError content', async () => {
+    // get_article on a live id would need the network; assert the contract holds either way.
+    const r = await callTool('get_article', { id: 999999999 });
+    assert.ok(Array.isArray(r.content));
+    assert.equal(typeof r.isError, 'boolean');
+});
+
+test('hasTool / toolNames agree with listTools', () => {
+    assert.ok(hasTool('update_article'));
+    assert.ok(!hasTool('definitely_not_a_tool'));
+    assert.deepEqual(toolNames(), listTools().map(t => t.name).sort());
+});
+
 // readModifyWrite needs apiGet stubbed; exercise the merge contract through a fake.
 test('readModifyWrite preserves fields the caller omitted', async () => {
     const stored = {

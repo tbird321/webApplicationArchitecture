@@ -1,16 +1,11 @@
+// stdio transport. Launched by Claude Code via .mcp.json.
+// All tool logic lives in dispatch.js — this file only wires up the stream.
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { setWebsiteId } from './apiClient.js';
-import { validateArgs } from './validate.js';
-import { pageTools } from './tools/pages.js';
-import { articleTools } from './tools/articles.js';
-import { navigationTools } from './tools/navigation.js';
-import { collectionTools } from './tools/collections.js';
-import { metadataTools } from './tools/metadata.js';
-import { compositeTools } from './tools/composite.js';
-import { sourceFetchTools } from './tools/sourceFetch.js';
-import { cacheTools } from './tools/cache.js';
+import { listTools, callTool } from './dispatch.js';
 
 const CONFIGURED_SITE = process.env.WEBSITE_ID || '';
 setWebsiteId(CONFIGURED_SITE);
@@ -30,41 +25,16 @@ if (missing.length > 0) {
     );
 }
 
-const allTools = [...compositeTools, ...sourceFetchTools, ...pageTools, ...articleTools, ...navigationTools, ...collectionTools, ...metadataTools, ...cacheTools];
-const toolMap = new Map(allTools.map(t => [t.name, t]));
-
 const server = new Server(
     { name: 'webcms-mcp', version: '0.1.0' },
     { capabilities: { tools: {} } }
 );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: allTools.map(({ name, description, inputSchema }) => ({ name, description, inputSchema }))
-}));
+server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: listTools() }));
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    const tool = toolMap.get(request.params.name);
-    if (!tool) {
-        const names = [...toolMap.keys()].sort().join(', ');
-        throw new Error(`Unknown tool: ${request.params.name}. Available tools: ${names}`);
-    }
-
-    // Coerce and validate centrally so handlers can trust their arguments, and so a bad
-    // call fails fast with a readable message instead of writing a null into the database.
-    const args = validateArgs(tool.name, tool.inputSchema, request.params.arguments);
-
-    try {
-        const result = await tool.handler(args);
-        return {
-            content: [{ type: 'text', text: typeof result === 'string' ? result : JSON.stringify(result, null, 2) }]
-        };
-    } catch (e) {
-        // Surface the failing tool and its arguments — an opaque upstream 500 with no
-        // context is what made these problems hard to diagnose in the first place.
-        const detail = e && e.message ? e.message : String(e);
-        throw new Error(`${tool.name} failed: ${detail}`);
-    }
-});
+server.setRequestHandler(CallToolRequestSchema, async (request) =>
+    callTool(request.params.name, request.params.arguments)
+);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

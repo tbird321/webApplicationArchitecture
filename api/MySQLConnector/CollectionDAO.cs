@@ -265,15 +265,23 @@ namespace MySQLConnector
                 throw new ArgumentException("websiteId is required for the search.");
             }
 
-            var query = "SELECT * FROM collection WHERE name LIKE %@name% AND websiteId = @websiteId";
-            if (string.IsNullOrEmpty(name))
-            {
-                query = "SELECT * FROM collection WHERE websiteId = @websiteId";
-            }
+            // The wildcards belong in the PARAMETER VALUE, not in the SQL text. Written as
+            // `LIKE %@name%` the percent signs sit outside the placeholder, so MySQL received
+            // `LIKE %'%text%'%` and rejected the statement outright — collection search by name
+            // has never worked.
+            bool filterByName = !string.IsNullOrEmpty(name);
+            var query = filterByName
+                ? "SELECT * FROM collection WHERE name LIKE @name AND websiteId = @websiteId"
+                : "SELECT * FROM collection WHERE websiteId = @websiteId";
+
             using (var command = new MySqlCommand(query, connection))
             {
                 // Using parameters to avoid SQL injection and to filter the search based on inputs.
-                command.Parameters.AddWithValue("@name", $"%{name}%");
+                // Only bind @name when the query actually references it.
+                if (filterByName)
+                {
+                    command.Parameters.AddWithValue("@name", $"%{name}%");
+                }
                 command.Parameters.AddWithValue("@websiteId", websiteId);
 
                 using (var reader = await command.ExecuteReaderAsync())

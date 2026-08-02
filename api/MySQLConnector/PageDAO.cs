@@ -195,7 +195,16 @@ namespace MySQLConnector
             {
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.AddWithValue("pageId", pageId);
-                command.Parameters.AddWithValue("websiteId", websiteId);
+                // Must match the procedure's declared parameter name exactly — Connector/NET
+                // discovers the signature and throws "Parameter '_websiteId' not found in the
+                // collection" if it is missing. The proc deliberately names it _websiteId rather
+                // than websiteId: an unqualified `websiteId` inside the body would otherwise
+                // resolve to the parameter instead of the page column, making recordset 1 echo
+                // back the requested site and silently defeating every cross-site check.
+                //
+                // 0 or NULL means "no site filter" — GetPageByNameAsync passes 0 when its
+                // int.TryParse fails, and must keep working.
+                command.Parameters.AddWithValue("_websiteId", websiteId);
 
                 using (var reader = await command.ExecuteReaderAsync())
                 {
@@ -208,6 +217,13 @@ namespace MySQLConnector
                         pageModel.layoutid = reader.SafeRead<int?>("layoutid");
                         pageModel.style=reader.SafeRead<string>("style");
                         pageModel.websiteId = reader.SafeRead<int>("websiteId");
+                        // status must be read back, not just written. UpsertPage writes
+                        // `page.status ?? "draft"` unconditionally, so a caller that reads a page,
+                        // edits one field and writes it back would silently UNPUBLISH it if the
+                        // read did not return the current status. SafeRead yields default for a
+                        // column that is not present, so trying both names is safe.
+                        pageModel.status = reader.SafeRead<string>("status")
+                                           ?? reader.SafeRead<string>("page_status");
                         // Add other fields as necessary
                     }
 
@@ -238,6 +254,26 @@ namespace MySQLConnector
                             description = reader.SafeRead<string>("description"),
                             memeImagePath = reader.SafeRead<string>("memeImagePath"),
                             articlePath = reader.SafeRead<string>("articlePath"),
+                            // SavePageAndArticles re-upserts every article attached to the page,
+                            // and UpsertArticle writes every column. So an article read back
+                            // without these and handed straight to a save gets rewritten with
+                            // websiteId 0 (orphaning it from its site) and status 'draft'
+                            // (unpublishing it).
+                            //
+                            // status IS returned by the GetPageDetails article recordset and is
+                            // read correctly here.
+                            //
+                            // websiteId is NOT in that recordset, so SafeRead yields 0 and this
+                            // line is currently inert — it is left in place so the value starts
+                            // flowing the moment the GetPageDetails stored procedure is amended
+                            // to select it. THE PROC IS NOT IN THIS REPO; it lives only in the
+                            // database. Until it is changed, any caller that round-trips a page
+                            // read straight back into POST /page will zero these articles'
+                            // websiteId. The webcms MCP avoids this by re-reading every article
+                            // in full by id before saving (see mcp/src/tools/pages.js); the
+                            // admin SPA does NOT and remains exposed.
+                            websiteId = reader.SafeRead<int>("websiteId"),
+                            status = reader.SafeRead<string>("status"),
                             topics = new List<string>(), // Initialize for later population
                             keywords = new List<string>()  // Initialize for later population
                         };
@@ -412,10 +448,6 @@ namespace MySQLConnector
                 conditions.Add($"page_description LIKE {paramName}");
             }
 
-            var webParmName = $"@websiteId{paramCount}";
-            parameters.Add(new MySqlParameter(webParmName, $"{websiteId}"));
-            conditions.Add($"websiteId = {webParmName}");
-
             if (!string.IsNullOrEmpty(name))
             {
                 var paramName = $"@name{paramCount}";
@@ -423,13 +455,37 @@ namespace MySQLConnector
                 conditions.Add($"page_name LIKE {paramName}");
             }
 
-            if (conditions.Count == 0)
+            // The site filter is ANDed with the search terms, never ORed into them. Previously it
+            // was appended as another condition and the whole list joined with OR, so
+            //     WHERE page_name LIKE '%X%' OR websiteId = '2'
+            // matched every page on the site regardless of the term, and leaked pages belonging
+            // to OTHER sites whose name happened to match.
+            // Only constrain by site when one was supplied — a null/empty websiteId means the
+            // caller deliberately wants an unscoped search, and filtering on '' would match
+            // nothing at all rather than everything.
+            string siteClause = null;
+            if (!string.IsNullOrEmpty(websiteId))
             {
-                queryBuilder.Append("1 = 1"); // Default condition if there are no filters
+                var webParmName = $"@websiteId{paramCount}";
+                parameters.Add(new MySqlParameter(webParmName, websiteId));
+                siteClause = $"websiteId = {webParmName}";
+            }
+
+            if (conditions.Count > 0 && siteClause != null)
+            {
+                queryBuilder.Append("(").Append(string.Join(" OR ", conditions)).Append(") AND ").Append(siteClause);
+            }
+            else if (siteClause != null)
+            {
+                queryBuilder.Append(siteClause);
+            }
+            else if (conditions.Count > 0)
+            {
+                queryBuilder.Append(string.Join(" OR ", conditions));
             }
             else
             {
-                queryBuilder.Append(string.Join(" OR ", conditions));
+                queryBuilder.Append("1 = 1"); // Default condition if there are no filters
             }
 
             using (var command = new MySqlCommand(queryBuilder.ToString(), connection))
@@ -502,13 +558,6 @@ namespace MySQLConnector
                 conditions.Add($"(article_descriptions LIKE {descriptionParam} OR page_description LIKE {descriptionParam})");
             }
 
-            if (!string.IsNullOrEmpty(websiteId))
-            {
-                var descriptionParam = $"@websiteId{paramCount}";
-                parameters.Add(new MySqlParameter(descriptionParam, $"{websiteId}"));
-                conditions.Add($"(websiteId =  {websiteId})");
-            }
-
             if (!string.IsNullOrEmpty(name))
             {
                 var nameParam = $"@name{paramCount}";
@@ -516,13 +565,33 @@ namespace MySQLConnector
                 conditions.Add($"(page_name LIKE {nameParam} OR article_names LIKE {nameParam})");
             }
 
-            if (conditions.Count == 0)
+            // Site filter: ANDed with the search terms, never ORed into them (see the note in
+            // SearchPagesByKeywordAndTopic). This also previously interpolated the raw websiteId
+            // VALUE into the SQL instead of referencing the bound parameter, which left the
+            // parameter unused and put caller input directly into the statement.
+            string siteClause = null;
+            if (!string.IsNullOrEmpty(websiteId))
             {
-                queryBuilder.Append("1 = 1"); // Default condition if there are no filters
+                var siteParam = $"@websiteId{paramCount}";
+                parameters.Add(new MySqlParameter(siteParam, websiteId));
+                siteClause = $"websiteId = {siteParam}";
+            }
+
+            if (conditions.Count > 0 && siteClause != null)
+            {
+                queryBuilder.Append("(").Append(string.Join(" OR ", conditions)).Append(") AND ").Append(siteClause);
+            }
+            else if (siteClause != null)
+            {
+                queryBuilder.Append(siteClause);
+            }
+            else if (conditions.Count > 0)
+            {
+                queryBuilder.Append(string.Join(" OR ", conditions));
             }
             else
             {
-                queryBuilder.Append(string.Join(" OR ", conditions));
+                queryBuilder.Append("1 = 1"); // Default condition if there are no filters
             }
 
             using (var command = new MySqlCommand(queryBuilder.ToString(), connection))
@@ -613,6 +682,10 @@ namespace MySQLConnector
             currentPage.topics = reader.SafeRead<string>("page_topics")?.Split(',')?.ToList() ?? new List<string>();
             currentPage.keywords = reader.SafeRead<string>("page_keywords")?.Split(',')?.ToList() ?? new List<string>();
             currentPage.websiteId = reader.SafeRead<int>("websiteId");
+            // See the note in GetPageById: status is written unconditionally by UpsertPage,
+            // so it has to survive a read/modify/write round trip or pages silently unpublish.
+            currentPage.status = reader.SafeRead<string>("page_status")
+                                 ?? reader.SafeRead<string>("status");
         }
 
         private async Task CacheKeywordsAndTopics(List<string> topics, List<string> keywords, Dictionary<string, int> keywordCache, Dictionary<string, int> topicCache, MySqlConnection connection)

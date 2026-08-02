@@ -323,10 +323,23 @@ namespace MySQLConnectorTest
             string description = "Description";
             string name = null;
             List<PageModel> list = await pageDAO.SearchPages(keywordList, topicList,name,description,"1");
-            Assert.AreEqual(true, list.Count>=3);
+
+            // This previously asserted `list.Count >= 3`, which only held because the site filter
+            // was ORed into the search terms rather than ANDed — so the query returned EVERY page
+            // on website 1 regardless of description. With the filter correctly ANDed, the result
+            // is the pages that genuinely match, so assert on identity and on the filter actually
+            // filtering rather than on a raw count.
+            Assert.IsTrue(list.Any(p => p.name == "page 1"), "search should find page 1 by description");
+            Assert.IsTrue(list.Any(p => p.name == "page 2"), "search should find page 2 by description");
+
             foreach (PageModel pageModel in list)
             {
-                if (pageModel.name== "page 1")
+                Assert.IsTrue(
+                    (pageModel.description ?? string.Empty).Contains("Description", StringComparison.OrdinalIgnoreCase),
+                    $"page '{pageModel.name}' was returned but its description does not match the search term");
+                Assert.AreEqual(1, pageModel.websiteId, $"page '{pageModel.name}' is not on the requested website");
+
+                if (pageModel.name == "page 1")
                 {
                     Assert.AreEqual(basicModel.articles.Count, pageModel.articles.Count);
                 }

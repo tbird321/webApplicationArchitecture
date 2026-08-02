@@ -221,28 +221,87 @@ namespace MySQLConnector
         private async Task<Dictionary<int, ArticleModel>> SearchArticlesByKeywordAndTopic(List<string> keywords, List<string> topics, string? description, string? name, MySqlConnection connection,String? websiteId)
         {
             Dictionary<int, ArticleModel> results = new Dictionary<int, ArticleModel>();
-            var queryBuilder = new StringBuilder("SELECT * FROM article_keywords_topics_view WHERE ");
-            var conditions = new List<string>();
+
+            // Every filter value is bound as a parameter. These used to be interpolated straight
+            // into the SQL, so a name containing an apostrophe broke the query and a crafted one
+            // could inject.
+            //
+            // The site filter is ANDed, never ORed. It was previously appended as just another
+            // condition and joined with OR, which produced
+            //     WHERE article_name LIKE '%X%' OR websiteId = '2'
+            // — matching every article on the site regardless of the search term, AND leaking
+            // articles from OTHER sites whose name happened to match.
+            var filters = new List<string>();
+            var parameters = new List<MySqlParameter>();
+            int paramCount = 0;
+
             if (keywords != null && keywords.Count > 0)
             {
-                conditions.Add($"article_keywords LIKE '%{string.Join("%' OR article_keywords LIKE '%", keywords)}%'");
+                var parts = keywords.Select(keyword => {
+                    var p = $"@keyword{paramCount++}";
+                    parameters.Add(new MySqlParameter(p, $"%{keyword}%"));
+                    return $"article_keywords LIKE {p}";
+                });
+                filters.Add("(" + string.Join(" OR ", parts) + ")");
             }
             if (topics != null && topics.Count > 0)
             {
-                conditions.Add($"article_topics LIKE '%{string.Join("%' OR article_topics LIKE '%", topics)}%'");
+                var parts = topics.Select(topic => {
+                    var p = $"@topic{paramCount++}";
+                    parameters.Add(new MySqlParameter(p, $"%{topic}%"));
+                    return $"article_topics LIKE {p}";
+                });
+                filters.Add("(" + string.Join(" OR ", parts) + ")");
             }
             if (!string.IsNullOrEmpty(description))
             {
-                conditions.Add($"article_description LIKE '%{description}%'");
+                var p = $"@description{paramCount++}";
+                parameters.Add(new MySqlParameter(p, $"%{description}%"));
+                filters.Add($"article_description LIKE {p}");
             }
             if (!string.IsNullOrEmpty(name))
             {
-                conditions.Add($"article_name LIKE '%{name}%'");
+                var p = $"@name{paramCount++}";
+                parameters.Add(new MySqlParameter(p, $"%{name}%"));
+                filters.Add($"article_name LIKE {p}");
             }
-            conditions.Add($"websiteId = '{websiteId}'");
-            queryBuilder.Append(string.Join(" OR ", conditions));
+
+            var queryBuilder = new StringBuilder("SELECT * FROM article_keywords_topics_view WHERE ");
+
+            // Only constrain by site when one was supplied — a null/empty websiteId means the
+            // caller deliberately wants an unscoped search, and filtering on '' would match
+            // nothing at all rather than everything.
+            string siteClause = null;
+            if (!string.IsNullOrEmpty(websiteId))
+            {
+                var siteParam = $"@websiteId{paramCount++}";
+                parameters.Add(new MySqlParameter(siteParam, websiteId));
+                siteClause = $"websiteId = {siteParam}";
+            }
+
+            if (filters.Count > 0 && siteClause != null)
+            {
+                queryBuilder.Append("(").Append(string.Join(" OR ", filters)).Append(") AND ").Append(siteClause);
+            }
+            else if (siteClause != null)
+            {
+                queryBuilder.Append(siteClause);
+            }
+            else if (filters.Count > 0)
+            {
+                queryBuilder.Append(string.Join(" OR ", filters));
+            }
+            else
+            {
+                queryBuilder.Append("1 = 1");
+            }
+
             using (var command = new MySqlCommand(queryBuilder.ToString(), connection))
             {
+                foreach (var parameter in parameters)
+                {
+                    command.Parameters.Add(parameter);
+                }
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
