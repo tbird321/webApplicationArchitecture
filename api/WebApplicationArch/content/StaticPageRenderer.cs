@@ -85,11 +85,11 @@ namespace WebApplicationArch.content
             { 5, new SiteMeta("ldsapologetics.com", "LDS Apologetics", "G-J6H714HFSM") },
             { 6, new SiteMeta("ldsdiscussions.info", "LDS Discussions", "G-G8VH9TBRNR") },
             { 8, new SiteMeta("cesletter.info", "CES Letter", "G-Z4XDMTTGRN") },
-            // Analytics deliberately blank: the site's old UA-69739113-1 property is Universal
-            // Analytics, dead since July 2023, and cannot be carried over. Set this and
-            // ldsgospeldoctrine-Prod.json together when a GA4 property exists -- the drift test
-            // compares them, so changing only one fails the build.
-            { 9, new SiteMeta("ldsgospeldoctrine.info", "LDS Gospel Doctrine", "") },
+            // Replaced the site's old UA-69739113-1 property, which was Universal Analytics and
+            // stopped collecting in July 2023. The GA4 property also issues a Google tag id
+            // (GT-57VBS2J); the renderer's gtag snippet keys on the measurement id below, so the
+            // GT- form is not used here.
+            { 9, new SiteMeta("ldsgospeldoctrine.info", "LDS Gospel Doctrine", "G-0QJ9ZJ0LC6") },
         };
 
         public StaticPageRenderer(string contentBucket, string region)

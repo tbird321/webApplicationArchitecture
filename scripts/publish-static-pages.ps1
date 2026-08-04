@@ -109,7 +109,7 @@ $sites = @(
     @{ Key = 'ldsapologetics';         Id = 5; Domain = 'ldsapologetics.com';         Analytics = 'G-J6H714HFSM';  Title = 'LDS Apologetics' }
     @{ Key = 'ldsdiscussions';         Id = 6; Domain = 'ldsdiscussions.info';        Analytics = 'G-G8VH9TBRNR';  Title = 'LDS Discussions' }
     @{ Key = 'cesletter';              Id = 8; Domain = 'cesletter.info';             Analytics = 'G-Z4XDMTTGRN';  Title = 'CES Letter' }
-    @{ Key = 'ldsgospeldoctrine';      Id = 9; Domain = 'ldsgospeldoctrine.info';     Analytics = '';              Title = 'LDS Gospel Doctrine' }
+    @{ Key = 'ldsgospeldoctrine';      Id = 9; Domain = 'ldsgospeldoctrine.info';     Analytics = 'G-0QJ9ZJ0LC6'; Title = 'LDS Gospel Doctrine' }
 )
 
 # ----- Env -----------------------------------------------------------------
