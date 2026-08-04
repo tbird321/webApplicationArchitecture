@@ -174,7 +174,7 @@ public class StaticLayoutCssTests
         public void Unset_PublishesNothing()
         {
             Set(null);
-            foreach (var id in new[] { 1, 2, 4, 5, 6, 8 })
+            foreach (var id in new[] { 1, 2, 4, 5, 6, 8, 9 })
                 Assert.False(StaticPageRenderer.IsPublishEnabled(id),
                     $"website {id} must NOT publish when STATIC_PUBLISH_SITES is unset");
         }
@@ -235,7 +235,7 @@ public class StaticLayoutCssTests
         {
             // An unparseable value must never be read as "publish everywhere".
             Set("yes,true,ldsapologetics");
-            foreach (var id in new[] { 1, 2, 4, 5, 6, 8 })
+            foreach (var id in new[] { 1, 2, 4, 5, 6, 8, 9 })
                 Assert.False(StaticPageRenderer.IsPublishEnabled(id));
         }
     }
@@ -281,7 +281,7 @@ public class StaticLayoutCssTests
         public void Analytics_IdsAreWellFormed()
         {
             // A GA4 measurement id is "G-" followed by a 10-character alphanumeric suffix.
-            foreach (var id in new[] { 1, 2, 4, 5, 6, 8 })
+            foreach (var id in new[] { 1, 2, 4, 5, 6, 8, 9 })
             {
                 var tag = StaticPageRenderer.GetSiteMeta(id, "x").Analytics;
                 if (string.IsNullOrEmpty(tag)) continue;   // deliberately unset is allowed
@@ -304,6 +304,7 @@ public class StaticLayoutCssTests
                 { 5, "ldsapologetics" },
                 { 6, "ldsdiscussions" },
                 { 8, "cesletter" },
+                { 9, "ldsgospeldoctrine" },
             };
 
             foreach (var kv in byWebsiteId)
@@ -322,7 +323,7 @@ public class StaticLayoutCssTests
         {
             // Two sites reporting into one property silently merges their traffic.
             var seen = new Dictionary<string, int>();
-            foreach (var id in new[] { 1, 2, 4, 5, 6, 8 })
+            foreach (var id in new[] { 1, 2, 4, 5, 6, 8, 9 })
             {
                 var tag = StaticPageRenderer.GetSiteMeta(id, "x").Analytics;
                 if (string.IsNullOrEmpty(tag)) continue;

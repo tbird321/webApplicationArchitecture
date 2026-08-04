@@ -12,6 +12,16 @@ namespace MySQLConnector
         {
         }
 
+        /// <summary>
+        /// The website table has only id and name -- there is no description column, and there
+        /// never was. This overload used to INSERT one anyway, so POST /website failed with
+        /// "Unknown column 'description' in 'field list'" every time it was called; the existing
+        /// site rows were all inserted by hand, which is why nothing surfaced it until site 9.
+        ///
+        /// The description parameter is kept so the IWebsiteProcessing signature and its callers
+        /// do not change, but it is deliberately not persisted. GetWebsites, UpdateWebsite and the
+        /// UpsertWebsite proc all read/write name only, so there is nowhere to put it.
+        /// </summary>
         public async Task<int> InsertWebsite(string name, string description, MySqlConnection? connection = null)
         {
             bool shouldCloseConnection = false;
@@ -22,9 +32,8 @@ namespace MySQLConnector
                 shouldCloseConnection = true;
             }
 
-            var command = new MySqlCommand("INSERT INTO website (name, description) VALUES (@name, @description); SELECT LAST_INSERT_ID();", connection);
+            var command = new MySqlCommand("INSERT INTO website (name) VALUES (@name); SELECT LAST_INSERT_ID();", connection);
             command.Parameters.AddWithValue("@name", name);
-            command.Parameters.AddWithValue("@description", description);
 
             int websiteId = Convert.ToInt32(await command.ExecuteScalarAsync());
 

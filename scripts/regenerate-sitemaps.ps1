@@ -55,7 +55,7 @@
 #>
 
 param(
-    [ValidateSet('all', 'ldsapologetics', 'ldsdoctrines', 'ldsdiscussions', 'cesletter', 'ldsfaithincrisis')]
+    [ValidateSet('all', 'ldsapologetics', 'ldsdoctrines', 'ldsdiscussions', 'cesletter', 'ldsfaithincrisis', 'ldsgospeldoctrine')]
     [string]$Site = 'all',
     [switch]$NoUpload,
     [switch]$NoInvalidate,
@@ -82,6 +82,7 @@ $sites = @(
     @{ Key = 'ldsapologetics';         Id = 5; Domain = 'ldsapologetics.com' }
     @{ Key = 'ldsdiscussions';         Id = 6; Domain = 'ldsdiscussions.info' }
     @{ Key = 'cesletter';              Id = 8; Domain = 'cesletter.info' }
+    @{ Key = 'ldsgospeldoctrine';      Id = 9; Domain = 'ldsgospeldoctrine.info' }
 )
 
 # ----- Validate env ------------------------------------------------------

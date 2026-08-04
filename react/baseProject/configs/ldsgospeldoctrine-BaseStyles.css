@@ -1,0 +1,112 @@
+/* ldsgospeldoctrine.info -- site brand sheet.
+ *
+ * Carries forward the identity of the pre-migration site (theme/blue/theme.css): navy
+ * #003366 chrome, #333 body text, Helvetica Neue. Deliberately does NOT carry forward
+ * that sheet's "#content h1..h6 { font-size: 18px }" rule -- flattening every heading to
+ * body size is what left the old pages with ~20 <h1> elements each and no real document
+ * outline. Headings are sized properly here; the imported article HTML is rewritten to
+ * use them as actual heading levels.
+ *
+ * Inlined into every static page at render time, after infra/static/page-layout.css and
+ * before theme.css. Changing it does NOT propagate to already-rendered pages -- re-render
+ * the site (publish-static-pages.ps1 -Site ldsgospeldoctrine -Upload).
+ */
+
+.headerContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.menuContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.bodyStyle {
+    margin-left: 8%;
+    margin-right: 8%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.mainContent {
+    padding-top: 25px;
+    padding-bottom: 25px;
+}
+
+.articleContents h1 {
+    font-size: 1.9em;
+    font-weight: 700;
+    color: #003366;
+    line-height: 1.25;
+    margin: 0 0 0.5em 0;
+}
+
+.articleContents h2 {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: #003366;
+    border-bottom: 2px solid #003366;
+    padding-bottom: 0.25em;
+    margin: 1.6em 0 0.7em 0;
+}
+
+.articleContents h3 {
+    font-size: 1.15em;
+    font-weight: 700;
+    color: #24425f;
+    margin: 1.3em 0 0.5em 0;
+}
+
+.articleContents p {
+    margin: 0 0 1em 0;
+}
+
+.articleContents a {
+    color: #004d99;
+}
+
+.articleContents blockquote {
+    background: #f4f7fa;
+    border-left: 4px solid #003366;
+    padding: 12px 20px;
+    margin: 0 0 1.2em 0;
+    color: #3d4c5a;
+}
+
+.articleContents table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0 1.5em 0;
+    font-size: 0.92em;
+}
+
+.articleContents th {
+    background: #003366;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.6em 1em;
+    border: 1px solid #c9d2db;
+    text-align: left;
+}
+
+.articleContents td {
+    padding: 0.6em 1em;
+    border: 1px solid #c9d2db;
+    vertical-align: top;
+}
+
+.articleContents img {
+    max-width: 100%;
+    height: auto;
+}
+
+.parent-menu-button {
+    min-width: unset !important;
+}

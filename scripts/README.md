@@ -119,6 +119,10 @@ break the live site · never run `publish-static-pages.ps1 -Upload` by hand with
 `cesletter` (29), `ldsapologetics` (140), `ldsdiscussions` (88), `ldsdoctrines` (471).
 The order was smallest-blast-radius-first, and each site taught the preflight a new check.
 
+**`ldsgospeldoctrine` (id 9, 143 pages) was migrated 2026-08-04** and did *not* follow this
+run book, because it was never the React SPA — it was a hand-rolled static site edited in the
+browser by TinyMCE. See [Migrating a non-SPA site](#migrating-a-non-spa-site) below.
+
 **`reflectiverealizations.com` is deliberately NOT migrated** and has been removed from the
 registry. It is a hand-built static site, not the React SPA — no script tags, its own fonts and
 stylesheets, a hand-authored homepage — so it is already fully crawlable and the migration has
@@ -324,6 +328,61 @@ intend to write the site root:
 ```
 
 **Order matters.** See the traps in the next section.
+
+---
+
+## Migrating a non-SPA site
+
+`ldsgospeldoctrine.info` (id 9) was the first site migrated that was **not** the React SPA, and
+four of its differences are worth knowing before another one like it turns up.
+
+**1. There is no `?page=` to redirect — but every old URL still moves.** The old site served
+`/section/name.html`; the platform serves flat `/slug/`, and the slug comes from the page
+**title**, not the filename, so only 79 of 143 could be derived mechanically.
+
+**2. The redirect table went in S3, not the CloudFront function.** 163 entries came to 12.7 KB
+against the function's hard **10 KB source limit** — and that function is shared by every public
+distribution, so a per-site table there is a blast-radius problem as well as a size one. Instead
+each old key became a zero-byte object carrying `x-amz-website-redirect-location`, which the S3
+*website* endpoint answers with a real 301. No size limit, no shared code:
+
+```powershell
+aws s3 cp empty.bin "s3://www.{domain}/old/path.html" --website-redirect "/new-slug/"
+```
+
+> Two traps. **Git Bash rewrites the leading `/`** in `--website-redirect` into a Windows path
+> and the call fails with `InvalidRedirectLocation` — set `MSYS_NO_PATHCONV=1`. And this only
+> works once the distribution uses the **website** endpoint (`set-public-origin.ps1`); at the
+> REST endpoint the metadata is ignored.
+
+**3. Query-string redirects need the cache policy changed.** The bucket's 49
+`?PageId=LessonN` rules are S3 *routing rules* (a query string cannot be an object key). They
+fired at the origin but returned 404 through CloudFront, because `Managed-CachingOptimized`
+strips query strings before the origin ever sees them. Fixed with a cache policy that
+whitelists just `PageId` (`ldsgospeldoctrine-pageid-qs`) — whitelisting rather than forwarding
+all query strings keeps `utm_*` tags from fragmenting the cache. Set `HostName` + `Protocol`
+on each rule too, or the 301 leaks the raw `s3-website-…amazonaws.com` host over http.
+
+**4. `-Phase root` has no SPA to protect, but still needs the admin site first.** Same rule,
+different reason: once the root `index.html` is the Home render, the old in-page editor is gone
+and `admin.{domain}` is the only way back into the content.
+
+**Content import.** The article body is the inner HTML of the old page's content container;
+everything else (header, nav, analytics, editor) is chrome the platform now supplies. Two
+things that are easy to get wrong, both found here:
+
+- **Headings may not be headings.** This site's CSS forced `#content h1…h6` to `18px`, so
+  `<h1>` was used as a bold tag ~20× per page, and most section headings were
+  `<p><strong>…</strong></p>` or a bare `<div><strong>…</strong></div>` with no heading tag at
+  all. Rebuilding a real outline is inference, not a regex — pilot one section and read the
+  output before running the rest.
+- **A page's own index may live in the chrome.** `#left-sidebar` is a duplicate nav on article
+  pages (drop it) but on a section table-of-contents page it *is* the content — the Book of
+  Mormon index kept all 41 lesson links there and nowhere else.
+
+**Gate every page on content preservation.** Compare the source and output text with all
+whitespace stripped and refuse any page that shrinks. That catches a transform bug on page 3
+instead of page 140.
 
 ---
 
