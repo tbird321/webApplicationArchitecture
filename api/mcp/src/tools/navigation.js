@@ -298,6 +298,52 @@ export const navigationTools = [
         }
     },
     {
+        name: 'replace_menu',
+        description:
+            'Replace the ENTIRE site menu in a single write. Use this for a restructure — regrouping sections, nesting, or reordering — instead of many add/update calls. ' +
+            'WHY: every single-item change re-renders EVERY page on the site, so moving 140 items one at a time costs ~140 whole-site renders; this costs one. It is also the ONLY way to control sibling ORDER, because order is array order and add_menu_item can only append. ' +
+            'Pass the COMPLETE menu as items — anything omitted is deleted. Call get_menu first and modify what it returns. ' +
+            'The server refuses the write, changing nothing, unless: every id is unique, every parent exists, every item is reachable from the top level (no cycles or detached branches), nothing sits deeper than the nav renders, every pageName is a published page ON THIS SITE, and no page that is linked today would silently stop being linked (override that last one with allowUnlink). ' +
+            'Pages are never deleted by this call — unlinking only removes them from the navigation.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                items: {
+                    type: 'array',
+                    description: 'The COMPLETE menu as a flat array, in the order it should render. Each item: id (unique number), parent (0 for top level, else another item id), text (label), and for a page link pageId and pageName. Section headers have no pageId/pageName. Sibling order is array order.',
+                    items: { type: 'object' }
+                },
+                allowUnlink: {
+                    type: 'boolean',
+                    description: 'Permit pages that are in the menu today to be absent from the new one. Default false, because dropping a page out of the nav is usually accidental and silent.'
+                }
+            },
+            required: ['items']
+        },
+        handler: async ({ items, allowUnlink }) => {
+            if (!Array.isArray(items) || items.length === 0) {
+                throw new Error(
+                    'Refused: items must be the COMPLETE menu as a non-empty array. ' +
+                    'An empty or partial list erases the navigation on every page of the site. Call get_menu and edit what it returns.'
+                );
+            }
+
+            const before = await fetchMenu();
+            const result = await apiPost(`/menu/${websiteId()}/replace`, { items, allowUnlink: allowUnlink === true });
+
+            const beforeLinked = before.filter(m => m && m.pageName).length;
+            const afterLinked = items.filter(m => m && m.pageName).length;
+
+            return {
+                result,
+                summary:
+                    `Replaced the whole menu on ${await siteLabel()}: ${before.length} items -> ${items.length}, ` +
+                    `${beforeLinked} linked pages -> ${afterLinked}. ` +
+                    `This is ONE site-wide re-render; the nav is baked into every page, so the change is not visible until it finishes.`
+            };
+        }
+    },
+    {
         name: 'delete_menu_item',
         description:
             'Remove a menu item by id. If the item is a section header this also removes every item beneath it — so the tool REFUSES when the item has children unless includeChildren is true, and names what would go. ' +

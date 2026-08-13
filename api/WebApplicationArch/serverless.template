@@ -846,6 +846,44 @@
         }
       }
     },
+    "ReplaceMenuFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Comment": "Replaces the WHOLE menu in one write. Timeout is higher than the item-at-a-time menu functions because it also loads every page on the site to check each pageName resolves -- ldsdoctrines is ~471 pages. The point of the endpoint is that a restructure costs ONE site-wide re-render instead of one per moved item."
+      },
+      "Properties": {
+        "Handler": "WebApplicationArch::WebApplicationArch.ApiMenuFunctions::ReplaceMenu",
+        "Runtime": "dotnet8",
+        "CodeUri": ".",
+        "MemorySize": 512,
+        "Timeout": 60,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          "AmazonS3FullAccess",
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "secretsmanager:GetSecretValue",
+                "Resource": "arn:aws:secretsmanager:us-west-2:646797148861:secret:prod/websites/webadmin*"
+              }
+            ]
+          }
+        ],
+        "Events": {
+          "ReplaceMenu": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/menu/{websiteId}/replace",
+              "Method": "post",
+              "RestApiId": {
+                "Ref": "WebArchAPI"
+              }
+            }
+          }
+        }
+      }
+    },
     "InvalidateCacheFunction": {
       "Type": "AWS::Serverless::Function",
       "Properties": {

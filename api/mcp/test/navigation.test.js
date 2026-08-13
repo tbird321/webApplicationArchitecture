@@ -197,6 +197,56 @@ test('moving an item under its own descendant is refused', async () => {
     assert.equal(posted.length, 0);
 });
 
+// --- whole-menu replace ---------------------------------------------------------------------
+//
+// The restructure path. Every single-item change re-renders the whole site, so moving 140
+// items one at a time costs ~140 renders; this costs one. It is also the only way to set
+// sibling ORDER, since order is array order and adding can only append.
+
+test('replace_menu posts the complete menu in one call', async () => {
+    posted.length = 0;
+    const items = [
+        { id: 1, parent: 0, droppable: true, text: 'Section' },
+        { id: 2, parent: 1, droppable: false, text: 'Leaf', pageId: 1058, pageName: 'BOM-Witnesses' }
+    ];
+    const r = await callTool('replace_menu', { items });
+    assert.equal(r.isError, false, r.content[0].text);
+
+    const sent = posted.filter(p => p.url === '/menu/5/replace');
+    assert.equal(sent.length, 1, 'exactly one write, not one per item');
+    assert.deepEqual(sent[0].body.items, items);
+    assert.equal(sent[0].body.allowUnlink, false, 'unlinking must be opt-in');
+});
+
+test('replace_menu refuses an empty menu rather than erasing the navigation', async () => {
+    posted.length = 0;
+    const r = await callTool('replace_menu', { items: [] });
+    assert.equal(r.isError, true);
+    assert.match(r.content[0].text, /COMPLETE menu/);
+    assert.equal(posted.length, 0, 'nothing may be written');
+});
+
+test('replace_menu passes allowUnlink through when explicitly set', async () => {
+    posted.length = 0;
+    const r = await callTool('replace_menu', {
+        items: [{ id: 1, parent: 0, text: 'Only', pageId: 1058, pageName: 'BOM-Witnesses' }],
+        allowUnlink: true
+    });
+    assert.equal(r.isError, false, r.content[0].text);
+    assert.equal(posted.find(p => p.url === '/menu/5/replace').body.allowUnlink, true);
+});
+
+test('replace_menu summary names the site and the before/after counts', async () => {
+    posted.length = 0;
+    const r = await callTool('replace_menu', {
+        items: [{ id: 1, parent: 0, text: 'Only', pageId: 1058, pageName: 'BOM-Witnesses' }]
+    });
+    const summary = JSON.parse(r.content[0].text).summary;
+    assert.match(summary, /ldsapologetics\.com \(site 5\)/);
+    assert.match(summary, /-> 1/);
+    assert.match(summary, /ONE site-wide re-render/);
+});
+
 // --- destructive delete -------------------------------------------------------------------
 
 test('deleting a section with children is refused without includeChildren', async () => {
