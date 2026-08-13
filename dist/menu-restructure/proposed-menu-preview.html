@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LDS Apologetics — The Answers Are Better Than the Questions | LDS Apologetics</title>
+<meta name="description" content="Evidence-based answers to the hardest questions about Latter-day Saint doctrine and history — the First Vision, the Book of Abraham, plural marriage, and more.">
+<link rel="canonical" href="https://www.ldsapologetics.com/">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LDS Apologetics — The Answers Are Better Than the Questions">
+<meta property="og:description" content="Evidence-based answers to the hardest questions about Latter-day Saint doctrine and history — the First Vision, the Book of Abraham, plural marriage, and more.">
+<meta property="og:url" content="https://www.ldsapologetics.com/">
+<meta property="og:site_name" content="LDS Apologetics">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LDS Apologetics — The Answers Are Better Than the Questions">
+<meta name="twitter:description" content="Evidence-based answers to the hardest questions about Latter-day Saint doctrine and history — the First Vision, the Book of Abraham, plural marriage, and more.">
+<style>/* ===========================================================================
+   Structural stylesheet for PUBLIC STATIC PAGES.
+
+   SINGLE SOURCE OF TRUTH. Three things read this file:
+     1. StaticPageRenderer  (C#, embedded resource)  -- the on-save re-render
+     2. publish-static-pages.ps1                     -- the bulk backfill
+     3. StaticLayoutCssTests                         -- drift detection
+   Edit it here and nowhere else.
+
+   WHY IT EXISTS
+   The site's appearance is entirely CSS driven: a page's `layout` value becomes
+   a class ("2, 1 Grid" -> "layout-2-1") on the article container, and CSS grid
+   rules do the rest. Those rules live in
+   react/baseProject/src/sitecontent/content/PageContainer.css, and the menu's
+   rules in reactcomponents/.../NestedDynamicMenu.css -- both compiled into the
+   SPA bundle.
+
+   A pre-rendered static page never loads that bundle. It inlines the site's
+   theme.css, but theme.css is the ThemeBuilder output (colours, fonts) and
+   contains none of this. Without this file every static page loses its
+   .articleContents padding and every grid and menu rule.
+
+   SELECTOR NOTE
+   PageContainer.css targets "> div:nth-child(...)" because the SPA wraps each
+   article in a <div>. The static renderer emits <article>. The child element
+   name is therefore dropped here -- "> :nth-child(...)" matches both, so these
+   rules stay correct for either markup.
+
+   KEEPING IN SYNC
+   Add a layout to PageContainer.css and you must mirror it here, or pages using
+   it render as a plain vertical stack. StaticLayoutCssTests fails when they
+   drift apart.
+   =========================================================================== */
+
+/* ---- document baseline ---------------------------------------------------
+   Copied from react/baseProject/src/index.css, which is compiled into the SPA
+   bundle and therefore never reaches a static page. Without it every page falls
+   back to the browser default -- Times New Roman instead of the system sans
+   stack, plus the default 8px body margin and no font smoothing.
+
+   This is the FIRST thing in the file so a per-site BaseStyles.css or theme.css
+   can still override the font (cesletter sets Open Sans, for instance). */
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+code{font-family:source-code-pro,Menlo,Monaco,Consolas,'Courier New',monospace}
+
+/* ---- navigation ----------------------------------------------------------
+   The SPA renders <div class="nested-dynamic-menu"> with DynamicMenu children.
+   The static renderer emits semantic <nav class="menuContents"><ul>...</ul>
+   instead: better for crawlers, and it works with JavaScript disabled. These
+   rules give that markup the same horizontal bar + hover dropdown. The SPA's
+   dropdown is pure CSS :hover (not JS state), so nothing is lost by going
+   static. :focus-within is added so the menu is keyboard operable, which the
+   SPA version is not. */
+.menuContents{position:relative;z-index:1000;max-width:100%}
+.menuContents ul{list-style:none;margin:0;padding:0}
+.menuContents > ul{display:flex;flex-wrap:wrap}
+/* Every li anchors its own submenu. Written depth-agnostically on purpose: BuildNav
+   nests to StaticPageRenderer.MaxNavDepth, so a rule that names "> ul > li > ul"
+   renders level 3 into the HTML and then hides it forever. */
+.menuContents li{position:relative}
+.menuContents > ul > li{flex:1 1 auto;white-space:nowrap}
+/* Top-level entries: a link when the item points at a page, a plain heading when it is
+   only a group label. Both need the same box so the bar does not jump between them. */
+.menuContents .nav-section{display:block;padding:10px;cursor:default}
+.menuContents > ul > li > a{display:block;padding:10px;text-decoration:none;color:inherit}
+.menuContents > ul > li > a:hover,.menuContents > ul > li > a:focus{text-decoration:underline}
+/* Submenus at any depth. Level 1 drops below its top-level parent; level 2 and deeper
+   fly out to the side, because dropping them below would cover their own parent list. */
+.menuContents ul ul{display:none;position:absolute;background-color:#f9f9f9;min-width:160px;box-shadow:0 8px 16px 0 rgba(0,0,0,.2);z-index:1}
+.menuContents > ul > li > ul{top:100%;left:0}
+.menuContents ul ul ul{top:0;left:100%}
+.menuContents li:hover > ul,.menuContents li:focus-within > ul{display:block}
+.menuContents ul ul a,.menuContents ul ul .nav-section{color:#000;padding:12px 16px;text-decoration:none;display:block;white-space:nowrap}
+.menuContents ul ul a:hover,.menuContents ul ul a:focus{background-color:#f1f1f1}
+/* A flyout gives no hint that it exists, unlike a top-level item sitting under a visible
+   bar. Mark the parents that have one. :has() degrades to no marker on older browsers,
+   which is exactly the behaviour before this rule existed. */
+.menuContents ul ul li:has(> ul) > a::after,.menuContents ul ul li:has(> ul) > .nav-section::after{content:"\203A";float:right;padding-left:12px}
+
+/* ---- article container --------------------------------------------------- */
+.articleContents{padding-left:15%;padding-right:15%}
+.articleContents::after{content:"";display:block;clear:both}
+
+@media (max-width:480px){.layout-2-1{grid-template-columns:1fr !important}.articleContents{padding-left:0;padding-right:0}}
+@media (max-width:768px){.layout-2-1{grid-template-columns:1fr !important}.articleContents{padding-left:0;padding-right:0}}
+
+/* ---- layouts ------------------------------------------------------------- */
+.layout-standard{display:grid;grid-template-columns:1fr;gap:10px}
+
+.layout-1 > :nth-child(1n + 1){grid-column:1 / -1}
+
+.layout-1-1_3-2_3{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto;gap:10px}
+.layout-1-1_3-2_3 > :nth-child(5n + 1){grid-column:1 / -1}
+.layout-1-1_3-2_3 > :nth-child(5n + 2){grid-column:1 / 2}
+.layout-1-1_3-2_3 > :nth-child(5n + 3){grid-column:2 / 4}
+.layout-1-1_3-2_3 > :nth-child(5n + 4){grid-column:1 / 3}
+.layout-1-1_3-2_3 > :nth-child(5n + 5){grid-column:3 / 4}
+
+.layout-1-1_3{display:grid;grid-template-columns:1fr 2fr;grid-template-rows:auto;gap:10px}
+.layout-1-1_3 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-1_3 > :nth-child(3n + 2){grid-column:1 / 2}
+.layout-1-1_3 > :nth-child(3n + 3){grid-column:2 / 3}
+
+.layout-1-2-3{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:auto;gap:10px}
+.layout-1-2-3 > :nth-child(6n + 1){grid-column:1 / -1}
+.layout-1-2-3 > :nth-child(6n + 2),.layout-1-2-3 > :nth-child(6n + 3){grid-column:span 3}
+.layout-1-2-3 > :nth-child(6n + 4),.layout-1-2-3 > :nth-child(6n + 5),.layout-1-2-3 > :nth-child(6n + 6){grid-column:span 2}
+
+.layout-1-2_3-1_3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-1-2_3-1_3 > :nth-child(5n + 1){grid-column:1 / -1}
+.layout-1-2_3-1_3 > :nth-child(5n + 2){grid-column:1 / 3}
+.layout-1-2_3-1_3 > :nth-child(5n + 3){grid-column:3 / 4}
+.layout-1-2_3-1_3 > :nth-child(5n + 4){grid-column:1 / 2}
+.layout-1-2_3-1_3 > :nth-child(5n + 5){grid-column:2 / 4}
+
+.layout-1-2_3{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.layout-1-2_3 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-2_3 > :nth-child(3n + 2){grid-column:1 / 2}
+.layout-1-2_3 > :nth-child(3n + 3){grid-column:2 / 3}
+
+.layout-1-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.layout-1-2 > :nth-child(3n + 1){grid-column:1 / -1}
+.layout-1-2 > :nth-child(3n + 2),.layout-1-2 > :nth-child(3n + 3){grid-column:auto}
+
+.layout-1-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-1-3 > :nth-child(4n + 1){grid-column:1 / -1}
+.layout-1-3 > :nth-child(4n + 2),.layout-1-3 > :nth-child(4n + 3),.layout-1-3 > :nth-child(4n + 4){grid-column:auto}
+
+.layout-1_3{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.layout-1_3 > :nth-child(2n + 1){grid-column:1 / 2}
+.layout-1_3 > :nth-child(2n + 2){grid-column:2 / 3}
+
+.layout-1_3-1{display:grid;grid-template-columns:1fr 2fr;grid-auto-rows:auto;gap:10px}
+.layout-1_3-1 > :nth-child(3n + 1){grid-column:1 / 2}
+.layout-1_3-1 > :nth-child(3n + 2){grid-column:2 / 3}
+.layout-1_3-1 > :nth-child(3n + 3){grid-column:1 / -1}
+
+.layout-1_3-2_3{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;gap:10px}
+.layout-1_3-2_3 > :nth-child(4n + 1){grid-column:1 / span 1}
+.layout-1_3-2_3 > :nth-child(4n + 2){grid-column:2 / span 2}
+.layout-1_3-2_3 > :nth-child(4n + 3){grid-column:1 / span 2}
+.layout-1_3-2_3 > :nth-child(4n + 4){grid-column:3 / span 1}
+
+.layout-2-1{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.layout-2-1 > :nth-child(3n + 1),.layout-2-1 > :nth-child(3n + 2){grid-column:auto}
+.layout-2-1 > :nth-child(3n + 3){grid-row:auto;grid-column:1 / -1}
+
+.layout-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.layout-2 > :nth-child(2n - 1),.layout-2 > :nth-child(2n){grid-column:auto}
+
+.layout-2-3{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.layout-2-3 > :nth-child(5n + 1),.layout-2-3 > :nth-child(5n + 2){grid-column:span 3}
+.layout-2-3 > :nth-child(5n + 3),.layout-2-3 > :nth-child(5n + 4),.layout-2-3 > :nth-child(5n + 5){grid-column:span 2}
+
+.layout-2_3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-2_3-1 > :nth-child(3n + 1){grid-column:1 / span 2}
+.layout-2_3-1 > :nth-child(3n + 2){grid-column:3 / span 1}
+.layout-2_3-1 > :nth-child(3n + 3){grid-column:1 / -1}
+
+.layout-2_3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-2_3 > :nth-child(2n + 1){grid-column:1 / span 2}
+.layout-2_3 > :nth-child(2n + 2){grid-column:3 / span 1}
+
+.layout-3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-3-1 > :nth-child(4n + 1),.layout-3-1 > :nth-child(4n + 2),.layout-3-1 > :nth-child(4n + 3){grid-column:span 1}
+.layout-3-1 > :nth-child(4n + 4){grid-column:1 / -1}
+
+.layout-3-2{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.layout-3-2 > :nth-child(5n + 1),.layout-3-2 > :nth-child(5n + 2),.layout-3-2 > :nth-child(5n + 3){grid-column:span 2}
+.layout-3-2 > :nth-child(5n + 4),.layout-3-2 > :nth-child(5n + 5){grid-column:span 3}
+
+.layout-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.layout-3 > *{grid-column:span 1}
+</style>
+<style>.headerContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* This stacks your items vertically. Remove if you want horizontal layout. */
+}
+
+.menuContents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* This stacks your items vertically. Remove if you want horizontal layout. */
+}
+
+.bodyStyle {
+    margin-left: 10%;
+    margin-right: 10%;
+    font-size: large;
+    font-family: Georgia;
+}
+
+.question {
+    font-weight: bold;
+    font-size: 24px;
+    text-align: center;
+    padding-bottom: 25px;
+}
+
+.mainContent {
+    padding-top: 25px;
+    padding-bottom: 25px;
+}
+
+.comingSoon {
+    text-align: center;
+    font-size: 48px;
+    font-weight: bolder;
+    font-family: cursive;
+}
+.parent-menu-button {
+    min-width: unset !important;
+}
+
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"LDS Apologetics — The Answers Are Better Than the Questions","description":"Evidence-based answers to the hardest questions about Latter-day Saint doctrine and history — the First Vision, the Book of Abraham, plural marriage, and more.","inLanguage":"en","mainEntityOfPage":"https://www.ldsapologetics.com/","url":"https://www.ldsapologetics.com/","publisher":{"@type":"Organization","name":"LDS Apologetics","url":"https://www.ldsapologetics.com/"}}</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J6H714HFSM"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-J6H714HFSM');</script>
+</head>
+<body>
+<div class="pageContents">
+<header class="headerContents"><div style="cursor: pointer;"><a href="https://www.ldsapologetics.com/"><img style="display: block; margin-left: auto; margin-right: auto;" src="https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/LDSApologetics.jpg" alt="" width="273" height="84"></a></div></header>
+<nav class="menuContents" aria-label="Site navigation"><ul>
+<li><span class="nav-section">Authority &amp; Revelation</span>
+<ul>
+<li><span class="nav-section">Answering Critics</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/truth-seeking-suppression/">Does the Church Suppress Truth-Seeking?</a></li>
+<li><a href="https://www.ldsapologetics.com/logical-fallacies/">Logical Fallacies to Avoid</a></li>
+<li><a href="https://www.ldsapologetics.com/should-debate/">Should You Debate?</a></li>
+<li><a href="https://www.ldsapologetics.com/joseph-smith-muhammad/">The Joseph Smith and Muhammad Parallel</a></li>
+<li><a href="https://www.ldsapologetics.com/organized-religion-matters/">Why Organized Religion Matters</a></li>
+<li><a href="https://www.ldsapologetics.com/churchtrue-or-not/">Would You Want to Know If the Church Were False?</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Apostasy and Restoration</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/covenants-restored/">Gospel, Priesthood, and Covenants — Three Protestant Claims Refuted</a></li>
+<li><a href="https://www.ldsapologetics.com/gates-of-hell/">The Gates of Hell and Continuous Revelation</a></li>
+<li><a href="https://www.ldsapologetics.com/spirit-prison-gospel/">The Gospel Is Preached to the Dead</a></li>
+<li><a href="https://www.ldsapologetics.com/harrowing-hell-restored/">The Harrowing of Hell and the Restoration</a></li>
+<li><a href="https://www.ldsapologetics.com/path-of-apostasy/">The Path of Personal Apostasy</a></li>
+<li><a href="https://www.ldsapologetics.com/apostasy-why/">Why a Restoration Was Necessary</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Priesthood Authority</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/nt-church-offices/">Apostles and Prophets Are Still Required</a></li>
+<li><a href="https://www.ldsapologetics.com/melchizedek-priesthood-hebrews/">Does Only Jesus Hold the Priesthood?</a></li>
+<li><a href="https://www.ldsapologetics.com/melchizedek-person/">Melchizedek the Person</a></li>
+<li><a href="https://www.ldsapologetics.com/simon-magician/">Simon the Magician and Priesthood Authority</a></li>
+<li><a href="https://www.ldsapologetics.com/priesthood-lds/">The Priesthood — Authority That Can't Be Self-Appointed</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Receiving Revelation</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/lds-feelings/">Can You Trust Revelation by Feelings?</a></li>
+<li><a href="https://www.ldsapologetics.com/revelation-pattern/">How to Receive Truth — The Revelation Pattern</a></li>
+<li><a href="https://www.ldsapologetics.com/trial-of-faith/">Why God Requires Belief Before Evidence</a></li>
+</ul>
+</li>
+<li><span class="nav-section">The Church in Practice</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/dc-retroactive-changes/">Changes to the Doctrine and Covenants — What They Show</a></li>
+<li><a href="https://www.ldsapologetics.com/church-growth-statistics/">Church Growth Statistics — What Do They Actually Mean?</a></li>
+<li><a href="https://www.ldsapologetics.com/handcart-not-negligence/">Handcart Companies: Faith, Not Negligence</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="nav-section">Who Is God?</span>
+<ul>
+<li><span class="nav-section">Agency and Our Divine Nature</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/creation-ex-nihilo/">Creation Ex Nihilo Destroys Free Will</a></li>
+<li><a href="https://www.ldsapologetics.com/jesus-lucifer-brother/">Jesus and Lucifer Are Spirit Brothers</a></li>
+<li><a href="https://www.ldsapologetics.com/spirit-matter/">Spirit Is Real Matter</a></li>
+<li><a href="https://www.ldsapologetics.com/legal-versus-righteous/">What Makes Anything Right or Wrong? — Objective Good, Genuine Agency, and Why &quot;Legal&quot; Never Means &quot;Righteous&quot;</a></li>
+<li><a href="https://www.ldsapologetics.com/agency-requires-preexistence/">Why Agency Requires Pre-Existent Intelligences</a></li>
+</ul>
+</li>
+<li><span class="nav-section">God the Father</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/evolving-nature-of-god/">Did LDS Theology About God Change Over Time?</a></li>
+<li><a href="https://www.ldsapologetics.com/god-is-our-father/">God Is Our Literal Father</a></li>
+<li><a href="https://www.ldsapologetics.com/heavenly-mother/">Heavenly Mother — Why This Doctrine Is Inevitable</a></li>
+</ul>
+</li>
+<li><span class="nav-section">The Godhead</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/jesus-is-jehovah/">Jesus Is Jehovah — God of the Old Testament</a></li>
+<li><a href="https://www.ldsapologetics.com/john-17-oneness/">John 17 and the Oneness Jesus Prayed For</a></li>
+<li><a href="https://www.ldsapologetics.com/trinity-math/">The Algebra of the Godhead</a></li>
+<li><a href="https://www.ldsapologetics.com/godhead-vs-trinity/">The Godhead vs. the Trinity</a></li>
+<li><a href="https://www.ldsapologetics.com/who-is-holy-ghost/">Who Is the Holy Ghost?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="nav-section">Church History</span>
+<ul>
+<li><span class="nav-section">Abuse and the Church</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/abuse-church-policy/">Church Policy and Protections — What the Record Shows</a></li>
+<li><a href="https://www.ldsapologetics.com/abuse-clergy-privilege-law/">Clergy Privilege and the Law</a></li>
+<li><a href="https://www.ldsapologetics.com/abuse-comparative-context/">Comparative Context and the Psychology of Predators</a></li>
+<li><a href="https://www.ldsapologetics.com/abuse-and-the-church/">Does the Church Protect Abusers? An Honest Answer</a></li>
+<li><a href="https://www.ldsapologetics.com/abuse-cases/">The Abuse Cases — The Help Line, the Privilege, and the Doctrine</a></li>
+<li><a href="https://www.ldsapologetics.com/abuse-help-line/">The Abuse Help Line — What It Is, What Was Alleged</a></li>
+<li><a href="https://www.ldsapologetics.com/abuse-cases-critics-cite/">The Cases Critics Cite — Arizona, West Virginia, Idaho</a></li>
+<li><a href="https://www.ldsapologetics.com/christofferson-case/">The Christofferson Case</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Bringing Forth the Book of Mormon</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/bom-printing-harris/">Martin Harris and the Book of Mormon Printing</a></li>
+<li><a href="https://www.ldsapologetics.com/source-documents-translation/">Source Documents and the Translation Process</a></li>
+<li><a href="https://www.ldsapologetics.com/kinderhook-plates/">The Kinderhook Plates</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Conflict and Violence</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/blood-atonement/">Blood Atonement — What Was Taught and What Was Never Practiced</a></li>
+<li><a href="https://www.ldsapologetics.com/council-of-fifty/">The Council of Fifty — Theocracy or Preparation?</a></li>
+<li><a href="https://www.ldsapologetics.com/kirtland-safety-society/">The Kirtland Safety Society</a></li>
+<li><a href="https://www.ldsapologetics.com/mountain-meadows/">The Mountain Meadows Massacre</a></li>
+<li><a href="https://www.ldsapologetics.com/nauvoo-expositor/">The Nauvoo Expositor</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Doctrine in Historical Context</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/evolution/">Evolution and LDS Doctrine</a></li>
+<li><a href="https://www.ldsapologetics.com/hinckley-god-man/">Gordon Hinckley and the 'God Was Once a Man' Question</a></li>
+<li><a href="https://www.ldsapologetics.com/prophetic-perfection/">Prophets Don't Have to Be Perfect</a></li>
+<li><a href="https://www.ldsapologetics.com/adamgod/">The Adam-God Theory — What Brigham Young Actually Said</a></li>
+<li><a href="https://www.ldsapologetics.com/journal-of-discourses/">The Journal of Discourses — Is It a Valid Source?</a></li>
+<li><a href="https://www.ldsapologetics.com/temple-and-masonry/">The Temple and Masonry</a></li>
+<li><a href="https://www.ldsapologetics.com/word-of-wisdom/">The Word of Wisdom — Origin, Authority, and Purpose</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Joseph Smith</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/joseph-methodist/">Did Joseph Smith Join the Methodist Church?</a></li>
+<li><a href="https://www.ldsapologetics.com/disciple/">I Am a Disciple of Christ</a></li>
+<li><a href="https://www.ldsapologetics.com/joseph-criminal-record/">Joseph Smith’s Legal Troubles — What the Record Shows</a></li>
+<li><a href="https://www.ldsapologetics.com/false-prophecies/">Joseph Smith's Prophecies — Did They Fail?</a></li>
+<li><a href="https://www.ldsapologetics.com/first-vision-accounts/">The Four First Vision Accounts</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Polygamy</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/joseph-fanny/">Joseph Smith and Fanny Alger</a></li>
+<li><a href="https://www.ldsapologetics.com/polygamy/">Polygamy — What Actually Happened</a></li>
+<li><a href="https://www.ldsapologetics.com/polygamy-coercion/">Polygamy and Coercion — Was Consent Real?</a></li>
+<li><a href="https://www.ldsapologetics.com/joseph-polygamy-context/">Why Joseph Smith Denied Plural Marriage Publicly</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Race and the Priesthood</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/joseph-smith-abolitionist/">Joseph Smith Was an Abolitionist</a></li>
+<li><a href="https://www.ldsapologetics.com/indian-indenture/">Native American Indenture — The 1852 Act</a></li>
+<li><a href="https://www.ldsapologetics.com/priesthood-topics/">The Priesthood Ban — What It Was and Why It Ended</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Recent Events</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/recent-events-issues/">Recent Events/Issues</a></li>
+<li><a href="https://www.ldsapologetics.com/women-mormon-history/">Women in Church History — Answering the Hard Questions</a></li>
+</ul>
+</li>
+<li><span class="nav-section">The Book of Abraham</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/abraham-relativity/">Joseph Smith and Einsteinian Relativity</a></li>
+<li><a href="https://www.ldsapologetics.com/book-of-abraham-papyri/">The Book of Abraham and the Papyri</a></li>
+<li><a href="https://www.ldsapologetics.com/abraham-facsimiles/">The Facsimiles — Inverted Priestly Imagery</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Treasure Seeking and Folk Magic</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/treasure-digging-folk-magic/">Joseph Smith and Folk Magic - Context and Meaning</a></li>
+<li><a href="https://www.ldsapologetics.com/salem-1836-treasure-dc-111/">Salem, 1836 — The Treasure Trip and D&amp;C 111</a></li>
+<li><a href="https://www.ldsapologetics.com/open-door-demonic-deception/">The &quot;Open Door&quot; Argument — Treasure Seeking and Demonic Deception</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="nav-section">Book of Mormon</span>
+<ul>
+<li><span class="nav-section">Answering Criticism</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/roper-anachronism-trends/">The Anachronism Trend — What 190 Years of Criticism Shows</a></li>
+<li><a href="https://www.ldsapologetics.com/bom-kitchen-sink/">The Kitchen Sink Attack — Every Anti–Book of Mormon Bullet Point, Answered</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Archaeology and Geography</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/bom-archaeology/">BOM Archaeology — Once Mocked, Now Confirmed</a></li>
+<li><a href="https://www.ldsapologetics.com/hill-cumorah/">Hill Cumorah — The Archaeological Question</a></li>
+<li><a href="https://www.ldsapologetics.com/horses/">Horses in the Book of Mormon</a></li>
+<li><a href="https://www.ldsapologetics.com/laban-sword-steel/">Laban's Steel Sword — Iron Age Jerusalem Vindicates the BOM</a></li>
+<li><a href="https://www.ldsapologetics.com/bom-self-limiting/">The BOM Never Claimed to Be a Complete American History</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Doctrine and Difficult Passages</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/jesusbirth/">Jesus Born in Jerusalem — Alma's Prophecy Explained</a></li>
+<li><a href="https://www.ldsapologetics.com/bom-challenge/">The Book of Mormon Doctrine Challenge</a></li>
+<li><a href="https://www.ldsapologetics.com/nephi-kills-laban/">Why Nephi Killing Laban Was Not Murder</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Language and Text</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/bofm-isaiah/">Isaiah in the Book of Mormon</a></li>
+<li><a href="https://www.ldsapologetics.com/bom-linguistic/">Linguistic Evidence for the Book of Mormon</a></li>
+<li><a href="https://www.ldsapologetics.com/bom-missing-jewish-elements/">Missing Jewish Elements in the Book of Mormon?</a></li>
+<li><a href="https://www.ldsapologetics.com/stylometry/">Stylometry — Multiple Authors, One Book</a></li>
+<li><a href="https://www.ldsapologetics.com/charles-anthon-script/">The Charles Anthon Incident — What Actually Happened</a></li>
+<li><a href="https://www.ldsapologetics.com/bom-textual-changes/">Thousands of Changes to the Book of Mormon?</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Peoples and Origins</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/bom-population-math/">Book of Mormon Population — Answering the Math Objection</a></li>
+<li><a href="https://www.ldsapologetics.com/dna-evidence/">DNA Evidence and the Book of Mormon</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Race and the Book of Mormon</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/bookofmormon-racistdoc/">Is the Book of Mormon a Racist Document?</a></li>
+<li><a href="https://www.ldsapologetics.com/bom-not-racist-full/">The Book of Mormon Is Not a Racist Document</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Witnesses and the Plates</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/bom-author-proprietor/">&quot;Author and Proprietor&quot; — The Book of Mormon Copyright</a></li>
+<li><a href="https://www.ldsapologetics.com/bom-witnesses/">The Book of Mormon Witnesses</a></li>
+<li><a href="https://www.ldsapologetics.com/bookofmormonweight/">Weight and Composition of the Gold Plates</a></li>
+<li><a href="https://www.ldsapologetics.com/plates-taken-back/">Why the Plates Were Taken Back</a></li>
+<li><a href="https://www.ldsapologetics.com/plates-purpose/">Why Were the Gold Plates Needed at All?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="nav-section">Scripture</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/isaiah-reason-together/">&quot;Come, Let Us Reason Together&quot; — In Context</a></li>
+<li><a href="https://www.ldsapologetics.com/filthy-rags/">&quot;Filthy Rags&quot; — What Isaiah Actually Said</a></li>
+<li><a href="https://www.ldsapologetics.com/bible-math5/">Is the Bible Translated Correctly?</a></li>
+<li><a href="https://www.ldsapologetics.com/joseph-smith-translation-bible/">The Joseph Smith Translation of the Bible</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Against Protestantism</span>
+<ul>
+<li><span class="nav-section">Doctrine Answered</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/ldschristians/">Are Latter-day Saints Christian?</a></li>
+<li><a href="https://www.ldsapologetics.com/gods-in-regression/">Gods in Regression — Does God Have a God?</a></li>
+<li><a href="https://www.ldsapologetics.com/lds-jesus-biblical/">Is the LDS Jesus the Jesus of the Bible?</a></li>
+<li><a href="https://www.ldsapologetics.com/original-sin-refuted/">Original Sin Refuted</a></li>
+<li><a href="https://www.ldsapologetics.com/repentance-real/">Repentance Means Actual Change</a></li>
+<li><a href="https://www.ldsapologetics.com/salvation-process/">Salvation Is a Process, Not an Event</a></li>
+<li><a href="https://www.ldsapologetics.com/tithing-answered/">Tithing — Answering the Objections</a></li>
+<li><a href="https://www.ldsapologetics.com/tulip-refuted/">TULIP Calvinism Refuted Systematically</a></li>
+<li><a href="https://www.ldsapologetics.com/temple-veil/">Why Does the Temple Still Have a Veil?</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Practice and Ethics</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/biblical-communalism/">Biblical Communalism — Why Protestants Don't Follow the Bible</a></li>
+<li><a href="https://www.ldsapologetics.com/biblical-slavery/">Biblical Slavery — What the Bible Actually Permits</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Profiles of the Damned</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/profile-indigenous/">Profile of the Damned — Indigenous People</a></li>
+<li><a href="https://www.ldsapologetics.com/profile-innocent/">Profile of the Damned — Innocent Children</a></li>
+<li><a href="https://www.ldsapologetics.com/profile-pastors/">Profile of the Damned — Pastors Who Lost Their Faith</a></li>
+<li><a href="https://www.ldsapologetics.com/profile-jews/">Profile of the Damned — The Jewish People</a></li>
+<li><a href="https://www.ldsapologetics.com/profile-obedient/">Profile of the Damned — The Obedient</a></li>
+</ul>
+</li>
+<li><span class="nav-section">The Five Solas</span>
+<ul>
+<li><span class="nav-section">Refuted Point by Point</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/sola-christus/">Sola Christus Refuted</a></li>
+<li><a href="https://www.ldsapologetics.com/sola-gracia/">Sola Gratia Refuted</a></li>
+<li><a href="https://www.ldsapologetics.com/sola-scriptura/">Sola Scriptura Refuted</a></li>
+<li><a href="https://www.ldsapologetics.com/sola-gloria/">Soli Deo Gloria Refuted</a></li>
+</ul>
+</li>
+<li><a href="https://www.ldsapologetics.com/imputed-righteousness/">Imputed Righteousness — Declared Clean, or Made Clean?</a></li>
+<li><a href="https://www.ldsapologetics.com/james-2-faith-works/">James 2 — Not by Faith Only</a></li>
+<li><a href="https://www.ldsapologetics.com/sola-fide-false/">Sola Fide — A False Ideology</a></li>
+<li><a href="https://www.ldsapologetics.com/evangelical-immorality-faq/">Sola Fide's Fruit — Objections Answered</a></li>
+<li><a href="https://www.ldsapologetics.com/evangelical-immorality/">Sola Fide's Fruit — The Statistical Record</a></li>
+<li><a href="https://www.ldsapologetics.com/carnal-christian/">The Carnal Christian — Sola Fide's Logical Product</a></li>
+<li><a href="https://www.ldsapologetics.com/five-solas/">The Five Solas — Overview</a></li>
+</ul>
+</li>
+<li><span class="nav-section">The Reformation in History</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/deification-early-fathers/">Deification in the Early Fathers</a></li>
+<li><a href="https://www.ldsapologetics.com/luther-antisemitism/">Martin Luther's Antisemitism Cannot Be Ignored</a></li>
+<li><a href="https://www.ldsapologetics.com/nicaea-creeds/">Nicaea, the Creeds, and What They Actually Settled</a></li>
+<li><a href="https://www.ldsapologetics.com/protestant-slavers/">Protestant Churches and American Slavery</a></li>
+<li><a href="https://www.ldsapologetics.com/protestant-collapse/">The Collapse of Protestant Christendom</a></li>
+<li><a href="https://www.ldsapologetics.com/reformation-failed/">The Reformation Failed as Reform</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="nav-section">God &amp; Reason</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/god-did-it/">&quot;God Did It&quot; — Why That's a Valid Explanation</a></li>
+<li><a href="https://www.ldsapologetics.com/abrahamstest/">Abraham's Test — And What It Reveals About God</a></li>
+<li><a href="https://www.ldsapologetics.com/agency-or-decree/">Agency or Decree — Which God Do You Actually Worship?</a></li>
+<li><a href="https://www.ldsapologetics.com/foreknowledge-agency/">Foreknowledge and Agency — Does Omniscience Destroy Free Will?</a></li>
+<li><a href="https://www.ldsapologetics.com/god-sovereign/">Is God Truly Sovereign?</a></li>
+<li><a href="https://www.ldsapologetics.com/godexists/">Prove God Exists</a></li>
+<li><a href="https://www.ldsapologetics.com/god-type/">What Kind of God Do You Believe In?</a></li>
+</ul>
+</li>
+<li><span class="nav-section">The Plan of Salvation</span>
+<ul>
+<li><span class="nav-section">After This Life</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/angels-are-people/">Angels Are Resurrected and Spirit Humans</a></li>
+<li><a href="https://www.ldsapologetics.com/eternal-punishment-dc19/">Eternal Punishment — What the Word Actually Means</a></li>
+<li><a href="https://www.ldsapologetics.com/hell-has-end/">Hell Has an End — Universal Resurrection</a></li>
+<li><a href="https://www.ldsapologetics.com/resurrection-power/">Resurrected Bodies Are More Powerful Than Spirits</a></li>
+<li><a href="https://www.ldsapologetics.com/three-kingdoms/">Three Kingdoms of Glory</a></li>
+<li><a href="https://www.ldsapologetics.com/why-resurrection/">Why the Resurrection Matters</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Before This Life</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/abrahams-seed/">How Many Descendants of Abraham Are There?</a></li>
+<li><a href="https://www.ldsapologetics.com/preexistence-bible/">Pre-Existence — What the Bible Actually Says</a></li>
+<li><a href="https://www.ldsapologetics.com/abrahams-seed-answer/">The Abraham's Seed Problem — LDS Has the Only Answer</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Family and Eternal Identity</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/gender-eternal/">Gender Is Eternal</a></li>
+<li><a href="https://www.ldsapologetics.com/family-under-attack/">The Family Is Under Coordinated Attack</a></li>
+</ul>
+</li>
+<li><span class="nav-section">Ordinances and Covenants</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/baptism-dead-chiasmus/">Baptism for the Dead in the Center of Paul's Chiasmus</a></li>
+<li><a href="https://www.ldsapologetics.com/baptism-four-reasons/">Baptism Is Required — Four Reasons</a></li>
+<li><a href="https://www.ldsapologetics.com/born-again/">Born Again — Of Water and of the Spirit</a></li>
+<li><a href="https://www.ldsapologetics.com/temple-ordinances-new-testament/">Temple Ordinances and the New Testament</a></li>
+</ul>
+</li>
+<li><span class="nav-section">The Atonement</span>
+<ul>
+<li><a href="https://www.ldsapologetics.com/why-mediator/">Why a Mediator Is Necessary</a></li>
+<li><a href="https://www.ldsapologetics.com/whyisan-atonement-necessary/">Why Is an Atonement Necessary?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul></nav>
+
+
+<div style="background:#7a2d0b;color:#fff;padding:14px 20px;font:600 15px/1.5 system-ui,sans-serif">PROPOSED ldsapologetics MENU &mdash; local preview. Every link goes to the real live page. Nothing has been changed on the site.</div><main class="articleContents layout-standard">
+<article><p style="text-align: center; margin: 0 0 20px 0;"><img src="https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsapologetics.com/images/mceu_92494305511733959238944.jpg" width="513" height="513"></p>
+
+<h1 style="font-size: 2em; font-weight: bold; color: #1a1410; margin: 0 0 6px 0;">LDS Apologetics &mdash; The Answers Are Better Than the Questions</h1>
+<p style="font-size: 1.05em; font-style: italic; color: #5c4a35; margin: 0 0 28px 0;">The Restored Gospel is true, the attacks on it are answerable, and this is where the answers live.</p>
+
+<h2 style="font-size: 1.3em; font-weight: bold; color: #1a1410; border-bottom: 2px solid #b8860b; padding-bottom: 6px; margin: 0 0 16px 0;">Why This Site Exists</h2>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">The attacks on the Restored Gospel are real. They are organized, they are rehearsed, and they are aimed at members who have not been given the tools to answer them. The stakes are eternal. And the evidence in favor of the truth is overwhelming.</p>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">The critics deserve a real answer. The wavering member deserves a real answer. This is where they get it.</p>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 28px 0;">This site does not ask critics to be patient with the faith. It asks the faith to be patient with nothing. Every objection is answered directly &mdash; not deflected, not minimized, not softened into comfortable ambiguity. Answered.</p>
+
+<h2 style="font-size: 1.3em; font-weight: bold; color: #1a1410; border-bottom: 2px solid #b8860b; padding-bottom: 6px; margin: 0 0 16px 0;">What Is Covered Here</h2>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">The articles on this site address the arguments that shake faith &mdash; the ones circulating in anti-LDS forums, in evangelical debates, in the quiet doubts of members who heard something they couldn&rsquo;t answer. The topics include:</p>
+<ul style="margin: 0 0 14px 0; padding-left: 24px; color: #2a1f14; font-size: 0.97em; line-height: 1.8;">
+  <li style="margin-bottom: 8px;"><strong style="color: #1a1410;">Priesthood authority</strong> &mdash; who has it, what it is, why it matters, and why Protestant claims to authority fail</li>
+  <li style="margin-bottom: 8px;"><strong style="color: #1a1410;">Salvation and exaltation</strong> &mdash; what the Gospel of Jesus Christ actually teaches, and where Protestant theology falls short</li>
+  <li style="margin-bottom: 8px;"><strong style="color: #1a1410;">Scripture</strong> &mdash; the Book of Mormon, the Book of Abraham, the Bible as it is and as it has been misread</li>
+  <li style="margin-bottom: 8px;"><strong style="color: #1a1410;">History and doctrine</strong> &mdash; Joseph Smith, the Great Apostasy, the Restoration, and every objection that follows</li>
+  <li style="margin-bottom: 8px;"><strong style="color: #1a1410;">The covenants</strong> &mdash; Abraham&rsquo;s promise, eternal families, and the theology no other tradition can fulfill</li>
+</ul>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 28px 0;">Each article is built on scripture, logic, and the historical record. Not on sentiment. Not on &ldquo;the Church&rsquo;s position.&rdquo; On what Christ said, what the apostles wrote, and what the Restoration recovered.</p>
+
+<h2 style="font-size: 1.3em; font-weight: bold; color: #1a1410; border-bottom: 2px solid #b8860b; padding-bottom: 6px; margin: 0 0 16px 0;">Verdicts, Not Meditations</h2>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">Every article on this site ends with a verdict. Not &ldquo;some people believe.&rdquo; Not &ldquo;both sides have merit.&rdquo; A verdict &mdash; stated, proved, closed.</p>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">This is not arrogance. It is what truth demands. The Gospel of Jesus Christ is either true or it is not. The evidence either supports it or it does not. This site holds that the Gospel is true and that the evidence is overwhelming &mdash; and every page here is written from that conviction.</p>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">If your faith has been shaken by a well-rehearsed objection, the answer is here. If you came here with a genuine question, you will find a genuine answer &mdash; direct, documented, unhedged. And if you came here with an attack prepared, you will find it has already been answered.</p>
+<p style="font-size: 0.97em; line-height: 1.8; color: #2a1f14; margin: 0 0 14px 0;">The truth can withstand the scrutiny. It always could. This site exists to prove it.</p></article>
+
+</main>
+</div>
+</body>
+</html>
