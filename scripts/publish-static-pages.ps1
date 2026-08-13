@@ -60,7 +60,7 @@
 #>
 
 param(
-    [ValidateSet('all', 'ldsapologetics', 'ldsdoctrines', 'ldsdiscussions', 'cesletter', 'ldsfaithincrisis')]
+    [ValidateSet('all', 'ldsapologetics', 'ldsdoctrines', 'ldsdiscussions', 'cesletter', 'ldsfaithincrisis', 'ldsgospeldoctrine')]
     [string]$Site = 'all',
     [string]$Slug,
     [switch]$Upload,
@@ -109,6 +109,7 @@ $sites = @(
     @{ Key = 'ldsapologetics';         Id = 5; Domain = 'ldsapologetics.com';         Analytics = 'G-J6H714HFSM';  Title = 'LDS Apologetics' }
     @{ Key = 'ldsdiscussions';         Id = 6; Domain = 'ldsdiscussions.info';        Analytics = 'G-G8VH9TBRNR';  Title = 'LDS Discussions' }
     @{ Key = 'cesletter';              Id = 8; Domain = 'cesletter.info';             Analytics = 'G-Z4XDMTTGRN';  Title = 'CES Letter' }
+    @{ Key = 'ldsgospeldoctrine';      Id = 9; Domain = 'ldsgospeldoctrine.info';     Analytics = 'G-0QJ9ZJ0LC6'; Title = 'LDS Gospel Doctrine' }
 )
 
 # ----- Env -----------------------------------------------------------------
@@ -368,46 +369,91 @@ function Get-MenuPageName {
     return $null
 }
 
+# An item with no `parent` property at all is top-level. The C# renderer gets this from
+# `it["parent"]?.ToString() ?? "0"`; spelling it out here keeps the two agreeing about an
+# item the tree editor wrote without the field.
+function Get-MenuParentId {
+    param($Item)
+    $p = Get-MenuField $Item 'parent'
+    if ($null -eq $p -or "$p" -eq '') { return '0' }
+    return "$p"
+}
+
+# A menu item that points at a page must be a LINK, at any level. Home lives at the
+# site root, not /home/. Must match StaticPageRenderer.BuildNav exactly.
+function Get-MenuHref {
+    param([string]$PageName, [string]$Domain)
+    if ($PageName -ieq 'Home') { return "https://www.$Domain/" }
+    return "https://www.$Domain/$(ConvertTo-Slug $PageName)/"
+}
+
+# Kept in sync with StaticPageRenderer.MaxNavDepth. Top-level sections are depth 0.
+$script:MaxNavDepth = 5
+
+# Emits the <li> elements for one level, recursing into each item's children.
+#
+# Must produce byte-identical markup to StaticPageRenderer.BuildNav's RenderLevel. Both
+# renderers write to the same bucket -- the C# one on every content save, this one on a
+# bulk backfill -- so any difference means a page's nav silently depends on which of the
+# two last touched it. This rollout has already produced four bugs of exactly that shape.
+function Build-MenuLevel {
+    param($Menu, [string]$ParentId, [int]$Depth, [string]$Domain, $Rendered)
+
+    if ($Depth -ge $script:MaxNavDepth) { return '' }
+
+    $children = @($Menu | Where-Object { (Get-MenuParentId $_) -eq $ParentId })
+    if ($children.Count -eq 0) { return '' }
+
+    $sb = New-Object System.Text.StringBuilder
+    foreach ($item in $children) {
+        $id = "$(Get-MenuField $item 'id')"
+        if ([string]::IsNullOrEmpty($id)) { continue }
+
+        # Every id renders at most once: an item that is its own parent, or a duplicated
+        # id, is skipped on the second visit rather than recursed into.
+        if (-not $Rendered.Add($id)) { continue }
+
+        $label     = Get-HtmlEncoded (Get-MenuField $item 'text')
+        $pageName  = Get-MenuPageName $item
+        $childHtml = Build-MenuLevel -Menu $Menu -ParentId $id -Depth ($Depth + 1) -Domain $Domain -Rendered $Rendered
+
+        # Below the top level an item earns its place by going somewhere: it links to a
+        # page, or it heads a group of items that do. Top-level items are exempt -- a site
+        # may deliberately carry an empty section.
+        if ($Depth -gt 0 -and -not $pageName -and [string]::IsNullOrEmpty($childHtml)) { continue }
+
+        # Items are frequently pages in their own right, not just group headings.
+        # Rendering those as a bare <span> makes the nav unclickable.
+        if ($pageName) {
+            $anchor = "<a href=""$(Get-MenuHref -PageName $pageName -Domain $Domain)"">$label</a>"
+        } else {
+            $anchor = "<span class=""nav-section"">$label</span>"
+        }
+
+        if ([string]::IsNullOrEmpty($childHtml)) {
+            [void]$sb.AppendLine("<li>$anchor</li>")
+        } else {
+            [void]$sb.AppendLine("<li>$anchor")
+            [void]$sb.AppendLine('<ul>')
+            [void]$sb.Append($childHtml)
+            [void]$sb.AppendLine('</ul>')
+            [void]$sb.AppendLine('</li>')
+        }
+    }
+    return $sb.ToString()
+}
+
 function Build-MenuNav {
     param($Menu, [string]$Domain)
     if (-not $Menu -or $Menu.Count -eq 0) { return '' }
-    $top = $Menu | Where-Object { "$(Get-MenuField $_ 'parent')" -eq '0' }
+
+    $rendered = New-Object 'System.Collections.Generic.HashSet[string]' (,[StringComparer]::Ordinal)
+    $top = Build-MenuLevel -Menu $Menu -ParentId '0' -Depth 0 -Domain $Domain -Rendered $rendered
+    if ([string]::IsNullOrEmpty($top)) { return '' }
+
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.AppendLine('<nav class="menuContents" aria-label="Site navigation"><ul>')
-    # A menu item that points at a page must be a LINK, at any level. Home lives at the
-    # site root, not /home/. Must match StaticPageRenderer.BuildNav exactly.
-    function Get-MenuHref {
-        param([string]$PageName, [string]$Domain)
-        if ($PageName -ieq 'Home') { return "https://www.$Domain/" }
-        return "https://www.$Domain/$(ConvertTo-Slug $PageName)/"
-    }
-
-    foreach ($section in $top) {
-        $label = Get-HtmlEncoded (Get-MenuField $section 'text')
-
-        # Top-level items are frequently pages in their own right, not just group
-        # headings. Rendering those as a bare <span> makes the whole nav unclickable.
-        $sectionPage = Get-MenuPageName $section
-        if ($sectionPage) {
-            [void]$sb.AppendLine("<li><a href=""$(Get-MenuHref -PageName $sectionPage -Domain $Domain)"">$label</a>")
-        } else {
-            [void]$sb.AppendLine("<li><span class=""nav-section"">$label</span>")
-        }
-
-        $sectionId = Get-MenuField $section 'id'
-        $children = @($Menu | Where-Object {
-            "$(Get-MenuField $_ 'parent')" -eq "$sectionId" -and (Get-MenuPageName $_)
-        })
-        if ($children.Count -gt 0) {
-            [void]$sb.AppendLine('<ul>')
-            foreach ($child in $children) {
-                $ctext = Get-HtmlEncoded (Get-MenuField $child 'text')
-                [void]$sb.AppendLine("<li><a href=""$(Get-MenuHref -PageName (Get-MenuPageName $child) -Domain $Domain)"">$ctext</a></li>")
-            }
-            [void]$sb.AppendLine('</ul>')
-        }
-        [void]$sb.AppendLine('</li>')
-    }
+    [void]$sb.Append($top)
     [void]$sb.AppendLine('</ul></nav>')
     return $sb.ToString()
 }

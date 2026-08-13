@@ -74,6 +74,15 @@
       "analytics": "G-Z4XDMTTGRN",
       "dns": "godaddy",
       "configPrefix": "cesletter"
+    },
+    {
+      "key": "ldsgospeldoctrine",
+      "id": 9,
+      "domain": "ldsgospeldoctrine.info",
+      "title": "LDS Gospel Doctrine",
+      "analytics": "G-0QJ9ZJ0LC6",
+      "dns": "godaddy",
+      "configPrefix": "ldsgospeldoctrine"
     }
   ]
 }

@@ -123,11 +123,24 @@ Even though `UserSecurity.cs` was updated to use env vars, the old hardcoded val
 
 ### 4. SiteAuth.json credentials (ldsgospeldoctrine.info S3 bucket)
 
-**Status:** OPEN
+**Status:** OBSOLETE as of 2026-08-04 — the consumer is gone. Key rotation still tracked by item #1.
 
 `api/WebApplicationArch/security/SiteAuth.json` contained an AWS access key and secret for the `ldsgospeldoctrine.info` S3 bucket. This file is now gitignored and deleted locally. The credentials in it are covered by item #1 (same key).
 
-**Long-term fix:** If direct S3 access for that bucket is still needed:
+**What changed:** `ldsgospeldoctrine.info` was migrated onto this platform as website id 9. It now
+authenticates through Cognito on `admin.ldsgospeldoctrine.info` like every other site, so nothing
+needs a static key for that bucket any more. The in-browser TinyMCE editor those credentials
+served (`scripts/contentmanage.js`, `pageAdmin.html`, `loginForm.html`, and the whole
+`scripts/tinymce/` distribution — 111 objects) has been deleted from the public bucket; it was
+being downloaded by every anonymous visitor, along with a "Logout / PageAdmin" menu.
+
+**Still to do — not blocking, but the credential is not dead until these are:**
+- The old API Gateway `websitecontentmanagementNew` and its Lambdas (`Login`, `UpdateContent`,
+  `UploadFile`, `GetFileList`, `DeleteFile`) are still deployed and still reachable. Nothing calls
+  them now. They should be deleted.
+- Rotate/disable the access key itself under item #1.
+
+**Long-term fix (kept for any other bucket that needs direct access):**
 - The Lambda execution role (`AWSLambdaBasicExecutionRole`) should be granted an IAM policy for that bucket instead of using explicit keys
 - Use `new AmazonS3Storage(bucketName, region)` (the new IAM constructor) rather than passing keys
 - Store bucket name in a Lambda environment variable, not a committed file

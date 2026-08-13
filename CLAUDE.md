@@ -87,6 +87,86 @@ Mirrors the visual design of **read.cesletter.org** — white background, red ac
 - Use `&ldquo;` / `&rdquo;` for curly quotes, `&mdash;` for em dashes
 - CES Letter quotes being refuted always use the red-border blockquote style
 
+---
+
+## LDS Gospel Doctrine Styling Guide (WEBSITE_ID=9 — ldsgospeldoctrine.info only)
+
+Carries forward the navy identity of the pre-migration site. Apply to all article HTML on
+ldsgospeldoctrine.info.
+
+### Color Palette
+
+| Role | Value |
+|------|-------|
+| Brand navy (headings, borders, table header) | `#003366` |
+| Sub-heading navy | `#24425f` |
+| Body text | `#333333` |
+| Link blue | `#004d99` |
+| Blockquote background | `#f4f7fa` |
+| Table border | `#c9d2db` |
+| Header band | `#f1f1f1` |
+
+### Element Styles
+
+**H1** (one per page, or none — the renderer supplies the page title):
+```html
+<h1 style="font-size:1.9em; font-weight:700; color:#003366; line-height:1.25; margin:0 0 0.5em 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">Title</h1>
+```
+
+**H2** (navy underline):
+```html
+<h2 style="font-size:1.4em; font-weight:700; color:#003366; border-bottom:2px solid #003366; padding-bottom:0.25em; margin:1.6em 0 0.7em 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">Section</h2>
+```
+
+**H3:**
+```html
+<h3 style="font-size:1.15em; font-weight:700; color:#24425f; margin:1.3em 0 0.5em 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">Sub-section</h3>
+```
+
+**Body paragraph:**
+```html
+<p style="font-size:1em; line-height:1.6; color:#333333; margin:0 0 1em 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">Text</p>
+```
+
+**Blockquote** (navy left border — scripture and quoted sources):
+```html
+<blockquote style="background:#f4f7fa; border-left:4px solid #003366; padding:12px 20px; margin:0 0 1.2em 0; color:#3d4c5a; line-height:1.6;">
+  Quote text
+</blockquote>
+```
+
+**Table** (navy header):
+```html
+<table style="border-collapse:collapse; width:100%; margin:1em 0 1.5em 0; font-size:0.92em; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <tbody>
+    <tr>
+      <th style="background:#003366; color:#ffffff; font-weight:600; padding:0.6em 1em; border:1px solid #c9d2db; text-align:left;">Column</th>
+    </tr>
+    <tr>
+      <td style="padding:0.6em 1em; border:1px solid #c9d2db; color:#333333; vertical-align:top;">Cell</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+### Migration-specific rules
+
+The source pages are raw TinyMCE 4 output. When importing:
+
+- **Strip every `data-mce-*` attribute** (`data-mce-style`, `data-mce-href`, `data-mce-src`) and
+  every `<br data-mce-bogus="1">`. Remove duplicated TinyMCE skin `<style id="u0">` blocks.
+- **Rebuild heading levels.** The old `theme.css` forced `#content h1…h6` to `18px`, so `<h1>` was
+  used as a bold-emphasis tag — often ~20 times per page. Emit at most one `<h1>` and demote the
+  rest to `<h2>`/`<h3>` based on their role in the document.
+- **Leave `/data/Images/…` and `/data/Topical/…` URLs alone.** Those objects stay in place in the
+  same public bucket, so existing image and PDF links keep working untouched.
+- Rewrite dead `lds.org` links to `churchofjesuschrist.org`; flag anything that cannot be mapped
+  rather than guessing at a target.
+- Drop the old page chrome entirely — header, nav, GA snippet, and the `Logout / PageAdmin` menu
+  are all supplied by the platform now. **Only the inner HTML of `<div id="content">` is the article.**
+
+---
+
 ### Color Palette
 
 | Role | Value |
@@ -269,6 +349,8 @@ The `webcms` MCP server manages content for multiple sites. Pass `websiteId` on 
 | 5 | ldsapologetics.com |
 | 6 | ldsdiscussions.info |
 | 7 | alexisbpetersen.com |
+| 8 | cesletter.info |
+| 9 | ldsgospeldoctrine.info |
 
 To switch sites, update `WEBSITE_ID` as a Windows User environment variable and restart VS Code.
 
