@@ -20,7 +20,16 @@ const MENU_5 = [
     { id: 110, parent: 20, droppable: false, text: "Joseph Smith's Legal Troubles", pageId: 900, pageName: 'Legal-Troubles' },
     { id: 30, parent: 0,  droppable: true,  text: 'Book of Mormon' },
     { id: 31, parent: 30, droppable: false, text: 'BOM Witnesses', pageId: 1058, pageName: 'BOM-Witnesses' },
-    { id: 32, parent: 31, droppable: false, text: 'Nested Leaf', pageId: 1059, pageName: 'Nested' }
+    { id: 32, parent: 31, droppable: false, text: 'Nested Leaf', pageId: 1059, pageName: 'Nested' },
+
+    // A chain that runs to the render limit: 40 is a top-level section (depth 0) and 44 is
+    // depth 4, the deepest level BuildNav draws. Anything below 44 exists in the file and
+    // appears in no page's navigation, which is what these tools refuse to create.
+    { id: 40, parent: 0,  droppable: true,  text: 'D0' },
+    { id: 41, parent: 40, droppable: true,  text: 'D1' },
+    { id: 42, parent: 41, droppable: true,  text: 'D2' },
+    { id: 43, parent: 42, droppable: true,  text: 'D3' },
+    { id: 44, parent: 43, droppable: false, text: 'D4', pageId: 1058, pageName: 'BOM-Witnesses' }
 ];
 
 // pages that exist on site 5 only
@@ -117,6 +126,74 @@ test('updating an item that does not exist on this site is refused', async () =>
     const r = await callTool('update_menu_item', { id: 4242, itemTitle: 'Nope' });
     assert.equal(r.isError, true);
     assert.match(r.content[0].text, /no menu item 4242 on ldsapologetics\.com/);
+    assert.equal(posted.length, 0);
+});
+
+// --- nesting depth --------------------------------------------------------------------------
+//
+// The renderer TRUNCATES a menu that is too deep; these tools REFUSE to create one. The
+// difference matters: a truncated item is a real page, linked from sitemenu.json, that appears
+// in the nav of no page at all — and nothing anywhere reports it.
+
+test('nesting a section under another section is allowed', async () => {
+    posted.length = 0;
+    // Item 31 is already a child, so this lands at level 3 — the case the old two-level
+    // renderer silently dropped.
+    const r = await callTool('add_menu_item', { parentId: 31, itemTitle: 'Three Witnesses', pageId: 1057 });
+    assert.equal(r.isError, false, r.content[0].text);
+    assert.equal(posted.filter(p => p.url === '/menu/5/item').length, 1);
+});
+
+test('adding at the deepest rendered level is allowed', async () => {
+    posted.length = 0;
+    const r = await callTool('add_menu_item', { parentId: 43, itemTitle: 'Still Visible', pageId: 1057 });
+    assert.equal(r.isError, false, r.content[0].text);
+    assert.equal(posted.filter(p => p.url === '/menu/5/item').length, 1);
+});
+
+test('adding below the deepest rendered level is refused, and names the parent chain', async () => {
+    posted.length = 0;
+    const r = await callTool('add_menu_item', { parentId: 44, itemTitle: 'Invisible', pageId: 1057 });
+    assert.equal(r.isError, true);
+    assert.match(r.content[0].text, /would sit at level 6/);
+    assert.match(r.content[0].text, /D0 > D1 > D2 > D3 > D4/);
+    assert.equal(posted.length, 0, 'nothing may be written that renders nowhere');
+});
+
+test('moving a subtree is measured by its DEEPEST item, not the item moved', async () => {
+    posted.length = 0;
+    // Item 30 carries 31 -> 32 beneath it. Landing 30 at level 4 would put 32 at level 6.
+    const r = await callTool('update_menu_item', { id: 30, parentId: 42 });
+    assert.equal(r.isError, true);
+    assert.match(r.content[0].text, /everything beneath it/);
+    assert.equal(posted.length, 0);
+});
+
+test('moving that same subtree somewhere it fits is allowed', async () => {
+    posted.length = 0;
+    const r = await callTool('update_menu_item', { id: 30, parentId: 41 });
+    assert.equal(r.isError, false, r.content[0].text);
+    assert.equal(posted.filter(p => p.url === '/menu/5/item/30').length, 1);
+});
+
+// --- cycles ---------------------------------------------------------------------------------
+//
+// A cycle does not corrupt the file or throw — it quietly detaches the branch from the root,
+// so every page beneath it disappears from the navigation of every page at once.
+
+test('making an item its own parent is refused', async () => {
+    posted.length = 0;
+    const r = await callTool('update_menu_item', { id: 30, parentId: 30 });
+    assert.equal(r.isError, true);
+    assert.match(r.content[0].text, /cannot be its own parent/);
+    assert.equal(posted.length, 0);
+});
+
+test('moving an item under its own descendant is refused', async () => {
+    posted.length = 0;
+    const r = await callTool('update_menu_item', { id: 30, parentId: 32 });
+    assert.equal(r.isError, true);
+    assert.match(r.content[0].text, /sits BENEATH item 30/);
     assert.equal(posted.length, 0);
 });
 

@@ -347,10 +347,29 @@ namespace WebApplicationArch.content
             return d;
         }
 
+        /// <summary>
+        /// How many levels of nav are rendered. Top-level sections are depth 0, so 5 allows
+        /// Section > Group > Subgroup > Sub-subgroup > Page.
+        ///
+        /// A cap exists because sitemenu.json is written by four clients (the tree editor, the
+        /// in-page editor, the MCP tools, and hand edits) and none of them owns the file. A
+        /// malformed parent chain must degrade to a shallower menu, never to a renderer that
+        /// walks forever -- this runs inside a whole-site render that already has 471 pages
+        /// and a 900 s ceiling to fit into.
+        ///
+        /// Kept in sync with MAX_MENU_DEPTH in api/mcp/src/tools/navigation.js, which refuses
+        /// to CREATE what this would refuse to render.
+        /// </summary>
+        public const int MaxNavDepth = 5;
+
         // Builds a <nav> from sitemenu.json. Defensive: handles the flat
         // react-dnd-treeview shape (id/parent/text with pageName possibly under .data),
         // and returns "" on any parse trouble (nav is enhancement, not SEO-critical).
-        private static string BuildNav(string menuJson, string domain)
+        //
+        // Nests to MaxNavDepth. This was two hard-coded loops until 2026-08-12, which silently
+        // dropped every grandchild -- the data model has always carried arbitrary depth, since
+        // an item names its parent and nothing bounds that chain.
+        public static string BuildNav(string menuJson, string domain)
         {
             if (string.IsNullOrWhiteSpace(menuJson)) return "";
             JArray items;
@@ -369,38 +388,80 @@ namespace WebApplicationArch.content
                     ? $"https://www.{domain}/"
                     : $"https://www.{domain}/{Slug(pageName)}/";
 
+            // Index children by parent id once. Document order within a parent is preserved,
+            // which is what the tree editor's drag-to-reorder actually writes -- sibling order
+            // IS array order, there is no sort key.
+            var byParent = new Dictionary<string, List<JToken>>(StringComparer.Ordinal);
+            foreach (var it in items)
+            {
+                if (it == null) continue;
+                var p = it["parent"]?.ToString() ?? "0";
+                if (!byParent.TryGetValue(p, out var bucket))
+                    byParent[p] = bucket = new List<JToken>();
+                bucket.Add(it);
+            }
+
+            // Every id renders at most once. This is what makes a malformed file safe: an item
+            // that is its own parent, or a duplicated id, is skipped on the second visit rather
+            // than recursed into. The depth cap is the second line of defence.
+            var rendered = new HashSet<string>(StringComparer.Ordinal);
+
+            string RenderLevel(string parentId, int depth)
+            {
+                if (depth >= MaxNavDepth) return "";
+                if (!byParent.TryGetValue(parentId, out var children)) return "";
+
+                var level = new StringBuilder();
+                foreach (var item in children)
+                {
+                    var id = item["id"]?.ToString();
+                    if (string.IsNullOrEmpty(id) || !rendered.Add(id)) continue;
+
+                    var label = Enc(item["text"]?.ToString() ?? "");
+                    var pageName = PageName(item);
+                    var childHtml = RenderLevel(id, depth + 1);
+
+                    // Below the top level an item earns its place by going somewhere: it links
+                    // to a page, or it heads a group of items that do. A pageless, childless
+                    // entry at depth 1+ is an editing leftover.
+                    //
+                    // Top-level items are exempt: a site may deliberately carry an empty
+                    // section, and dropping those would change menus that render correctly
+                    // today.
+                    if (depth > 0 && string.IsNullOrEmpty(pageName) && childHtml.Length == 0)
+                        continue;
+
+                    // Items are frequently pages in their own right rather than mere group
+                    // headings -- ldsfaithincrisis's whole menu is two of them. Rendering those
+                    // as a bare <span> makes the navigation unclickable, so link whenever the
+                    // item has a page and fall back to a heading only when it does not. This
+                    // holds at every depth, including a section that has children AND a page.
+                    var anchor = !string.IsNullOrEmpty(pageName)
+                        ? $"<a href=\"{Href(pageName)}\">{label}</a>"
+                        : $"<span class=\"nav-section\">{label}</span>";
+
+                    if (childHtml.Length == 0)
+                    {
+                        level.AppendLine($"<li>{anchor}</li>");
+                    }
+                    else
+                    {
+                        level.AppendLine($"<li>{anchor}");
+                        level.AppendLine("<ul>");
+                        level.Append(childHtml);
+                        level.AppendLine("</ul>");
+                        level.AppendLine("</li>");
+                    }
+                }
+                return level.ToString();
+            }
+
+            var top = RenderLevel("0", 0);
+            if (top.Length == 0) return "";
+
             var sb = new StringBuilder();
             sb.AppendLine("<nav class=\"menuContents\" aria-label=\"Site navigation\"><ul>");
-            var top = items.Where(i => (i["parent"]?.ToString() ?? "0") == "0").ToList();
-            foreach (var section in top)
-            {
-                var label = Enc(section["text"]?.ToString() ?? "");
-                var sectionPage = PageName(section);
-
-                // Top-level items are frequently pages in their own right rather than mere
-                // group headings -- ldsfaithincrisis's whole menu is two of them. Rendering
-                // those as a bare <span> makes the entire navigation unclickable, so link
-                // whenever the item has a page and fall back to a heading only when it does
-                // not.
-                if (!string.IsNullOrEmpty(sectionPage))
-                    sb.AppendLine($"<li><a href=\"{Href(sectionPage)}\">{label}</a>");
-                else
-                    sb.AppendLine($"<li><span class=\"nav-section\">{label}</span>");
-
-                var sid = section["id"]?.ToString();
-                var children = items.Where(i => i["parent"]?.ToString() == sid && !string.IsNullOrEmpty(PageName(i))).ToList();
-                if (children.Count > 0)
-                {
-                    sb.AppendLine("<ul>");
-                    foreach (var child in children)
-                    {
-                        var ctext = Enc(child["text"]?.ToString() ?? "");
-                        sb.AppendLine($"<li><a href=\"{Href(PageName(child))}\">{ctext}</a></li>");
-                    }
-                    sb.AppendLine("</ul>");
-                }
-                sb.AppendLine("</li>");
-            }
+            sb.Append(top);
             sb.AppendLine("</ul></nav>");
             return sb.ToString();
         }

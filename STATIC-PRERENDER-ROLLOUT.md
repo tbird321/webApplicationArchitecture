@@ -475,42 +475,48 @@ real fork in the road and worth an explicit decision rather than drifting into o
 
 ## Stage 5 — N-depth menu nesting
 
-**Deliberately last.** It is a feature change, not a migration step, and it touches the one thing
-every page on every site renders.
+**Public renderers done 2026-08-12 (not yet deployed). Admin UI deliberately deferred.**
 
-### Where it stands today
+The data model never had a depth limit: `sitemenu.json` items carry a `parent` id, so the tree has
+always been fully general. Only the renderers were flat.
 
-The menu is capped at **two levels**. Both renderers hard-code it:
-
-- `StaticPageRenderer.BuildNav` walks top-level items (`parent == "0"`), then their direct children,
-  and stops. A grandchild in `sitemenu.json` is silently dropped.
-- The SPA's `NestedDynamicMenu` renders one `DynamicMenu` per top-level item with a single
-  `.dropdown-content` layer.
-- The CSS in `page-layout.css` styles exactly `> ul > li > ul` — one dropdown level.
-
-The data model already supports arbitrary depth: `sitemenu.json` items carry a `parent` id, so the
-tree is fully general. Only the two renderers and the CSS are flat.
-
-### What it takes
+### What changed
 
 | Piece | Change |
 |---|---|
-| `BuildNav` (C#) | Replace the two hard-coded loops with a recursive walk over the parent/child map. Guard against cycles and cap depth (say 5) so a malformed menu cannot hang the renderer |
-| `Build-MenuNav` (PowerShell) | Same change, or retire the duplicate — see below |
-| `page-layout.css` | Replace `> ul > li > ul` with rules for nested submenus: level 2+ opens to the side (`left:100%; top:0`) rather than below, using `li:hover > ul` at any depth |
-| `NestedDynamicMenu.jsx` | Recurse, so the admin preview matches the published site |
-| Menu editor | Confirm the tree editor allows dragging to depth 3+; it uses `react-dnd-treeview`, which supports it |
+| `StaticPageRenderer.BuildNav` | Now a recursive walk over a parent→children map, public so it can be tested directly. `MaxNavDepth = 5`. Every id renders at most once, so a self-parenting or duplicated item is skipped rather than recursed into |
+| `Build-MenuNav` (PowerShell) | Split into `Build-MenuNav` + recursive `Build-MenuLevel`, byte-identical output to the C# renderer. `Get-MenuParentId` was added so an item written with no `parent` property is top-level in *both* renderers |
+| `page-layout.css` | Depth-agnostic submenu rules (`.menuContents ul ul`, `li:hover > ul`). Level 1 drops below its parent; level 2+ flies out sideways. A `:has(> ul)` chevron marks parents that have a flyout |
+| `navigation.js` (MCP) | `MAX_MENU_DEPTH` matching the renderer. Refuses a placement the renderer would truncate, an item parented to itself, and a move under an own descendant. Moving a subtree is measured by its **deepest** descendant |
+| `StaticRenderNavTests` | 22 tests: depth, ordering, cycles, duplicate ids, malformed JSON, plus drift checks pinning the PowerShell cap and the MCP cap to `MaxNavDepth` |
 
-### Worth folding in at the same time
+Two bugs fell out of the old two-loop version and are fixed with it:
 
-`BuildNav` (C#) and `Build-MenuNav` (PowerShell) are **two implementations of the same logic**, and
-this rollout has already turned up four bugs caused by exactly that pattern. Before adding recursion
-to both, collapse them: have the backfill call the same rendering path as the save hook, or drop the
-PowerShell renderer once the C# `RegenerateAllStaticPages` is proven.
+- A depth-1 item without a `pageName` was dropped **along with everything beneath it**. Group
+  headings are exactly that shape, so most three-level menus would have lost a whole branch. An
+  item is now kept if it has a page *or* has children.
+- A top-level item's grandchildren were dropped silently — no log, no error, nothing to notice.
 
-> **Risk: low, but sitewide.** Every page carries the nav. Do it after stage 4, with one site
-> re-rendered and eyeballed before the rest.
-> **Rollback:** re-run the backfill from the previous commit.
+### Still flat, on purpose
+
+The **admin UI** was left at two levels: `DynamicMenu` renders leaves without recursing, and
+`TreeView`'s "Add Menu Item" parents a new node to the *selected node's parent* when the selection
+is itself a child, so depth 3 is reachable only by dragging. The consequence is limited to the
+admin's own preview — every public site serves prerendered HTML. Menus are administered through the
+MCP tools, which nest to the full five levels.
+
+### Known landmine, untouched
+
+`PageContainer.handleSaveMenu` writes the **nested** `menuItems` tree straight back to
+`sitemenu.json` with no flatten step, so items saved from the in-page menu editor lose their
+`parent` field entirely. `BuildNav` reads `parent ?? "0"`, so on the next render every item becomes
+a top-level section and every child disappears. This predates the depth work and is unrelated to it,
+but going three levels deep makes the blast radius bigger. Fix before that editor is used again.
+
+> **Risk: low, but sitewide.** Every page carries the nav.
+> **Not yet deployed.** Deploying the Lambda re-renders on the next `sitemenu.json` write; edit one
+> site's menu and eyeball it before touching the rest.
+> **Rollback:** redeploy the previous commit; the menu files themselves are unchanged.
 
 ---
 

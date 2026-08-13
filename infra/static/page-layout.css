@@ -54,16 +54,28 @@ code{font-family:source-code-pro,Menlo,Monaco,Consolas,'Courier New',monospace}
 .menuContents{position:relative;z-index:1000;max-width:100%}
 .menuContents ul{list-style:none;margin:0;padding:0}
 .menuContents > ul{display:flex;flex-wrap:wrap}
-.menuContents > ul > li{position:relative;flex:1 1 auto;white-space:nowrap}
+/* Every li anchors its own submenu. Written depth-agnostically on purpose: BuildNav
+   nests to StaticPageRenderer.MaxNavDepth, so a rule that names "> ul > li > ul"
+   renders level 3 into the HTML and then hides it forever. */
+.menuContents li{position:relative}
+.menuContents > ul > li{flex:1 1 auto;white-space:nowrap}
 /* Top-level entries: a link when the item points at a page, a plain heading when it is
    only a group label. Both need the same box so the bar does not jump between them. */
 .menuContents .nav-section{display:block;padding:10px;cursor:default}
 .menuContents > ul > li > a{display:block;padding:10px;text-decoration:none;color:inherit}
 .menuContents > ul > li > a:hover,.menuContents > ul > li > a:focus{text-decoration:underline}
-.menuContents > ul > li > ul{display:none;position:absolute;left:0;background-color:#f9f9f9;min-width:160px;box-shadow:0 8px 16px 0 rgba(0,0,0,.2);z-index:1}
-.menuContents > ul > li:hover > ul,.menuContents > ul > li:focus-within > ul{display:block}
-.menuContents > ul > li > ul a{color:#000;padding:12px 16px;text-decoration:none;display:block;white-space:nowrap}
-.menuContents > ul > li > ul a:hover,.menuContents > ul > li > ul a:focus{background-color:#f1f1f1}
+/* Submenus at any depth. Level 1 drops below its top-level parent; level 2 and deeper
+   fly out to the side, because dropping them below would cover their own parent list. */
+.menuContents ul ul{display:none;position:absolute;background-color:#f9f9f9;min-width:160px;box-shadow:0 8px 16px 0 rgba(0,0,0,.2);z-index:1}
+.menuContents > ul > li > ul{top:100%;left:0}
+.menuContents ul ul ul{top:0;left:100%}
+.menuContents li:hover > ul,.menuContents li:focus-within > ul{display:block}
+.menuContents ul ul a,.menuContents ul ul .nav-section{color:#000;padding:12px 16px;text-decoration:none;display:block;white-space:nowrap}
+.menuContents ul ul a:hover,.menuContents ul ul a:focus{background-color:#f1f1f1}
+/* A flyout gives no hint that it exists, unlike a top-level item sitting under a visible
+   bar. Mark the parents that have one. :has() degrades to no marker on older browsers,
+   which is exactly the behaviour before this rule existed. */
+.menuContents ul ul li:has(> ul) > a::after,.menuContents ul ul li:has(> ul) > .nav-section::after{content:"\203A";float:right;padding-left:12px}
 
 /* ---- article container --------------------------------------------------- */
 .articleContents{padding-left:15%;padding-right:15%}
