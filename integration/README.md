@@ -8,15 +8,49 @@ human-paced delays throughout.
 1. You run the script.
 2. It launches **your Chrome** (a dedicated profile) and you **log in yourself**.
 3. It reads `posts.json`, picks the **next un-posted article**, and posts it to your
-   groups **one group at a time** — a separate native post in each group, so N groups
-   means N posts. For each group it:
+   groups **one group at a time** — a separate native post in each. A run takes only the
+   next **10 groups** (`MaxGroupsPerRun`, or `--max N`) and stops, so a 25-group article
+   is spread over three sittings instead of one burst. For each group it:
    - goes to the group, opens the composer, attaches the optional image,
    - **pastes the post in one Ctrl+V** — body, blank line, then the article URL as the
      last line, which is what Facebook builds its preview card from,
    - **pauses 5–10s** (randomized), then clicks **Post**,
    - advances once the post box closes, which is how it confirms the post landed.
-4. The article is marked posted and the run **stops** (one article per run). Schedule
-   it (e.g. daily via Task Scheduler) to advance one article at a time.
+4. Progress is written **per group**, so rerunning later continues with the next 10. Once
+   every group is covered the article is marked done and the run moves on to the next
+   article. Schedule it (e.g. daily via Task Scheduler) to work through the list.
+
+### Two kinds of failure, handled differently
+
+A group that can't be posted to is **not** the same thing as Facebook limiting the account,
+and conflating them is expensive: one bad group sits at the front of the un-posted list and
+would block every run from then on.
+
+| What happens | What the run does |
+|---|---|
+| **No composer in a group** — admins-only posting, membership lapsed, group gone | **Skips that group** and moves to the next; the next group fills its slot in the set |
+| Composer opens but the text won't land | Skips that group |
+| **3 groups in a row** with no usable composer | **Stops** — that pattern is account-wide, not per-group (`StopAfterConsecutiveFailures`) |
+| **A dialog shows rate-limit wording** | **Stops immediately** — Facebook said so outright |
+| The post box never closes after Post | **Stops** — the submit didn't go through |
+
+Because the cap counts **posts made**, not groups attempted, a skipped group costs the run
+nothing: `--max 10` still produces 10 posts if there are 10 postable groups left.
+
+A skip tells you why, and is written to `failed-groups.log` with the reason:
+```
+  ! No composer in this group — only admins can post here. Skipping it.
+```
+A stop tells you nothing further was attempted:
+```
+! Stopped early: Facebook is limiting posts right now (it said "action was blocked").
+  Nothing else was attempted. Give it a few hours before rerunning —
+  progress is saved per group, so the next run resumes at the group it stopped on.
+```
+
+Screenshots are wiped at the end of a **clean** run only. If anything was skipped, both
+`screenshots/` and `failed-groups.log` are kept — a failure report with its evidence deleted
+is useless.
 
 > **Why one post per group?** Facebook's "post to more groups" picker lets you hook ~8
 > groups onto one post, but ticking them in quick succession is exactly what its
@@ -91,7 +125,8 @@ Log into Facebook in the Chrome window, then press **Enter**. The session persis
 
 Easiest: **double-click `start.cmd`** and pick **3) Run**. Or:
 ```
-run.cmd                 (one post per group, auto-posts)
+run.cmd                 (next 10 groups of the next article, auto-posts)
+run.cmd -- --max 5      (take only 5 this run; --max 0 means no cap)
 run.cmd -- --dry-run    (fill composers, never post, never mark — great for testing)
 run.cmd -- links        (rewrite legacy ?page= links to canonical; no browser needed)
 ```
@@ -182,9 +217,11 @@ gone, and it would otherwise post a link to the homepage.
 > (H1 → italic lede → body H2s → a `Verdict` H2). Articles that don't will still post the
 > title + first paragraph.
 
-The runner takes the **first article whose `PostedAtUtc` is null**, posts it, marks it,
-and stops. It ships with a single article so you can validate the flow end-to-end
-before building out the full list.
+The runner takes the **first article whose `PostedAtUtc` is null** and posts it to the next
+`MaxGroupsPerRun` groups it hasn't reached yet. `PostedGroups` on each article records which
+ones are done, written immediately after every post, so a Ctrl+C, a failure, or a finished
+set all resume the same way — no group is ever posted twice. `PostedAtUtc` is set only once
+every group is covered.
 
 ## Multiple lists (apologetics, ldsdoctrines, …)
 

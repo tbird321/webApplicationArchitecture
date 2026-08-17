@@ -3,8 +3,16 @@ using Microsoft.Playwright;
 
 namespace FacebookPoster;
 
-/// <summary>Outcome of waiting for you to click Post.</summary>
+/// <summary>Outcome of waiting for the post box to close.</summary>
 public enum PostWait { Posted, Skipped, TimedOut }
+
+/// <summary>
+/// Why a group's composer did or didn't get filled. The distinction matters: a group with
+/// no composer is a problem with THAT GROUP (admins-only posting, membership lapsed, a tab
+/// that isn't the discussion feed) and the run should move on, whereas Facebook restricting
+/// the account affects every group and the run must stop.
+/// </summary>
+public enum PrepareOutcome { Prepared, NoComposer, Restricted }
 
 /// <summary>
 /// Drives Facebook's group composer, ONE GROUP AT A TIME: a fresh native post in each
@@ -95,10 +103,11 @@ public sealed class Poster
     };
 
     /// <summary>
-    /// Compose one post in one group. Returns false if the composer couldn't be opened
-    /// or filled. Does NOT submit — you click Post.
+    /// Compose one post in one group. Reports whether it filled the composer, couldn't find
+    /// one (a per-group problem — skip it), or hit an account restriction (stop the run).
+    /// Does not submit; see <see cref="ClickPostAsync"/>.
     /// </summary>
-    public async Task<bool> PrepareAsync(IPage page, Article article, Group group, string body)
+    public async Task<PrepareOutcome> PrepareAsync(IPage page, Article article, Group group, string body)
     {
         Console.WriteLine($"\n→ [{article.Id}] composing in: {group.Name}");
         await page.GotoAsync(group.Url, new() { WaitUntil = WaitUntilState.DOMContentLoaded });
@@ -107,11 +116,37 @@ public sealed class Poster
         var trigger = await FirstVisible(page, ComposerTriggers);
         if (trigger is null)
         {
-            Console.WriteLine("  ! Couldn't find the composer ('Write something') on this page.");
-            await Screenshot(page, article, "no-composer");
-            LogFailedGroup(article, group, "no-composer");
-            return false;
+            // Second look. The group feed renders lazily and some groups open on a tab other
+            // than Discussion, so one reload with a nudge down the page is worth a try before
+            // giving up — a composer that's merely slow shouldn't cost the group its turn.
+            Console.WriteLine("  · no composer on the first look — reloading the group feed…");
+            await page.GotoAsync(group.Url, new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+            await page.WaitForTimeoutAsync(2500);
+            try { await page.Mouse.WheelAsync(0, 350); await page.WaitForTimeoutAsync(700); await page.Mouse.WheelAsync(0, -350); } catch { }
+            trigger = await FirstVisible(page, ComposerTriggers, 8000);
         }
+
+        if (trigger is null)
+        {
+            await Screenshot(page, article, "no-composer");
+
+            // An account-level restriction shows up as a dialog and would hit every group, so
+            // that stops the run. Anything else is this group's own doing: skip it, but say
+            // what the page looked like so the plan can be corrected.
+            var restriction = await DetectBlockAsync(page);
+            if (restriction is not null)
+            {
+                Console.WriteLine($"  ! Facebook is restricting posting (\"{restriction}\").");
+                LogFailedGroup(article, group, $"restricted:{restriction}");
+                return PrepareOutcome.Restricted;
+            }
+
+            var hint = await WhyNoComposerAsync(page);
+            Console.WriteLine($"  ! No composer in this group{(hint is null ? "" : $" — {hint}")}. Skipping it.");
+            LogFailedGroup(article, group, hint is null ? "no-composer" : $"no-composer:{hint}");
+            return PrepareOutcome.NoComposer;
+        }
+
         await MoveAndClickAsync(page, trigger);
 
         // Wait for the "Create post" dialog to actually open before hunting for its editor,
@@ -127,10 +162,10 @@ public sealed class Poster
         var textbox = await FirstVisible(page, Textboxes);
         if (textbox is null)
         {
-            Console.WriteLine("  ! Composer opened but no text box was found.");
+            Console.WriteLine("  ! Composer opened but no text box was found. Skipping this group.");
             await Screenshot(page, article, "no-textbox");
             LogFailedGroup(article, group, "no-textbox");
-            return false;
+            return PrepareOutcome.NoComposer;
         }
 
         await StepPause(page);
@@ -145,10 +180,10 @@ public sealed class Poster
 
         if (!await FillComposerAsync(page, textbox, BuildBody(body, article.Link)))
         {
-            Console.WriteLine("  ! Composer text box found but typing didn't land (Lexical editor).");
+            Console.WriteLine("  ! Composer text box found but nothing landed in it. Skipping this group.");
             await Screenshot(page, article, "empty-textbox");
             LogFailedGroup(article, group, "empty-textbox");
-            return false;
+            return PrepareOutcome.NoComposer;
         }
         await StepPause(page);
 
@@ -162,8 +197,36 @@ public sealed class Poster
         }
 
         await Screenshot(page, article, "prepared");
-        Console.WriteLine("  ✓ composer filled. Give it a look, then post it yourself.");
-        return true;
+        Console.WriteLine("  ✓ composer filled.");
+        return PrepareOutcome.Prepared;
+    }
+
+    /// <summary>
+    /// Best-effort reason a group shows no composer, for the console and the fail log. Uses
+    /// narrow, targeted locators rather than a page-text scan: these feeds are full of members
+    /// discussing bans and permissions, and a text match would invent reasons. Returns null
+    /// when nothing recognizable is on the page.
+    /// </summary>
+    private static async Task<string?> WhyNoComposerAsync(IPage page)
+    {
+        var probes = new (string Selector, string Reason)[]
+        {
+            ("div[role='button']:has-text('Join group'), [aria-label='Join group']", "not a member — there's a Join button"),
+            ("div[role='button']:has-text('Cancel request')",                        "membership request is still pending"),
+            ("[aria-label*='Only admins'], :text('Only admins can post')",           "only admins can post here"),
+            ("[aria-label*='Visit group'], div[role='button']:has-text('Visit group')", "landed on a preview, not the group feed"),
+            (":text('This content isn')",                                            "content unavailable — group may be gone or private"),
+        };
+
+        foreach (var (sel, reason) in probes)
+        {
+            try
+            {
+                if (await page.Locator(sel).First.IsVisibleAsync()) return reason;
+            }
+            catch { /* selector unsupported on this page shape — try the next */ }
+        }
+        return null;
     }
 
     /// <summary>

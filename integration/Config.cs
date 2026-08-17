@@ -28,6 +28,18 @@ public sealed class Config
     /// it's doing and to keep the pacing human. Set to 0 to disable.</summary>
     public int PrePostDelayMs { get; set; } = 3000;
 
+    /// <summary>How many groups a single run will post to before stopping, so an article is
+    /// spread over several sittings instead of hitting every group at once. The run posts the
+    /// next this-many un-posted groups and exits; rerun to take the following set. Progress is
+    /// recorded per group, so nothing is repeated. 0 means no limit; --max N overrides it.</summary>
+    public int MaxGroupsPerRun { get; set; } = 10;
+
+    /// <summary>Stop the run after this many groups in a row fail to give a usable composer.
+    /// One such group is its own problem (admins-only posting, membership lapsed) and is just
+    /// skipped; several in a row means the account is restricted, and continuing makes it
+    /// worse. Facebook's explicit rate-limit notice stops the run immediately regardless.</summary>
+    public int StopAfterConsecutiveFailures { get; set; } = 3;
+
     /// <summary>Click the composer's Post button automatically once it's filled. Set false to
     /// go back to a fully human-in-the-loop run, where the tool prepares the post and waits
     /// for you to submit it yourself. Never applies to --dry-run.</summary>

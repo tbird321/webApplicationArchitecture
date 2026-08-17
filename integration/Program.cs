@@ -4,10 +4,13 @@ using Microsoft.Playwright;
 // ── Facebook group publishing assistant (human-in-the-loop) ───────────────────
 //
 //   One run = the NEXT un-posted article from posts.json, posted ONE GROUP AT A TIME:
-//   a separate native post in each of your groups, so the run makes as many posts as
-//   there are groups left. Per group it pastes the post in, pauses, clicks Post, and
-//   advances once the post box closes. When every group is done the article is marked
-//   and the run stops. Schedule it (e.g. daily) to advance one article at a time.
+//   a separate native post in each group. Per group it pastes the post in, pauses, clicks
+//   Post, and advances once the post box closes. A run stops after MaxGroupsPerRun groups
+//   (10 by default, --max N to override), so one article is spread over several sittings;
+//   rerun to take the next set. When every group is covered the article is marked done.
+//
+//   ANY failure aborts the run — a composer that won't fill or a post that doesn't submit
+//   is usually Facebook throttling the account, and continuing makes that worse.
 //
 //   The "Add groups" picker is deliberately NOT used: hooking many groups onto one
 //   post is what trips Facebook's rapid-selection rate limit.
@@ -149,6 +152,12 @@ if (remaining.Count == 0)
     return;
 }
 
+// Cap the run: take only the next MaxGroupsPerRun groups (--max N overrides), so an article
+// is spread over several sittings rather than hitting every group in one burst. Progress is
+// recorded per group, so the next run continues with the following set.
+int maxThisRun = GetIntOption(argv, "--max") ?? cfg.MaxGroupsPerRun;
+int target = maxThisRun > 0 ? Math.Min(maxThisRun, remaining.Count) : remaining.Count;
+
 // One group per post, always: a separate native post in each group instead of hooking
 // many onto one via the "Add groups" picker (which is what trips the rate limit).
 string modeLabel = dryRun ? "DRY-RUN"
@@ -156,11 +165,12 @@ string modeLabel = dryRun ? "DRY-RUN"
                  : "ONE POST PER GROUP (you click Post)";
 
 Console.WriteLine($"\nNext article: [{article.Id}]");
-if (alreadyDone > 0)
-    Console.WriteLine($"  {alreadyDone} group(s) already posted (skipping). {remaining.Count} left.");
-else
-    Console.WriteLine($"  {remaining.Count} group(s) to post.");
-Console.WriteLine($"  {remaining.Count} separate post(s) this run — one per group. Mode: {modeLabel}.");
+Console.WriteLine(alreadyDone > 0
+    ? $"  {alreadyDone} of {plan.Groups.Count} group(s) already posted; {remaining.Count} left."
+    : $"  {remaining.Count} group(s) to post.");
+Console.WriteLine(target < remaining.Count
+    ? $"  This run: up to {target} post(s) (cap {maxThisRun}) — the other {remaining.Count - target} wait for a later run. Mode: {modeLabel}."
+    : $"  This run: up to {target} post(s), one per group. Mode: {modeLabel}.");
 
 // Post text: hand-written override if present, otherwise fetched from the live page.
 string body = article.Message ?? "";
@@ -200,6 +210,7 @@ if (cleanArtifacts) PurgeArtifacts(cfg, resetFailLog: true);
 var poster = new Poster(cfg);
 var rng = new Random();
 int posted = 0, skipped = 0;
+string? stopReason = null;   // set when the run aborts early instead of finishing its set
 
 // Record a group as posted and persist immediately, so progress survives an interrupt.
 void MarkGroupPosted(Group g)
@@ -211,14 +222,18 @@ void MarkGroupPosted(Group g)
     }
 }
 
-for (int i = 0; i < remaining.Count; i++)
+// Walk the un-posted groups until the run has MADE its quota of posts. Counting posts rather
+// than attempts means a group that can't be posted to (admins-only, membership lapsed) costs
+// the run nothing — it's skipped and the next group takes its place in this set.
+int made = 0, consecutiveFailures = 0;
+
+for (int i = 0; i < remaining.Count && made < target; i++)
 {
     var group = remaining[i];
 
-    // One group at a time: no per-group Enter. The composer fills, you click Post, and we
-    // advance the moment the post box disappears. Spacing comes from your own Post clicks
-    // plus the pauses below.
-    Console.WriteLine($"\n— Group {i + 1}/{remaining.Count}: {group.Name}");
+    // One group at a time: the composer fills, Post is clicked, and we advance the moment
+    // the post box disappears.
+    Console.WriteLine($"\n— Group {made + 1}/{target}: {group.Name}");
 
     // A randomized beat before every post — the pause a person takes before starting one,
     // rather than jumping into the next group the instant the last box closes. It applies to
@@ -235,8 +250,30 @@ for (int i = 0; i < remaining.Count; i++)
     if (cfg.PrePostDelayMs > 0)
         await page.WaitForTimeoutAsync(cfg.PrePostDelayMs);
 
-    bool prepared = await poster.PrepareAsync(page, article, group, body);
-    if (!prepared) { skipped++; continue; }
+    var outcome = await poster.PrepareAsync(page, article, group, body);
+
+    // Facebook restricting the ACCOUNT affects every group, so the run stops.
+    if (outcome == PrepareOutcome.Restricted)
+    {
+        skipped++;
+        stopReason = $"Facebook is restricting posting from this account (seen in \"{group.Name}\")";
+        break;
+    }
+
+    // No composer in THIS group is that group's own problem — admins-only posting, a lapsed
+    // membership, a group that's gone. Skip it and let the next group take its place. But if
+    // several in a row fail, that's no longer per-group: stop rather than keep hammering.
+    if (outcome == PrepareOutcome.NoComposer)
+    {
+        skipped++;
+        if (++consecutiveFailures >= Math.Max(1, cfg.StopAfterConsecutiveFailures))
+        {
+            stopReason = $"{consecutiveFailures} groups in a row had no usable composer — that looks account-wide, not per-group";
+            break;
+        }
+        continue;
+    }
+    consecutiveFailures = 0;
 
     if (dryRun)
     {
@@ -245,6 +282,7 @@ for (int i = 0; i < remaining.Count; i++)
         Console.WriteLine("  (dry-run: not marking posted)");
         Console.Write("  → Discard the post yourself, then press [Enter] for the next group… ");
         Console.ReadLine();
+        made++;
         continue;
     }
 
@@ -277,22 +315,30 @@ for (int i = 0; i < remaining.Count; i++)
     var block = await poster.DetectBlockAsync(page);
     if (block is not null)
     {
-        Console.WriteLine($"\n! Facebook is blocking posts right now (\"{block}\").");
-        Console.WriteLine("  Stopping this run. Progress is saved — rerun later and it resumes at this group.");
         if (result == PostWait.Posted) { MarkGroupPosted(group); posted++; } else skipped++;
+        stopReason = $"Facebook is limiting posts right now (it said \"{block}\")";
         break;
     }
 
+    // The post box never closed: the submit didn't go through. Same conclusion — stop.
     if (result == PostWait.TimedOut)
     {
         skipped++;
-        Console.WriteLine("  · timed out waiting for the post box to close — skipping.");
-        continue;
+        stopReason = $"the post box never closed in \"{group.Name}\" — the post didn't go through";
+        break;
     }
 
     MarkGroupPosted(group);
     posted++;
+    made++;
     Console.WriteLine($"  ✓ posted to {group.Name} ({article.PostedGroups.Count}/{plan.Groups.Count}).");
+}
+
+if (stopReason is not null)
+{
+    Console.WriteLine($"\n! Stopped early: {stopReason}.");
+    Console.WriteLine("  Nothing else was attempted. Give it a few hours before rerunning —");
+    Console.WriteLine($"  progress is saved per group, so the next run resumes at the group it stopped on.");
 }
 
 // Complete when the recorded posts cover every group — not just this run's count, so a
@@ -307,14 +353,22 @@ if (!dryRun && complete)
 else if (!dryRun)
 {
     int left = plan.Groups.Count - article.PostedGroups.Count;
-    Console.WriteLine($"\n[{article.Id}] still has {left} group(s) to go; rerun to finish it.");
+    Console.WriteLine($"\n[{article.Id}] still has {left} group(s) to go; rerun to take the next set.");
 }
 
 Console.WriteLine($"\nRun finished. Group posts completed: {posted}, skipped/failed: {skipped}.");
 
-// Tidy up after ourselves: remove this run's screenshots + temp files. The fail log
-// (failed-groups.log) is kept as the post-run report unless there were no failures.
-if (cleanArtifacts) PurgeArtifacts(cfg, resetFailLog: false);
+// Tidy up after ourselves: remove this run's screenshots + temp files. But KEEP them when
+// anything failed — the failure screenshots are the whole diagnosis, and deleting them is
+// how a "no composer" report ends up with no evidence attached to it.
+if (cleanArtifacts && skipped == 0 && stopReason is null)
+{
+    PurgeArtifacts(cfg, resetFailLog: false);
+}
+else if (cleanArtifacts)
+{
+    Console.WriteLine($"  (kept screenshots in {cfg.ScreenshotDir} and the fail log — {skipped} group(s) didn't post.)");
+}
 
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -374,6 +428,11 @@ static string? GetOption(string[] args, string name)
             return args[i + 1];
     return null;
 }
+
+// Numeric option, e.g. `--max 10`. Null when absent or not a number, so the config default
+// stands rather than a typo silently meaning "no limit".
+static int? GetIntOption(string[] args, string name) =>
+    int.TryParse(GetOption(args, name), out var v) ? v : null;
 
 // "apologetics"            -> <cwd>/posts.apologetics.json
 // "posts.ldsdoctrines.json"-> that file as given
