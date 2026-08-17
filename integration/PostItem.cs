@@ -3,15 +3,15 @@ using System.Text.Json.Serialization;
 
 namespace FacebookPoster;
 
-/// <summary>A group you post to. Name is needed because Facebook's "post to more
-/// groups" picker searches by name; Url is where the primary post is composed.</summary>
+/// <summary>A group you post to. Url is where the post is composed; Name is what the
+/// console and the validation report identify it by.</summary>
 public sealed class Group
 {
     public string Name { get; set; } = "";
     public string Url { get; set; } = "";
 }
 
-/// <summary>One article to promote, cross-posted to the plan's shared group list.</summary>
+/// <summary>One article to promote, posted once to each group in the plan's list.</summary>
 public sealed class Article
 {
     /// <summary>Stable id / slug (also used in screenshot names).</summary>
@@ -41,19 +41,14 @@ public sealed class Article
 }
 
 /// <summary>
-/// The whole posting plan: the shared groups, Facebook's per-post group cap, and the
-/// ordered list of articles. posts.json is the deterministic source of truth.
+/// The whole posting plan: the shared groups and the ordered list of articles.
+/// posts.json is the deterministic source of truth.
 /// </summary>
 public sealed class Plan
 {
-    /// <summary>You always post to these same groups, so they live here once.</summary>
+    /// <summary>You always post to these same groups, so they live here once. Each
+    /// article gets its own separate post in every one of them.</summary>
     public List<Group> Groups { get; set; } = new();
-
-    /// <summary>
-    /// How many groups Facebook lets you hook onto a single post (~8). One run posts
-    /// the next article as ceil(Groups / GroupsPerPost) posts, each hooking this many.
-    /// </summary>
-    public int GroupsPerPost { get; set; } = 8;
 
     /// <summary>Articles in the order you want them posted (one per scheduled run).</summary>
     public List<Article> Articles { get; set; } = new();

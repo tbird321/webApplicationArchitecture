@@ -3,13 +3,17 @@ using Microsoft.Playwright;
 
 namespace FacebookPoster;
 
-/// <summary>Outcome of waiting for you to click Post in single-group mode.</summary>
+/// <summary>Outcome of waiting for you to click Post.</summary>
 public enum PostWait { Posted, Skipped, TimedOut }
 
 /// <summary>
-/// Drives Facebook's group composer + "post to more groups" picker. In the intended
-/// (semi-auto) mode it only PREPARES the post — fills text/link/image and tries to
-/// hook the batch's other groups — then leaves YOU to verify and click "Post".
+/// Drives Facebook's group composer, ONE GROUP AT A TIME: a fresh native post in each
+/// group. The "post to more groups" picker is deliberately not used — hooking many
+/// groups onto a single post is what trips Facebook's rapid-selection rate limit, and
+/// a native per-group post also reaches each group's feed on its own terms.
+///
+/// It only PREPARES the post — fills text/link/image — then leaves YOU to verify and
+/// click "Post".
 ///
 /// Facebook's DOM is obfuscated and changes often, so selectors are candidate lists
 /// matched by role/aria/visible-text. Expect to tune these; --dry-run + the
@@ -24,19 +28,22 @@ public sealed class Poster
     /// per run and reused across every group instead of re-fetched for each post.</summary>
     private readonly Dictionary<string, string> _imageCache = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Clipboard permission is a context-level grant, so ask for it once per run
+    /// rather than before every group's paste.</summary>
+    private bool _clipboardGranted;
+
     public Poster(Config cfg) => _cfg = cfg;
 
-    /// <summary>Where groups that couldn't be auto-selected get recorded for review.</summary>
+    /// <summary>Where groups whose composer couldn't be prepared get recorded for review.</summary>
     private string FailLogPath => Path.Combine(Path.GetDirectoryName(_cfg.QueueFile) ?? ".", "failed-groups.log");
 
-    /// <summary>Append each un-selectable group (with the article and reason) to the fail log.</summary>
-    private void LogFailedGroups(Article article, IEnumerable<Group> groups, string reason)
+    /// <summary>Append a group we couldn't compose in (with the article and reason) to the fail log.</summary>
+    private void LogFailedGroup(Article article, Group group, string reason)
     {
         try
         {
             var stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            var lines = groups.Select(g => $"{stamp}\t[{article.Id}]\t{reason}\t{g.Name}\t{g.Url}");
-            File.AppendAllLines(FailLogPath, lines);
+            File.AppendAllLines(FailLogPath, new[] { $"{stamp}\t[{article.Id}]\t{reason}\t{group.Name}\t{group.Url}" });
         }
         catch (Exception ex)
         {
@@ -63,6 +70,17 @@ public sealed class Poster
         "div[role='dialog'] div[role='textbox']:not([aria-placeholder^='Comment'])",
     };
 
+    // The composer's submit button. Matched by aria-label / exact text only: a loose
+    // has-text('Post') also matches other composer chrome, and mis-clicking in a dialog
+    // that is about to publish is the one mistake with no undo.
+    private static readonly string[] PostButtons =
+    {
+        "div[role='dialog'] div[role='button'][aria-label='Post']",
+        "div[aria-label='Create post'] div[role='button'][aria-label='Post']",
+        "div[role='dialog'] [role='button'][aria-label='Post']",
+        "div[role='dialog'] div[role='button']:text-is('Post')",
+    };
+
     private static readonly string[] PhotoButtons =
     {
         "div[role='dialog'] [aria-label='Photo/video']",
@@ -76,42 +94,14 @@ public sealed class Poster
         "text=Photo",
     };
 
-    private static readonly string[] MoreGroupsButtons =
-    {
-        "div[role='dialog'] [aria-label='Add groups']",
-        "div[role='dialog'] div[role='button']:has-text('Add groups')",
-        "text=Add groups",
-        "text=Post to more groups",
-        "[aria-label*='more groups']",
-    };
-
-    // The picker's OWN search box — scoped to a dialog and to "groups" so it can never
-    // match Facebook's global top "Search Facebook" bar (typing there navigates the page).
-    private static readonly string[] GroupSearchBoxes =
-    {
-        "div[role='dialog'] input[aria-label='Search groups']",
-        "div[role='dialog'] input[placeholder='Search groups']",
-        "div[role='dialog'] input[aria-label*='Search groups']",
-        "div[role='dialog'] input[placeholder*='Search groups']",
-        "div[role='dialog'] input[type='search']",
-        "div[role='dialog'] input[aria-label*='Search']",
-    };
-
-    private static readonly string[] ConfirmButtons =
-    {
-        "div[role='dialog'] [aria-label='Done']",
-        "div[role='dialog'] div[role='button']:has-text('Done')",
-    };
-
     /// <summary>
-    /// Compose one post in the batch's first group and try to hook the rest. Returns
-    /// false if the composer couldn't be opened. Does NOT submit — you click Post.
+    /// Compose one post in one group. Returns false if the composer couldn't be opened
+    /// or filled. Does NOT submit — you click Post.
     /// </summary>
-    public async Task<bool> PrepareMultiAsync(IPage page, Article article, IReadOnlyList<Group> batch, string body)
+    public async Task<bool> PrepareAsync(IPage page, Article article, Group group, string body)
     {
-        var primary = batch[0];
-        Console.WriteLine($"\n→ [{article.Id}] composing in: {primary.Name}");
-        await page.GotoAsync(primary.Url, new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        Console.WriteLine($"\n→ [{article.Id}] composing in: {group.Name}");
+        await page.GotoAsync(group.Url, new() { WaitUntil = WaitUntilState.DOMContentLoaded });
         await Jitter(page);
 
         var trigger = await FirstVisible(page, ComposerTriggers);
@@ -119,6 +109,7 @@ public sealed class Poster
         {
             Console.WriteLine("  ! Couldn't find the composer ('Write something') on this page.");
             await Screenshot(page, article, "no-composer");
+            LogFailedGroup(article, group, "no-composer");
             return false;
         }
         await MoveAndClickAsync(page, trigger);
@@ -138,25 +129,17 @@ public sealed class Poster
         {
             Console.WriteLine("  ! Composer opened but no text box was found.");
             await Screenshot(page, article, "no-textbox");
+            LogFailedGroup(article, group, "no-textbox");
             return false;
         }
 
         await StepPause(page);
 
-        // Attach the image first — Facebook removes the Photo/video button once groups are
-        // hooked onto the post, but keeps "Add groups" available when an image is attached.
-        // Order: image → groups → text.
+        // Attach the image before typing: the Photo/video button sits in the composer's
+        // footer, which Facebook reflows once the box has content and a link preview.
         if (!string.IsNullOrWhiteSpace(article.ImagePath))
         {
             await AttachImage(page, article);
-            await StepPause(page);
-        }
-
-        // Hook the batch's other groups AFTER the image (if any). Facebook hides the
-        // "Add groups" control as soon as the composer has text (unless an image is attached).
-        if (batch.Count > 1)
-        {
-            await TryHookMoreGroups(page, article, batch.Skip(1).ToList());
             await StepPause(page);
         }
 
@@ -164,27 +147,126 @@ public sealed class Poster
         {
             Console.WriteLine("  ! Composer text box found but typing didn't land (Lexical editor).");
             await Screenshot(page, article, "empty-textbox");
+            LogFailedGroup(article, group, "empty-textbox");
             return false;
         }
         await StepPause(page);
 
         if (!string.IsNullOrWhiteSpace(article.Link))
         {
+            // The URL rides along in the paste as the last line; confirm it survived, then
+            // give Facebook time to render its preview card from it.
+            await EnsureLinkAtEndAsync(page, textbox, article.Link!);
             Console.WriteLine("  · waiting for link preview…");
             await page.WaitForTimeoutAsync(_cfg.LinkPreviewWaitMs);
         }
 
         await Screenshot(page, article, "prepared");
-        Console.WriteLine("  ✓ composer filled. Confirm the groups, then post it yourself.");
+        Console.WriteLine("  ✓ composer filled. Give it a look, then post it yourself.");
         return true;
     }
 
     /// <summary>
+    /// Click the composer's Post button after a randomized pause — the beat a person takes
+    /// to read what they wrote before submitting. Waits for the button to be ENABLED first
+    /// (Facebook disables it while an image upload or link preview is still resolving), then
+    /// re-resolves it after the pause in case the dialog re-rendered. Returns false if no
+    /// enabled Post button ever appeared, so the caller can hand the click back to you.
+    /// </summary>
+    public async Task<bool> ClickPostAsync(IPage page, Article article)
+    {
+        var btn = await FirstEnabled(page, PostButtons, 30000);
+        if (btn is null)
+        {
+            Console.WriteLine("  ! no enabled Post button found (still uploading, or the selector drifted).");
+            await Screenshot(page, article, "no-post-button");
+            return false;
+        }
+
+        int lo = Math.Max(0, _cfg.PreClickPostMinMs);
+        int wait = _rng.Next(lo, Math.Max(lo + 1, _cfg.PreClickPostMaxMs));
+        Console.WriteLine($"  · reading it over for {wait / 1000.0:0.#}s, then clicking Post…");
+        await page.WaitForTimeoutAsync(wait);
+
+        // Re-resolve: the pause is long enough for a preview card to land and re-render the
+        // dialog, which would leave the old handle detached.
+        btn = await FirstEnabled(page, PostButtons, 5000) ?? btn;
+        try
+        {
+            await MoveAndClickAsync(page, btn);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ! clicking Post failed ({ex.Message}) — click it yourself.");
+            await Screenshot(page, article, "post-click-failed");
+            return false;
+        }
+        Console.WriteLine("  · clicked Post.");
+        return true;
+    }
+
+    // Wording Facebook uses when it rate-limits posting. Matched ONLY inside a dialog/alert —
+    // these group feeds are full of members talking about being blocked, and scanning the
+    // whole page would abort the run on someone else's post text.
+    private static readonly string[] BlockMarkers =
+    {
+        "temporarily blocked",
+        "action was blocked",
+        "can't use this feature",
+        "cannot use this feature",
+        "we limit how often",
+        "try again later",
+        "you're posting too",
+    };
+
+    /// <summary>
+    /// Look for Facebook's rate-limit notice in an open dialog/alert. Returns the phrase
+    /// that matched, or null. The caller stops the run on a hit: once you're blocked, the
+    /// remaining groups will fail anyway and pushing on makes the block worse.
+    /// </summary>
+    public async Task<string?> DetectBlockAsync(IPage page)
+    {
+        try
+        {
+            var text = await page.EvaluateAsync<string>(@"() => [...document.querySelectorAll(
+                ""div[role='dialog'], div[role='alertdialog'], div[role='alert']"")]
+                .map(d => d.innerText || '').join('\n').toLowerCase()");
+            if (string.IsNullOrWhiteSpace(text)) return null;
+            foreach (var m in BlockMarkers)
+                if (text.Contains(m, StringComparison.OrdinalIgnoreCase)) return m;
+        }
+        catch { /* unreadable page — treat as no block */ }
+        return null;
+    }
+
+    /// <summary>First visible candidate that is not aria-disabled, or null on timeout.</summary>
+    private static async Task<ILocator?> FirstEnabled(IPage page, string[] selectors, int timeoutMs)
+    {
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < deadline)
+        {
+            foreach (var sel in selectors)
+            {
+                var loc = page.Locator(sel).First;
+                try
+                {
+                    if (!await loc.IsVisibleAsync()) continue;
+                    if (await loc.GetAttributeAsync("aria-disabled") == "true") continue;
+                    return loc;
+                }
+                catch { /* try the next candidate */ }
+            }
+            await page.WaitForTimeoutAsync(400);
+        }
+        return null;
+    }
+
+    /// <summary>
     /// Block until the "Create post" composer closes — i.e. YOU clicked Post (or discarded
-    /// it) — so single-group mode can advance to the next group with no Enter needed.
-    /// Polls the dialog's visibility; calls <paramref name="shouldSkip"/> each tick so the
-    /// caller can offer a keyboard skip. Returns Posted when the dialog goes away, Skipped if
-    /// the caller bails, or TimedOut after <paramref name="timeoutMs"/>.
+    /// it) — so the run can advance to the next group with no Enter needed. Polls the
+    /// dialog's visibility; calls <paramref name="shouldSkip"/> each tick so the caller can
+    /// offer a keyboard skip. Returns Posted when the dialog goes away, Skipped if the
+    /// caller bails, or TimedOut after <paramref name="timeoutMs"/>.
     /// </summary>
     public async Task<PostWait> WaitForComposerClosedAsync(IPage page, Func<bool> shouldSkip, int timeoutMs = 600_000)
     {
@@ -221,264 +303,6 @@ public sealed class Poster
             await page.WaitForTimeoutAsync(400);
         }
         return PostWait.TimedOut;
-    }
-
-    /// <summary>Best-effort: open "Post to more groups" and tick the batch's other groups by name.</summary>
-    private async Task TryHookMoreGroups(IPage page, Article article, IReadOnlyList<Group> others)
-    {
-        var moreBtn = await FirstVisible(page, MoreGroupsButtons, 5000);
-        if (moreBtn is null)
-        {
-            Console.WriteLine("  (couldn't find 'Post to more groups' — add these manually before posting:)");
-            foreach (var g in others) Console.WriteLine($"      • {g.Name}");
-            LogFailedGroups(article, others, "picker-not-found");
-            return;
-        }
-        await MoveAndClickAsync(page, moreBtn);
-        await page.WaitForTimeoutAsync(1500);
-
-        // Capture the picker the instant it opens, before touching anything.
-        await Screenshot(page, article, "group-picker");
-
-        // The picker's group list is virtualized — with many groups, a given row isn't in
-        // the DOM until you filter to it via the picker's search box. So grab that search
-        // box once and type each group's name before ticking it.
-        var search = await FirstVisible(page, GroupSearchBoxes, 4000);
-        if (search is null)
-            Console.WriteLine("  (no picker search box found — only currently-visible groups can be ticked)");
-
-        var failed = new List<Group>();
-        for (int gi = 0; gi < others.Count; gi++)
-        {
-            var g = others[gi];
-
-            // Space out selections — Facebook flags rapid ticking. Pause between each group.
-            if (gi > 0 && _cfg.GroupSelectDelayMs > 0)
-                await page.WaitForTimeoutAsync(_cfg.GroupSelectDelayMs);
-
-            bool ok = await TickGroupAsync(page, search, g.Name);
-            if (!ok)
-            {
-                // Facebook's picker search intermittently returns nothing for a group you're
-                // really in — a known FB bug. Retry once; it usually surfaces the 2nd time.
-                await page.WaitForTimeoutAsync(700);
-                ok = await TickGroupAsync(page, search, g.Name);
-            }
-            if (ok)
-            {
-                Console.WriteLine($"      ✓ selected: {g.Name}");
-            }
-            else
-            {
-                Console.WriteLine($"      ! couldn't auto-select '{g.Name}' — tick it manually in the picker.");
-                failed.Add(g);
-            }
-        }
-        if (failed.Count > 0)
-        {
-            LogFailedGroups(article, failed, "not-selected");
-            Console.WriteLine($"  ! {failed.Count}/{others.Count} group(s) in this batch couldn't be auto-selected — logged to {FailLogPath}");
-        }
-
-        await Screenshot(page, article, "group-picker-selected");
-
-        var done = await FirstVisible(page, ConfirmButtons, 3000);
-        if (done is not null)
-        {
-            Console.WriteLine("  · clicking picker confirm button…");
-            await MoveAndClickAsync(page, done);
-        }
-        else
-        {
-            Console.WriteLine("  ! couldn't find a Done/confirm button to close the group picker.");
-        }
-        await page.WaitForTimeoutAsync(1200);
-        await Screenshot(page, article, "after-add-groups");
-    }
-
-    /// <summary>
-    /// Tick a group's checkbox in the "Add groups" picker. The clickable target is the
-    /// row's checkbox/button — NOT the name text span (clicking the label does nothing) —
-    /// so we walk up from the name to the nearest interactive ancestor and click that,
-    /// then verify the row's checkbox actually flipped to checked.
-    /// </summary>
-    private async Task<bool> TickGroupAsync(IPage page, ILocator? search, string name)
-    {
-        var target = NormName(name);
-
-        // No picker search box: just match among whatever rows are currently rendered.
-        if (search is null)
-        {
-            var visible = await PollCandidatesAsync(page);
-            int i0 = ExactIndex(visible, target);
-            return i0 >= 0 && await TickByIndexAsync(page, i0);
-        }
-
-        // Type the name ONE WORD AT A TIME, checking after each word. As soon as the list
-        // narrows to a single row (or an exact-name row appears), tick it. This is far more
-        // robust than typing the whole name: distinctive early words usually narrow to one
-        // hit, and we never depend on Facebook's search liking a long, punctuated string.
-        var words = name.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-        try { await search.ClickAsync(); await search.FillAsync(""); } catch { }
-
-        var prev = new List<(int Idx, string Name)>();
-        for (int i = 0; i < words.Length; i++)
-        {
-            try
-            {
-                if (i > 0) await HumanTypeAsync(search, " ");
-                await HumanTypeAsync(search, words[i]);
-            }
-            catch { }
-
-            var cands = await PollCandidatesAsync(page);
-
-            int exact = ExactIndex(cands, target);
-            if (exact >= 0) return await TickByIndexAsync(page, exact);
-            if (cands.Count == 1) return await TickByIndexAsync(page, cands[0].Idx);
-            if (cands.Count == 0)
-            {
-                // This word over-filtered (the plan name diverges from Facebook's past here).
-                // Fall back to the results we had BEFORE adding it.
-                int pe = ExactIndex(prev, target);
-                if (pe >= 0) return await TickByIndexAsync(page, pe);
-                if (prev.Count == 1) return await TickByIndexAsync(page, prev[0].Idx);
-                return false;
-            }
-            prev = cands;
-        }
-
-        // Ran out of words with more than one candidate and no exact match — ambiguous, so
-        // leave it for manual ticking rather than risk selecting the wrong group.
-        return false;
-    }
-
-    private static int ExactIndex(List<(int Idx, string Name)> cands, string target)
-    {
-        foreach (var c in cands)
-            if (NormName(c.Name) == target) return c.Idx;
-        return -1;
-    }
-
-    /// <summary>Tick a checkbox by its document-order index (matches the JS enumeration).</summary>
-    private async Task<bool> TickByIndexAsync(IPage page, int idx)
-    {
-        var checkbox = page.Locator("input[type='checkbox']").Nth(idx);
-        if (await IsCheckedNow(checkbox)) return true;
-
-        // Click the visible row the way a person does — the real <input> is hidden, so a
-        // human never clicks it directly; they click the row with the avatar + name.
-        var row = checkbox.Locator("xpath=ancestor::div[.//*[local-name()='image' or local-name()='img']][1]").First;
-        try
-        {
-            await MoveAndClickAsync(page, row);
-            if (await IsCheckedNow(checkbox)) return true;
-        }
-        catch { /* fall through to forced fallbacks */ }
-
-        // Fallbacks if the humanized click didn't register the toggle — kept so selection
-        // still works when FB's row markup shifts. (Less human, but only on failure.)
-        try
-        {
-            await checkbox.CheckAsync(new() { Force = true });
-            if (await IsCheckedNow(checkbox)) return true;
-        }
-        catch { }
-        try
-        {
-            await row.ClickAsync(new() { Timeout = 3000, Force = true });
-            return await IsCheckedNow(checkbox);
-        }
-        catch { return false; }
-    }
-
-    /// <summary>
-    /// Read the currently-rendered group rows as (document-order checkbox index, name).
-    /// Polls briefly because search results render a beat after typing.
-    /// </summary>
-    private static async Task<List<(int Idx, string Name)>> PollCandidatesAsync(IPage page)
-    {
-        var list = new List<(int, string)>();
-        for (int t = 0; t < 4; t++)
-        {
-            await page.WaitForTimeoutAsync(t == 0 ? 500 : 300);
-            try
-            {
-                var raw = await page.EvaluateAsync<string[]>(CandidatesJs);
-                list = ParseCandidates(raw);
-            }
-            catch { list = new(); }
-            if (list.Count > 0) return list;
-        }
-        return list;
-    }
-
-    private static List<(int Idx, string Name)> ParseCandidates(string[] raw)
-    {
-        var list = new List<(int, string)>();
-        foreach (var r in raw)
-        {
-            var bar = r.IndexOf('|');
-            if (bar > 0 && int.TryParse(r[..bar], out var idx))
-                list.Add((idx, r[(bar + 1)..]));
-        }
-        return list;
-    }
-
-    /// <summary>Normalize a group name for tolerant comparison: lowercase, collapse
-    /// whitespace, drop trailing punctuation.</summary>
-    private static string NormName(string s)
-    {
-        if (string.IsNullOrWhiteSpace(s)) return "";
-        var collapsed = string.Join(' ', s.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
-        return collapsed.TrimEnd('.', ',', ';', ':', '!', ' ').ToLowerInvariant();
-    }
-
-    // Returns the document-order index (among all page checkboxes) of the group row whose
-    // name matches, or -1. Match is normalized: lowercased, whitespace collapsed, trailing
-    // punctuation dropped. The row is the nearest ancestor of the checkbox that holds an
-    // avatar image (so the composer's lone "anonymous" toggle never matches a group name).
-    private const string MatchCheckboxJs = @"(name) => {
-        const norm = s => (s || '').toLowerCase().replace(/[\s ]+/g, ' ').replace(/[.,;:!]+$/, '').trim();
-        const target = norm(name);
-        const all = [...document.querySelectorAll(""input[type=checkbox]"")];
-        for (let i = 0; i < all.length; i++) {
-            let row = all[i];
-            while (row && !(row.querySelector && (row.querySelector('image') || row.querySelector('img')))) row = row.parentElement;
-            if (!row) continue;
-            const line = (row.innerText || '').split('\n').map(s => s.trim()).filter(Boolean)[0] || '';
-            if (norm(line) === target) return i;
-        }
-        return -1;
-    }";
-
-    // Lists rendered group rows as "index|name": index is the checkbox's position among ALL
-    // page checkboxes (document order), so Playwright's Nth(index) selects the same element.
-    // The row is the nearest ancestor of the checkbox holding an avatar image, so the
-    // composer's lone "anonymous" toggle never shows up as a group.
-    private const string CandidatesJs = @"() => {
-        const all = [...document.querySelectorAll(""input[type=checkbox]"")];
-        const out = [];
-        for (let i = 0; i < all.length; i++) {
-            let row = all[i];
-            while (row && !(row.querySelector && (row.querySelector('image') || row.querySelector('img')))) row = row.parentElement;
-            if (!row) continue;
-            const line = (row.innerText || '').split('\n').map(s => s.trim()).filter(Boolean)[0] || '';
-            if (line) out.push(i + '|' + line);
-        }
-        return out;
-    }";
-
-    /// <summary>True if the given checkbox input reads as checked.</summary>
-    private static async Task<bool> IsCheckedNow(ILocator checkbox)
-    {
-        try
-        {
-            var aria = await checkbox.GetAttributeAsync("aria-checked");
-            if (aria is not null) return aria == "true";
-            return await checkbox.IsCheckedAsync();
-        }
-        catch { return false; }
     }
 
     private async Task AttachImage(IPage page, Article article)
@@ -523,7 +347,7 @@ public sealed class Poster
             return;
         }
 
-        // Give the composer a moment to settle after group picker closes.
+        // Give the composer a moment to settle before reaching for its footer buttons.
         await page.WaitForTimeoutAsync(1500);
         await Screenshot(page, article, "before-photo-btn");
 
@@ -541,24 +365,55 @@ public sealed class Poster
     }
 
     /// <summary>
-    /// Type into Facebook's Lexical contenteditable composer reliably. First tries
-    /// per-key typing; if the box is still empty (Lexical can drop key events when
-    /// focus isn't settled), falls back to InsertText, which Lexical accepts via its
-    /// beforeinput/insertText handler. Newlines are sent as Enter presses.
+    /// Put the whole post into Facebook's Lexical composer as one PASTE — the text (body,
+    /// blank line, then the article URL as the last line) goes on the clipboard and we press
+    /// Ctrl+V, exactly like drafting it elsewhere and pasting it in. Lexical's paste handler
+    /// keeps the paragraph breaks. Two fallbacks in case the real key event never reaches the
+    /// editor: a synthetic paste event carrying the same clipboard data, then a direct
+    /// InsertText per line.
     /// </summary>
     private async Task<bool> FillComposerAsync(IPage page, ILocator textbox, string text)
     {
         int candidates = await page.Locator("div[role='dialog'] div[role='textbox']").CountAsync();
         Console.WriteLine($"  · composer textbox candidates in dialog: {candidates}");
 
-        // If the composer editor isn't present we're likely still in the group picker.
-        // Bail fast rather than hang 30s on a click that can never resolve.
+        // If the composer editor isn't present we're likely still mid-animation. Bail fast
+        // rather than hang 30s on a click that can never resolve.
         try { await textbox.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 }); }
         catch { return false; }
 
-        // Strategy 1: paste-style insertion — drop each line in one shot via InsertText
-        // (Lexical accepts it as an insertText input event). This is near-instant; per-key
-        // typing of a multi-paragraph post took ~12s. Line breaks are sent as Enter.
+        await MoveAndClickAsync(page, textbox);
+        await page.WaitForTimeoutAsync(_rng.Next(400, 900));
+
+        // Strategy 1: the real thing — clipboard + Ctrl+V, one shot.
+        Console.WriteLine($"  · pasting {text.Length} chars (Ctrl+V)…");
+        if (await CopyToClipboardAsync(page, text))
+        {
+            await page.Keyboard.PressAsync("Control+V");
+            await page.WaitForTimeoutAsync(900);
+            var after1 = await SafeInner(textbox);
+            Console.WriteLine($"  · after paste, box reads: \"{Trunc(after1)}\"");
+            if (HasRealText(after1)) return true;
+            Console.WriteLine("  · Ctrl+V didn't land — retrying with a synthetic paste event…");
+        }
+        else
+        {
+            Console.WriteLine("  · couldn't write to the clipboard — using a synthetic paste event…");
+        }
+
+        // Strategy 2: dispatch a paste event carrying the text as clipboardData. Still a
+        // paste as far as Lexical is concerned, just without the OS clipboard round trip.
+        if (await SyntheticPasteAsync(textbox, text))
+        {
+            await page.WaitForTimeoutAsync(700);
+            var after2 = await SafeInner(textbox);
+            Console.WriteLine($"  · after synthetic paste, box reads: \"{Trunc(after2)}\"");
+            if (HasRealText(after2)) return true;
+        }
+
+        // Strategy 3: last resort — insert line by line, which Lexical accepts through its
+        // beforeinput/insertText handler.
+        Console.WriteLine("  · retrying via direct insert…");
         await textbox.ClickAsync();
         await page.WaitForTimeoutAsync(300);
         var lines = text.Split('\n');
@@ -567,20 +422,108 @@ public sealed class Poster
             if (i > 0) await page.Keyboard.PressAsync("Enter");
             if (lines[i].Length > 0) await page.Keyboard.InsertTextAsync(lines[i]);
         }
-        await page.WaitForTimeoutAsync(400);
-        var after1 = await SafeInner(textbox);
-        Console.WriteLine($"  · after insert, box reads: \"{Trunc(after1)}\"");
-        if (HasRealText(after1)) return true;
-
-        // Strategy 2 (fallback): slower per-key typing, in case InsertText was dropped.
-        Console.WriteLine("  · retrying via per-key typing…");
-        await textbox.ClickAsync();
-        await page.WaitForTimeoutAsync(250);
-        await textbox.PressSequentiallyAsync(text, new() { Delay = 15 });
         await page.WaitForTimeoutAsync(500);
-        var after2 = await SafeInner(textbox);
-        Console.WriteLine($"  · after typing, box reads: \"{Trunc(after2)}\"");
-        return HasRealText(after2);
+        var after3 = await SafeInner(textbox);
+        Console.WriteLine($"  · after insert, box reads: \"{Trunc(after3)}\"");
+        return HasRealText(after3);
+    }
+
+    /// <summary>
+    /// Put text on the real clipboard from inside the page, so the Ctrl+V that follows
+    /// pastes it. Needs clipboard-write permission on the context, granted once per run;
+    /// returns false if the browser refuses (e.g. the window isn't focused) so the caller
+    /// can fall back.
+    /// </summary>
+    private async Task<bool> CopyToClipboardAsync(IPage page, string text)
+    {
+        if (!_clipboardGranted)
+        {
+            try
+            {
+                await page.Context.GrantPermissionsAsync(
+                    new[] { "clipboard-read", "clipboard-write" },
+                    new() { Origin = "https://www.facebook.com" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  (clipboard permission not granted: {ex.Message})");
+            }
+            _clipboardGranted = true;   // don't re-attempt the grant for every group
+        }
+
+        try
+        {
+            return await page.EvaluateAsync<bool>(@"async (t) => {
+                try { await navigator.clipboard.writeText(t); return true; }
+                catch (e) { return false; }
+            }", text);
+        }
+        catch { return false; }
+    }
+
+    /// <summary>Fire a paste event at the editor with the text as its clipboardData — the
+    /// same event Ctrl+V produces, minus the OS clipboard round trip.</summary>
+    private static async Task<bool> SyntheticPasteAsync(ILocator textbox, string text)
+    {
+        try
+        {
+            return await textbox.EvaluateAsync<bool>(@"(el, t) => {
+                const dt = new DataTransfer();
+                dt.setData('text/plain', t);
+                el.focus();
+                return el.dispatchEvent(new ClipboardEvent('paste', {
+                    clipboardData: dt, bubbles: true, cancelable: true,
+                }));
+            }", text);
+        }
+        catch { return false; }
+    }
+
+    /// <summary>
+    /// Make sure the article URL really is the last line of the composer. The paste
+    /// normally carries it; this repairs the case where Lexical's link handling swallowed
+    /// it, by moving to the end and typing it in.
+    /// </summary>
+    private async Task EnsureLinkAtEndAsync(IPage page, ILocator textbox, string link)
+    {
+        var current = await SafeInner(textbox);
+        if (ContainsUrl(current, link))
+        {
+            Console.WriteLine($"  · source url present as the last line: {link}");
+            return;
+        }
+
+        Console.WriteLine("  · url missing after paste — appending it at the end…");
+        try
+        {
+            await textbox.ClickAsync();
+            await page.Keyboard.PressAsync("Control+End");
+            await page.Keyboard.PressAsync("Enter");
+            await page.Keyboard.PressAsync("Enter");
+            await page.Keyboard.InsertTextAsync(link);
+            await page.WaitForTimeoutAsync(500);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ! couldn't append the url ({ex.Message}) — add it before posting.");
+            return;
+        }
+
+        if (!ContainsUrl(await SafeInner(textbox), link))
+            Console.WriteLine("  ! the url still isn't in the box — add it before posting.");
+    }
+
+    /// <summary>Tolerant URL presence check: ignores scheme, www, and a trailing slash,
+    /// since Facebook normalizes what it shows in the box.</summary>
+    private static bool ContainsUrl(string haystack, string url)
+    {
+        static string Core(string s) => (s ?? "")
+            .Replace("https://", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("http://", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("www.", "", StringComparison.OrdinalIgnoreCase)
+            .TrimEnd('/');
+        var needle = Core(url.Trim());
+        return needle.Length > 0 && Core(haystack).Contains(needle, StringComparison.OrdinalIgnoreCase);
     }
 
     private static async Task<string> SafeInner(ILocator textbox)
@@ -595,14 +538,22 @@ public sealed class Poster
     private static string Trunc(string s) =>
         string.IsNullOrEmpty(s) ? "" : (s.Length > 60 ? s[..60].Replace("\n", "\\n") + "…" : s.Replace("\n", "\\n"));
 
+    /// <summary>
+    /// Assemble what gets pasted: the fetched/overridden body, then a blank line, then the
+    /// article URL as the LAST line — that's what Facebook builds its preview card from, and
+    /// it's the link readers click. Any earlier occurrence of the same URL in the body is
+    /// stripped so it appears exactly once, at the bottom.
+    /// </summary>
     private static string BuildBody(string body, string? link)
     {
-        var sb = new StringBuilder(body);
-        if (!string.IsNullOrWhiteSpace(link))
-        {
-            if (sb.Length > 0) sb.Append("\n\n");
-            sb.Append(link);
-        }
+        var text = (body ?? "").TrimEnd();
+        if (string.IsNullOrWhiteSpace(link)) return text;
+
+        var url = link.Trim();
+        var cleaned = text.Replace(url, "", StringComparison.OrdinalIgnoreCase).TrimEnd();
+        var sb = new StringBuilder(cleaned);
+        if (sb.Length > 0) sb.Append("\n\n");
+        sb.Append(url);
         return sb.ToString();
     }
 
@@ -672,23 +623,6 @@ public sealed class Poster
             catch { /* fall back to a plain click */ }
         }
         await loc.ClickAsync();
-    }
-
-    /// <summary>Type text one key at a time with a randomized human delay between keys
-    /// (plus the occasional longer think-pause), instead of machine-fast bursts.</summary>
-    private async Task HumanTypeAsync(ILocator field, string text)
-    {
-        if (!_cfg.HumanizeInput)
-        {
-            await field.PressSequentiallyAsync(text, new() { Delay = 12 });
-            return;
-        }
-        foreach (var ch in text)
-        {
-            await field.PressSequentiallyAsync(ch.ToString());
-            await Task.Delay(_rng.Next(_cfg.TypeMinDelayMs, _cfg.TypeMaxDelayMs + 1));
-            if (_rng.NextDouble() < 0.07) await Task.Delay(_rng.Next(180, 450));  // think-pause
-        }
     }
 
     private async Task Screenshot(IPage page, Article article, string tag)

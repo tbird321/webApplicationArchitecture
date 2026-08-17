@@ -24,26 +24,36 @@ public sealed class Config
     public int MinDelayMs { get; set; } = 4000;
     public int MaxDelayMs { get; set; } = 12000;
 
-    /// <summary>A deliberate, watchable pause before each post (batch) so you can see what
+    /// <summary>A deliberate, watchable pause before each group's post so you can see what
     /// it's doing and to keep the pacing human. Set to 0 to disable.</summary>
     public int PrePostDelayMs { get; set; } = 3000;
 
-    /// <summary>Small pause between in-composer steps (open, add groups, type) so each
+    /// <summary>Click the composer's Post button automatically once it's filled. Set false to
+    /// go back to a fully human-in-the-loop run, where the tool prepares the post and waits
+    /// for you to submit it yourself. Never applies to --dry-run.</summary>
+    public bool AutoClickPost { get; set; } = true;
+
+    /// <summary>Randomized pause between the composer being filled and the Post click — a
+    /// person reading over what they wrote. A random value in [min,max].</summary>
+    public int PreClickPostMinMs { get; set; } = 5000;
+    public int PreClickPostMaxMs { get; set; } = 10000;
+
+    /// <summary>Randomized pause before each post — the beat a person takes before starting
+    /// one, instead of moving the instant the previous post box closes. A random value in
+    /// [min,max] is waited before EVERY group, the first one included, so a rerun that
+    /// resumes a part-finished article doesn't open a composer the second it launches.
+    /// Set Max to 0 to disable.</summary>
+    public int BetweenPostsMinMs { get; set; } = 10000;
+    public int BetweenPostsMaxMs { get; set; } = 30000;
+
+    /// <summary>Small pause between in-composer steps (open, attach image, type) so each
     /// stage is visible rather than happening in a blink. Set to 0 to disable.</summary>
     public int StepDelayMs { get; set; } = 1200;
 
-    /// <summary>Pause between ticking each group in the "Add groups" picker. Facebook
-    /// watches for rapid selection, so space them out. Set to 0 to disable.</summary>
-    public int GroupSelectDelayMs { get; set; } = 2000;
-
-    /// <summary>Move a real cursor (stepped mouse path + hover) before clicks, and type
-    /// at human speed, instead of teleporting/forced clicks. Leave on to look human.</summary>
+    /// <summary>Move a real cursor to each control (stepped mouse path + hover dwell) before
+    /// clicking, instead of teleporting or forcing synthetic clicks. Leave on to look human.
+    /// The post body itself is always pasted in one shot, not typed.</summary>
     public bool HumanizeInput { get; set; } = true;
-
-    /// <summary>Per-keystroke delay range (ms) when typing like a human, e.g. into the
-    /// group picker's search box. Each key waits a random value in [min,max].</summary>
-    public int TypeMinDelayMs { get; set; } = 70;
-    public int TypeMaxDelayMs { get; set; } = 180;
 
     /// <summary>How long to wait after typing a link for Facebook to render its preview card.</summary>
     public int LinkPreviewWaitMs { get; set; } = 6000;

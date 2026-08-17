@@ -293,1561 +293,1934 @@
       "Url": "https://www.facebook.com/groups/2402010603200201"
     }
   ],
-  "GroupsPerPost": 10,
   "Articles": [
     {
       "Id": "Aaron",
-      "Link": "https://www.ldsdoctrines.com/?page=Aaron",
+      "Link": "https://www.ldsdoctrines.com/aaron/",
       "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_79166858311782136383537.jpg",
+      "PostedGroups": [],
       "PostedAtUtc": "2026-06-22T15:18:49.5882338Z"
     },
     {
       "Id": "Abigail",
-      "Link": "https://www.ldsdoctrines.com/?page=Abigail",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_96668098811764520786660.png"
+      "Link": "https://www.ldsdoctrines.com/abigail/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_96668098811764520786660.png",
+      "PostedGroups": []
     },
     {
       "Id": "Abinadi",
-      "Link": "https://www.ldsdoctrines.com/?page=Abinadi"
+      "Link": "https://www.ldsdoctrines.com/abinadi/",
+      "PostedGroups": []
     },
     {
       "Id": "Abish",
-      "Link": "https://www.ldsdoctrines.com/?page=Abish"
+      "Link": "https://www.ldsdoctrines.com/abish/",
+      "PostedGroups": []
     },
     {
       "Id": "Abraham",
-      "Link": "https://www.ldsdoctrines.com/?page=Abraham"
+      "Link": "https://www.ldsdoctrines.com/abraham/",
+      "PostedGroups": []
     },
     {
       "Id": "AbrahamCovenant-Blood",
-      "Link": "https://www.ldsdoctrines.com/?page=AbrahamCovenant-Blood"
+      "Link": "https://www.ldsdoctrines.com/abrahamcovenant-blood/",
+      "PostedGroups": []
     },
     {
       "Id": "Adam",
-      "Link": "https://www.ldsdoctrines.com/?page=Adam",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_67790522311765258239837.png"
+      "Link": "https://www.ldsdoctrines.com/adam/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_67790522311765258239837.png",
+      "PostedGroups": []
     },
     {
       "Id": "Adam-Ondi-Ahman",
-      "Link": "https://www.ldsdoctrines.com/?page=Adam-Ondi-Ahman"
+      "Link": "https://www.ldsdoctrines.com/adam-ondi-ahman/",
+      "PostedGroups": []
     },
     {
       "Id": "Alma-Elder",
-      "Link": "https://www.ldsdoctrines.com/?page=Alma-Elder"
+      "Link": "https://www.ldsdoctrines.com/alma-elder/",
+      "PostedGroups": []
     },
     {
       "Id": "Alma-Younger",
-      "Link": "https://www.ldsdoctrines.com/?page=Alma-Younger"
+      "Link": "https://www.ldsdoctrines.com/alma-younger/",
+      "PostedGroups": []
     },
     {
       "Id": "Ammon",
-      "Link": "https://www.ldsdoctrines.com/?page=Ammon"
+      "Link": "https://www.ldsdoctrines.com/ammon/",
+      "PostedGroups": []
     },
     {
       "Id": "Amos-Prophet",
-      "Link": "https://www.ldsdoctrines.com/?page=Amos-Prophet"
+      "Link": "https://www.ldsdoctrines.com/amos-prophet/",
+      "PostedGroups": []
     },
     {
       "Id": "Amulek",
-      "Link": "https://www.ldsdoctrines.com/?page=Amulek"
+      "Link": "https://www.ldsdoctrines.com/amulek/",
+      "PostedGroups": []
     },
     {
       "Id": "Andrew",
-      "Link": "https://www.ldsdoctrines.com/?page=Andrew"
+      "Link": "https://www.ldsdoctrines.com/andrew/",
+      "PostedGroups": []
     },
     {
       "Id": "Angel",
-      "Link": "https://www.ldsdoctrines.com/?page=Angel",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_68837716011738855673644.jpg"
+      "Link": "https://www.ldsdoctrines.com/angel/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_68837716011738855673644.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Anna-Prophetess",
-      "Link": "https://www.ldsdoctrines.com/?page=Anna-Prophetess"
+      "Link": "https://www.ldsdoctrines.com/anna-prophetess/",
+      "PostedGroups": []
     },
     {
       "Id": "Anti-Christ",
-      "Link": "https://www.ldsdoctrines.com/?page=Anti-Christ"
+      "Link": "https://www.ldsdoctrines.com/anti-christ/",
+      "PostedGroups": []
     },
     {
       "Id": "Apostasy",
-      "Link": "https://www.ldsdoctrines.com/?page=Apostasy",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/Apostasy.jpg"
+      "Link": "https://www.ldsdoctrines.com/apostasy/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/Apostasy.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Are-Mormons-Christian",
-      "Link": "https://www.ldsdoctrines.com/?page=Are-Mormons-Christian"
+      "Link": "https://www.ldsdoctrines.com/are-mormons-christian/",
+      "PostedGroups": []
     },
     {
       "Id": "Article1",
-      "Link": "https://www.ldsdoctrines.com/?page=Article1"
+      "Link": "https://www.ldsdoctrines.com/article1/",
+      "PostedGroups": []
     },
     {
       "Id": "Article10",
-      "Link": "https://www.ldsdoctrines.com/?page=Article10",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_28568052011763913890532.png"
+      "Link": "https://www.ldsdoctrines.com/article10/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_28568052011763913890532.png",
+      "PostedGroups": []
     },
     {
       "Id": "Article2",
-      "Link": "https://www.ldsdoctrines.com/?page=Article2"
+      "Link": "https://www.ldsdoctrines.com/article2/",
+      "PostedGroups": []
     },
     {
       "Id": "Article3",
-      "Link": "https://www.ldsdoctrines.com/?page=Article3"
+      "Link": "https://www.ldsdoctrines.com/article3/",
+      "PostedGroups": []
     },
     {
       "Id": "Article4",
-      "Link": "https://www.ldsdoctrines.com/?page=Article4"
+      "Link": "https://www.ldsdoctrines.com/article4/",
+      "PostedGroups": []
     },
     {
       "Id": "Article5",
-      "Link": "https://www.ldsdoctrines.com/?page=Article5"
+      "Link": "https://www.ldsdoctrines.com/article5/",
+      "PostedGroups": []
     },
     {
       "Id": "Article6",
-      "Link": "https://www.ldsdoctrines.com/?page=Article6"
+      "Link": "https://www.ldsdoctrines.com/article6/",
+      "PostedGroups": []
     },
     {
       "Id": "Article7",
-      "Link": "https://www.ldsdoctrines.com/?page=Article7"
+      "Link": "https://www.ldsdoctrines.com/article7/",
+      "PostedGroups": []
     },
     {
       "Id": "Article8",
-      "Link": "https://www.ldsdoctrines.com/?page=Article8",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_78822984611762419603661.png"
+      "Link": "https://www.ldsdoctrines.com/article8/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_78822984611762419603661.png",
+      "PostedGroups": []
     },
     {
       "Id": "Article9",
-      "Link": "https://www.ldsdoctrines.com/?page=Article9",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_40115872011763327008179.png"
+      "Link": "https://www.ldsdoctrines.com/article9/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_40115872011763327008179.png",
+      "PostedGroups": []
     },
     {
       "Id": "ArticlesOfFaith",
-      "Link": "https://www.ldsdoctrines.com/?page=ArticlesOfFaith"
+      "Link": "https://www.ldsdoctrines.com/articlesoffaith/",
+      "PostedGroups": []
     },
     {
       "Id": "Astrology-Signs-Heavens",
-      "Link": "https://www.ldsdoctrines.com/?page=Astrology-Signs-Heavens"
+      "Link": "https://www.ldsdoctrines.com/astrology-signs-heavens/",
+      "PostedGroups": []
     },
     {
       "Id": "Baal",
-      "Link": "https://www.ldsdoctrines.com/?page=Baal",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_2467457621743092024385.jpg"
+      "Link": "https://www.ldsdoctrines.com/baal/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_2467457621743092024385.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Balaam",
-      "Link": "https://www.ldsdoctrines.com/?page=Balaam"
+      "Link": "https://www.ldsdoctrines.com/balaam/",
+      "PostedGroups": []
     },
     {
       "Id": "Baptism-ForDead",
-      "Link": "https://www.ldsdoctrines.com/?page=Baptism-ForDead",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/font.jpg"
+      "Link": "https://www.ldsdoctrines.com/baptism-fordead/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/font.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Barnabas",
-      "Link": "https://www.ldsdoctrines.com/?page=Barnabas"
+      "Link": "https://www.ldsdoctrines.com/barnabas/",
+      "PostedGroups": []
     },
     {
       "Id": "Bartimaeus",
-      "Link": "https://www.ldsdoctrines.com/?page=Bartimaeus"
+      "Link": "https://www.ldsdoctrines.com/bartimaeus/",
+      "PostedGroups": []
     },
     {
       "Id": "Bathsheba",
-      "Link": "https://www.ldsdoctrines.com/?page=Bathsheba"
+      "Link": "https://www.ldsdoctrines.com/bathsheba/",
+      "PostedGroups": []
     },
     {
       "Id": "Being-Converted",
-      "Link": "https://www.ldsdoctrines.com/?page=Being-Converted"
+      "Link": "https://www.ldsdoctrines.com/being-converted/",
+      "PostedGroups": []
     },
     {
       "Id": "Bethlehem-Jesus",
-      "Link": "https://www.ldsdoctrines.com/?page=Bethlehem-Jesus",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_23248914011748526204524.jpg"
+      "Link": "https://www.ldsdoctrines.com/bethlehem-jesus/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_23248914011748526204524.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Bible-Reliability",
-      "Link": "https://www.ldsdoctrines.com/?page=Bible-Reliability"
+      "Link": "https://www.ldsdoctrines.com/bible-reliability/",
+      "PostedGroups": []
     },
     {
       "Id": "Birth-Jesus-Josephs-View",
-      "Link": "https://www.ldsdoctrines.com/?page=Birth-Jesus-Josephs-View"
+      "Link": "https://www.ldsdoctrines.com/birth-jesus-josephs-view/",
+      "PostedGroups": []
     },
     {
       "Id": "Blessing-Vs-Magic",
-      "Link": "https://www.ldsdoctrines.com/?page=Blessing-Vs-Magic"
+      "Link": "https://www.ldsdoctrines.com/blessing-vs-magic/",
+      "PostedGroups": []
     },
     {
       "Id": "Blood-Atonement",
-      "Link": "https://www.ldsdoctrines.com/?page=Blood-Atonement"
+      "Link": "https://www.ldsdoctrines.com/blood-atonement/",
+      "PostedGroups": []
     },
     {
       "Id": "Blood-Oath",
-      "Link": "https://www.ldsdoctrines.com/?page=Blood-Oath"
+      "Link": "https://www.ldsdoctrines.com/blood-oath/",
+      "PostedGroups": []
     },
     {
       "Id": "Boaz",
-      "Link": "https://www.ldsdoctrines.com/?page=Boaz"
+      "Link": "https://www.ldsdoctrines.com/boaz/",
+      "PostedGroups": []
     },
     {
       "Id": "Body-Power-Over-Spirits",
-      "Link": "https://www.ldsdoctrines.com/?page=Body-Power-Over-Spirits"
+      "Link": "https://www.ldsdoctrines.com/body-power-over-spirits/",
+      "PostedGroups": []
     },
     {
       "Id": "BofM-Arabia",
-      "Link": "https://www.ldsdoctrines.com/?page=BofM-Arabia"
+      "Link": "https://www.ldsdoctrines.com/bofm-arabia/",
+      "PostedGroups": []
     },
     {
       "Id": "BofM-Chiasmus",
-      "Link": "https://www.ldsdoctrines.com/?page=BofM-Chiasmus"
+      "Link": "https://www.ldsdoctrines.com/bofm-chiasmus/",
+      "PostedGroups": []
     },
     {
       "Id": "BofM-Evidences",
-      "Link": "https://www.ldsdoctrines.com/?page=BofM-Evidences"
+      "Link": "https://www.ldsdoctrines.com/bofm-evidences/",
+      "PostedGroups": []
     },
     {
       "Id": "BofM-Horses",
-      "Link": "https://www.ldsdoctrines.com/?page=BofM-Horses",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_67860686311731686404545.jpg"
+      "Link": "https://www.ldsdoctrines.com/bofm-horses/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_67860686311731686404545.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "BofM-Isaiah",
-      "Link": "https://www.ldsdoctrines.com/?page=BofM-Isaiah"
+      "Link": "https://www.ldsdoctrines.com/bofm-isaiah/",
+      "PostedGroups": []
     },
     {
       "Id": "BofM-Witnesses",
-      "Link": "https://www.ldsdoctrines.com/?page=BofM-Witnesses"
+      "Link": "https://www.ldsdoctrines.com/bofm-witnesses/",
+      "PostedGroups": []
     },
     {
       "Id": "BOM-Translation",
-      "Link": "https://www.ldsdoctrines.com/?page=BOM-Translation"
+      "Link": "https://www.ldsdoctrines.com/bom-translation/",
+      "PostedGroups": []
     },
     {
       "Id": "Book-Of-Abraham",
-      "Link": "https://www.ldsdoctrines.com/?page=Book-Of-Abraham"
+      "Link": "https://www.ldsdoctrines.com/book-of-abraham/",
+      "PostedGroups": []
     },
     {
       "Id": "BookOfMormon-Racist",
-      "Link": "https://www.ldsdoctrines.com/?page=BookOfMormon-Racist"
+      "Link": "https://www.ldsdoctrines.com/bookofmormon-racist/",
+      "PostedGroups": []
     },
     {
       "Id": "BookOfMormon-Stylometry",
-      "Link": "https://www.ldsdoctrines.com/?page=BookOfMormon-Stylometry",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_76079655111745768180513.png"
+      "Link": "https://www.ldsdoctrines.com/bookofmormon-stylometry/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_76079655111745768180513.png",
+      "PostedGroups": []
     },
     {
       "Id": "Brigham-Young",
-      "Link": "https://www.ldsdoctrines.com/?page=Brigham-Young"
+      "Link": "https://www.ldsdoctrines.com/brigham-young/",
+      "PostedGroups": []
     },
     {
       "Id": "Brother-Of-Jared",
-      "Link": "https://www.ldsdoctrines.com/?page=Brother-Of-Jared"
+      "Link": "https://www.ldsdoctrines.com/brother-of-jared/",
+      "PostedGroups": []
     },
     {
       "Id": "Cain",
-      "Link": "https://www.ldsdoctrines.com/?page=Cain",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_19967919011765602144374.png"
+      "Link": "https://www.ldsdoctrines.com/cain/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_19967919011765602144374.png",
+      "PostedGroups": []
     },
     {
       "Id": "Caleb",
-      "Link": "https://www.ldsdoctrines.com/?page=Caleb"
+      "Link": "https://www.ldsdoctrines.com/caleb/",
+      "PostedGroups": []
     },
     {
       "Id": "Called-Of-God",
-      "Link": "https://www.ldsdoctrines.com/?page=Called-Of-God"
+      "Link": "https://www.ldsdoctrines.com/called-of-god/",
+      "PostedGroups": []
     },
     {
       "Id": "Calling-And-Election",
-      "Link": "https://www.ldsdoctrines.com/?page=Calling-And-Election"
+      "Link": "https://www.ldsdoctrines.com/calling-and-election/",
+      "PostedGroups": []
     },
     {
       "Id": "Captain-Moroni",
-      "Link": "https://www.ldsdoctrines.com/?page=Captain-Moroni"
+      "Link": "https://www.ldsdoctrines.com/captain-moroni/",
+      "PostedGroups": []
     },
     {
       "Id": "Casting-Lots",
-      "Link": "https://www.ldsdoctrines.com/?page=Casting-Lots"
+      "Link": "https://www.ldsdoctrines.com/casting-lots/",
+      "PostedGroups": []
     },
     {
       "Id": "Celestial-Kingdom",
-      "Link": "https://www.ldsdoctrines.com/?page=Celestial-Kingdom"
+      "Link": "https://www.ldsdoctrines.com/celestial-kingdom/",
+      "PostedGroups": []
     },
     {
       "Id": "Centurion-Of-Capernaum",
-      "Link": "https://www.ldsdoctrines.com/?page=Centurion-Of-Capernaum"
+      "Link": "https://www.ldsdoctrines.com/centurion-of-capernaum/",
+      "PostedGroups": []
     },
     {
       "Id": "City-Of-Enoch",
-      "Link": "https://www.ldsdoctrines.com/?page=City-Of-Enoch"
+      "Link": "https://www.ldsdoctrines.com/city-of-enoch/",
+      "PostedGroups": []
     },
     {
       "Id": "Cleopas-And-Emmaus-Disciple",
-      "Link": "https://www.ldsdoctrines.com/?page=Cleopas-And-Emmaus-Disciple"
+      "Link": "https://www.ldsdoctrines.com/cleopas-and-emmaus-disciple/",
+      "PostedGroups": []
     },
     {
       "Id": "ComeFollowMe",
-      "Link": "https://www.ldsdoctrines.com/?page=ComeFollowMe"
+      "Link": "https://www.ldsdoctrines.com/comefollowme/",
+      "PostedGroups": []
     },
     {
       "Id": "Confidence-In-Gods-Presence",
-      "Link": "https://www.ldsdoctrines.com/?page=Confidence-In-Gods-Presence"
+      "Link": "https://www.ldsdoctrines.com/confidence-in-gods-presence/",
+      "PostedGroups": []
     },
     {
       "Id": "Consecrated-Oil",
-      "Link": "https://www.ldsdoctrines.com/?page=Consecrated-Oil"
+      "Link": "https://www.ldsdoctrines.com/consecrated-oil/",
+      "PostedGroups": []
     },
     {
       "Id": "Conversion",
-      "Link": "https://www.ldsdoctrines.com/?page=Conversion"
+      "Link": "https://www.ldsdoctrines.com/conversion/",
+      "PostedGroups": []
     },
     {
       "Id": "Coriantumr-Jaredite-King",
-      "Link": "https://www.ldsdoctrines.com/?page=Coriantumr-Jaredite-King"
+      "Link": "https://www.ldsdoctrines.com/coriantumr-jaredite-king/",
+      "PostedGroups": []
     },
     {
       "Id": "Cornelius",
-      "Link": "https://www.ldsdoctrines.com/?page=Cornelius"
+      "Link": "https://www.ldsdoctrines.com/cornelius/",
+      "PostedGroups": []
     },
     {
       "Id": "Council-In-Heaven",
-      "Link": "https://www.ldsdoctrines.com/?page=Council-In-Heaven"
+      "Link": "https://www.ldsdoctrines.com/council-in-heaven/",
+      "PostedGroups": []
     },
     {
       "Id": "Covenant-Defined",
-      "Link": "https://www.ldsdoctrines.com/?page=Covenant-Defined"
+      "Link": "https://www.ldsdoctrines.com/covenant-defined/",
+      "PostedGroups": []
     },
     {
       "Id": "Covenants-Of-God",
-      "Link": "https://www.ldsdoctrines.com/?page=Covenants-Of-God"
+      "Link": "https://www.ldsdoctrines.com/covenants-of-god/",
+      "PostedGroups": []
     },
     {
       "Id": "Daniel",
-      "Link": "https://www.ldsdoctrines.com/?page=Daniel"
+      "Link": "https://www.ldsdoctrines.com/daniel/",
+      "PostedGroups": []
     },
     {
       "Id": "David",
-      "Link": "https://www.ldsdoctrines.com/?page=David"
+      "Link": "https://www.ldsdoctrines.com/david/",
+      "PostedGroups": []
     },
     {
       "Id": "David-Whitmer",
-      "Link": "https://www.ldsdoctrines.com/?page=David-Whitmer"
+      "Link": "https://www.ldsdoctrines.com/david-whitmer/",
+      "PostedGroups": []
     },
     {
       "Id": "Dead-Sea-Scrolls",
-      "Link": "https://www.ldsdoctrines.com/?page=Dead-Sea-Scrolls"
+      "Link": "https://www.ldsdoctrines.com/dead-sea-scrolls/",
+      "PostedGroups": []
     },
     {
       "Id": "Deborah",
-      "Link": "https://www.ldsdoctrines.com/?page=Deborah"
+      "Link": "https://www.ldsdoctrines.com/deborah/",
+      "PostedGroups": []
     },
     {
       "Id": "Defending-Book-Of-Mormon",
-      "Link": "https://www.ldsdoctrines.com/?page=Defending-Book-Of-Mormon"
+      "Link": "https://www.ldsdoctrines.com/defending-book-of-mormon/",
+      "PostedGroups": []
     },
     {
       "Id": "Discipleship",
-      "Link": "https://www.ldsdoctrines.com/?page=Discipleship",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_6284620911751228920212.png"
+      "Link": "https://www.ldsdoctrines.com/discipleship/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_6284620911751228920212.png",
+      "PostedGroups": []
     },
     {
       "Id": "Dispensations",
-      "Link": "https://www.ldsdoctrines.com/?page=Dispensations"
+      "Link": "https://www.ldsdoctrines.com/dispensations/",
+      "PostedGroups": []
     },
     {
       "Id": "DNA-Book-of-Mormon",
-      "Link": "https://www.ldsdoctrines.com/?page=DNA-Book-of-Mormon",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_1206602411744610855522.jpg"
+      "Link": "https://www.ldsdoctrines.com/dna-book-of-mormon/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_1206602411744610855522.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Doctrine-And-Covenants",
-      "Link": "https://www.ldsdoctrines.com/?page=Doctrine-And-Covenants"
+      "Link": "https://www.ldsdoctrines.com/doctrine-and-covenants/",
+      "PostedGroups": []
     },
     {
       "Id": "Doctrine-Of-Christ",
-      "Link": "https://www.ldsdoctrines.com/?page=Doctrine-Of-Christ"
+      "Link": "https://www.ldsdoctrines.com/doctrine-of-christ/",
+      "PostedGroups": []
     },
     {
       "Id": "Eight-Witnesses",
-      "Link": "https://www.ldsdoctrines.com/?page=Eight-Witnesses"
+      "Link": "https://www.ldsdoctrines.com/eight-witnesses/",
+      "PostedGroups": []
     },
     {
       "Id": "Elias-Elijah-John",
-      "Link": "https://www.ldsdoctrines.com/?page=Elias-Elijah-John"
+      "Link": "https://www.ldsdoctrines.com/elias-elijah-john/",
+      "PostedGroups": []
     },
     {
       "Id": "Elijah",
-      "Link": "https://www.ldsdoctrines.com/?page=Elijah",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_84732306311764999685234.png"
+      "Link": "https://www.ldsdoctrines.com/elijah/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_84732306311764999685234.png",
+      "PostedGroups": []
     },
     {
       "Id": "Elisha",
-      "Link": "https://www.ldsdoctrines.com/?page=Elisha"
+      "Link": "https://www.ldsdoctrines.com/elisha/",
+      "PostedGroups": []
     },
     {
       "Id": "Eliza-R-Snow",
-      "Link": "https://www.ldsdoctrines.com/?page=Eliza-R-Snow"
+      "Link": "https://www.ldsdoctrines.com/eliza-r-snow/",
+      "PostedGroups": []
     },
     {
       "Id": "Elisabeth",
-      "Link": "https://www.ldsdoctrines.com/?page=Elisabeth"
+      "Link": "https://www.ldsdoctrines.com/elisabeth/",
+      "PostedGroups": []
     },
     {
       "Id": "Emma-Smith",
-      "Link": "https://www.ldsdoctrines.com/?page=Emma-Smith"
+      "Link": "https://www.ldsdoctrines.com/emma-smith/",
+      "PostedGroups": []
     },
     {
       "Id": "Emmeline-B-Wells",
-      "Link": "https://www.ldsdoctrines.com/?page=Emmeline-B-Wells"
+      "Link": "https://www.ldsdoctrines.com/emmeline-b-wells/",
+      "PostedGroups": []
     },
     {
       "Id": "Enoch",
-      "Link": "https://www.ldsdoctrines.com/?page=Enoch"
+      "Link": "https://www.ldsdoctrines.com/enoch/",
+      "PostedGroups": []
     },
     {
       "Id": "Enos",
-      "Link": "https://www.ldsdoctrines.com/?page=Enos"
+      "Link": "https://www.ldsdoctrines.com/enos/",
+      "PostedGroups": []
     },
     {
       "Id": "Esther",
-      "Link": "https://www.ldsdoctrines.com/?page=Esther",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_64324207311764919848785.png"
+      "Link": "https://www.ldsdoctrines.com/esther/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_64324207311764919848785.png",
+      "PostedGroups": []
     },
     {
       "Id": "Ether",
-      "Link": "https://www.ldsdoctrines.com/?page=Ether"
+      "Link": "https://www.ldsdoctrines.com/ether/",
+      "PostedGroups": []
     },
     {
       "Id": "Eve",
-      "Link": "https://www.ldsdoctrines.com/?page=Eve",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_54837153911766033347270.png"
+      "Link": "https://www.ldsdoctrines.com/eve/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_54837153911766033347270.png",
+      "PostedGroups": []
     },
     {
       "Id": "Evil-Spirits-Possession",
-      "Link": "https://www.ldsdoctrines.com/?page=Evil-Spirits-Possession"
+      "Link": "https://www.ldsdoctrines.com/evil-spirits-possession/",
+      "PostedGroups": []
     },
     {
       "Id": "Evolution",
-      "Link": "https://www.ldsdoctrines.com/?page=Evolution"
+      "Link": "https://www.ldsdoctrines.com/evolution/",
+      "PostedGroups": []
     },
     {
       "Id": "Evolution-LDS",
-      "Link": "https://www.ldsdoctrines.com/?page=Evolution-LDS"
+      "Link": "https://www.ldsdoctrines.com/evolution-lds/",
+      "PostedGroups": []
     },
     {
       "Id": "Ezekiel",
-      "Link": "https://www.ldsdoctrines.com/?page=Ezekiel"
+      "Link": "https://www.ldsdoctrines.com/ezekiel/",
+      "PostedGroups": []
     },
     {
       "Id": "Ezra",
-      "Link": "https://www.ldsdoctrines.com/?page=Ezra"
+      "Link": "https://www.ldsdoctrines.com/ezra/",
+      "PostedGroups": []
     },
     {
       "Id": "FaithAlone",
-      "Link": "https://www.ldsdoctrines.com/?page=FaithAlone"
+      "Link": "https://www.ldsdoctrines.com/faithalone/",
+      "PostedGroups": []
     },
     {
       "Id": "Final-Judgment",
-      "Link": "https://www.ldsdoctrines.com/?page=Final-Judgment"
+      "Link": "https://www.ldsdoctrines.com/final-judgment/",
+      "PostedGroups": []
     },
     {
       "Id": "First-Vision",
-      "Link": "https://www.ldsdoctrines.com/?page=First-Vision"
+      "Link": "https://www.ldsdoctrines.com/first-vision/",
+      "PostedGroups": []
     },
     {
       "Id": "Foreordination",
-      "Link": "https://www.ldsdoctrines.com/?page=Foreordination"
+      "Link": "https://www.ldsdoctrines.com/foreordination/",
+      "PostedGroups": []
     },
     {
       "Id": "Forgiveness",
-      "Link": "https://www.ldsdoctrines.com/?page=Forgiveness",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_47818126111754286987906.png"
+      "Link": "https://www.ldsdoctrines.com/forgiveness/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_47818126111754286987906.png",
+      "PostedGroups": []
     },
     {
       "Id": "Found-After-Death",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-After-Death",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_15430708111733983071634.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-after-death/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_15430708111733983071634.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Apostle",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Apostle"
+      "Link": "https://www.ldsdoctrines.com/found-apostle/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Atonement",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Atonement",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_35946238211739724292919.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-atonement/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_35946238211739724292919.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Baptism",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Baptism"
+      "Link": "https://www.ldsdoctrines.com/found-baptism/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Child-Of-God",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Child-Of-God",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_61702974111744430856799.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-child-of-god/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_61702974111744430856799.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Commandments",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Commandments",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_26891475311743742844661.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-commandments/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_26891475311743742844661.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Consecration",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Consecration"
+      "Link": "https://www.ldsdoctrines.com/found-consecration/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Creation",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Creation"
+      "Link": "https://www.ldsdoctrines.com/found-creation/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Doctrine",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Doctrine"
+      "Link": "https://www.ldsdoctrines.com/found-doctrine/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Eternal-Progression",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Eternal-Progression",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_97103827811736574743743.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-eternal-progression/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_97103827811736574743743.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Exaltation",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Exaltation"
+      "Link": "https://www.ldsdoctrines.com/found-exaltation/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Faith",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Faith",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_51200578711739140177007.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-faith/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_51200578711739140177007.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Family",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Family"
+      "Link": "https://www.ldsdoctrines.com/found-family/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Fasting",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Fasting"
+      "Link": "https://www.ldsdoctrines.com/found-fasting/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Forgiveness",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Forgiveness"
+      "Link": "https://www.ldsdoctrines.com/found-forgiveness/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-GatheringOfIsrael",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-GatheringOfIsrael"
+      "Link": "https://www.ldsdoctrines.com/found-gatheringofisrael/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-God",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-God",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_14099002811742536692011.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-god/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_14099002811742536692011.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Gospel",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Gospel",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/TheGospel.png"
+      "Link": "https://www.ldsdoctrines.com/found-gospel/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/TheGospel.png",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Grace",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Grace",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/GraceImage.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-grace/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/GraceImage.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Holy-Ghost",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Holy-Ghost",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_30275311711740300403514.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-holy-ghost/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_30275311711740300403514.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Hope",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Hope"
+      "Link": "https://www.ldsdoctrines.com/found-hope/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Humility",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Humility"
+      "Link": "https://www.ldsdoctrines.com/found-humility/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Jesus",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Jesus",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_65854476311742004880792.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-jesus/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_65854476311742004880792.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Miracles",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Miracles"
+      "Link": "https://www.ldsdoctrines.com/found-miracles/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-MissionaryWork",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-MissionaryWork"
+      "Link": "https://www.ldsdoctrines.com/found-missionarywork/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Obedience",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Obedience"
+      "Link": "https://www.ldsdoctrines.com/found-obedience/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Ordinances",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Ordinances"
+      "Link": "https://www.ldsdoctrines.com/found-ordinances/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Organized-Church",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Organized-Church"
+      "Link": "https://www.ldsdoctrines.com/found-organized-church/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-OuterDarkness",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-OuterDarkness"
+      "Link": "https://www.ldsdoctrines.com/found-outerdarkness/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-PatriarchalBlessings",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-PatriarchalBlessings"
+      "Link": "https://www.ldsdoctrines.com/found-patriarchalblessings/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Peace",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Peace"
+      "Link": "https://www.ldsdoctrines.com/found-peace/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Plan-Of-Salvation",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Plan-Of-Salvation"
+      "Link": "https://www.ldsdoctrines.com/found-plan-of-salvation/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Prayer",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Prayer"
+      "Link": "https://www.ldsdoctrines.com/found-prayer/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-PreExistence",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-PreExistence",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_92869685611767217793313.png"
+      "Link": "https://www.ldsdoctrines.com/found-preexistence/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_92869685611767217793313.png",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Priesthood",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Priesthood",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_98182988111744939958987.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-priesthood/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_98182988111744939958987.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Prophet",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Prophet",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_43411302111741645285779.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-prophet/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_43411302111741645285779.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Repentance",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Repentance",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_34272934211739781978527.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-repentance/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_34272934211739781978527.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Resurrection",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Resurrection",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_9703729911774847253478.png"
+      "Link": "https://www.ldsdoctrines.com/found-resurrection/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_9703729911774847253478.png",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Sabbath",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Sabbath"
+      "Link": "https://www.ldsdoctrines.com/found-sabbath/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Sacrament",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Sacrament",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/Sacrament.jpeg"
+      "Link": "https://www.ldsdoctrines.com/found-sacrament/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/Sacrament.jpeg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Satan",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Satan",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_81875116711737350475956.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-satan/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_81875116711737350475956.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Scripture",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Scripture"
+      "Link": "https://www.ldsdoctrines.com/found-scripture/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Sin",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Sin",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_22506229511748260305420.png"
+      "Link": "https://www.ldsdoctrines.com/found-sin/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_22506229511748260305420.png",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Spirit",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Spirit",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_177354911739335923317.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-spirit/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_177354911739335923317.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-SpiritualGifts",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-SpiritualGifts"
+      "Link": "https://www.ldsdoctrines.com/found-spiritualgifts/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-SpiritWorld",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-SpiritWorld"
+      "Link": "https://www.ldsdoctrines.com/found-spiritworld/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Temple",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Temple"
+      "Link": "https://www.ldsdoctrines.com/found-temple/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Temptation",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Temptation"
+      "Link": "https://www.ldsdoctrines.com/found-temptation/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Testimony",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Testimony"
+      "Link": "https://www.ldsdoctrines.com/found-testimony/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-ThreeGlories",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-ThreeGlories"
+      "Link": "https://www.ldsdoctrines.com/found-threeglories/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Tithing",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Tithing",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/Mammon.jpg"
+      "Link": "https://www.ldsdoctrines.com/found-tithing/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/Mammon.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Truth",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Truth"
+      "Link": "https://www.ldsdoctrines.com/found-truth/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Virtue",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Virtue"
+      "Link": "https://www.ldsdoctrines.com/found-virtue/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Why-Here",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Why-Here",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_95972883011766526817160.png"
+      "Link": "https://www.ldsdoctrines.com/found-why-here/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_95972883011766526817160.png",
+      "PostedGroups": []
     },
     {
       "Id": "Found-WordOfWisdom",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-WordOfWisdom"
+      "Link": "https://www.ldsdoctrines.com/found-wordofwisdom/",
+      "PostedGroups": []
     },
     {
       "Id": "Found-Worship",
-      "Link": "https://www.ldsdoctrines.com/?page=Found-Worship"
+      "Link": "https://www.ldsdoctrines.com/found-worship/",
+      "PostedGroups": []
     },
     {
       "Id": "Foundations-Of-Faith",
-      "Link": "https://www.ldsdoctrines.com/?page=Foundations-Of-Faith"
+      "Link": "https://www.ldsdoctrines.com/foundations-of-faith/",
+      "PostedGroups": []
     },
     {
       "Id": "Framework-Of-Revelation",
-      "Link": "https://www.ldsdoctrines.com/?page=Framework-Of-Revelation"
+      "Link": "https://www.ldsdoctrines.com/framework-of-revelation/",
+      "PostedGroups": []
     },
     {
       "Id": "Free-Agency",
-      "Link": "https://www.ldsdoctrines.com/?page=Free-Agency"
+      "Link": "https://www.ldsdoctrines.com/free-agency/",
+      "PostedGroups": []
     },
     {
       "Id": "Gates-Of-Hell",
-      "Link": "https://www.ldsdoctrines.com/?page=Gates-Of-Hell",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_69812035011746685657679.png"
+      "Link": "https://www.ldsdoctrines.com/gates-of-hell/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_69812035011746685657679.png",
+      "PostedGroups": []
     },
     {
       "Id": "General-Conference",
-      "Link": "https://www.ldsdoctrines.com/?page=General-Conference"
+      "Link": "https://www.ldsdoctrines.com/general-conference/",
+      "PostedGroups": []
     },
     {
       "Id": "Gideon",
-      "Link": "https://www.ldsdoctrines.com/?page=Gideon"
+      "Link": "https://www.ldsdoctrines.com/gideon/",
+      "PostedGroups": []
     },
     {
       "Id": "Goliath",
-      "Link": "https://www.ldsdoctrines.com/?page=Goliath"
+      "Link": "https://www.ldsdoctrines.com/goliath/",
+      "PostedGroups": []
     },
     {
       "Id": "Good-Evil",
-      "Link": "https://www.ldsdoctrines.com/?page=Good-Evil",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_73810861311747282710778.png"
+      "Link": "https://www.ldsdoctrines.com/good-evil/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_73810861311747282710778.png",
+      "PostedGroups": []
     },
     {
       "Id": "Great-And-Abominable",
-      "Link": "https://www.ldsdoctrines.com/?page=Great-And-Abominable"
+      "Link": "https://www.ldsdoctrines.com/great-and-abominable/",
+      "PostedGroups": []
     },
     {
       "Id": "Great-Apostasy",
-      "Link": "https://www.ldsdoctrines.com/?page=Great-Apostasy"
+      "Link": "https://www.ldsdoctrines.com/great-apostasy/",
+      "PostedGroups": []
     },
     {
       "Id": "Habakkuk",
-      "Link": "https://www.ldsdoctrines.com/?page=Habakkuk"
+      "Link": "https://www.ldsdoctrines.com/habakkuk/",
+      "PostedGroups": []
     },
     {
       "Id": "Hagar",
-      "Link": "https://www.ldsdoctrines.com/?page=Hagar"
+      "Link": "https://www.ldsdoctrines.com/hagar/",
+      "PostedGroups": []
     },
     {
       "Id": "Hannah",
-      "Link": "https://www.ldsdoctrines.com/?page=Hannah"
+      "Link": "https://www.ldsdoctrines.com/hannah/",
+      "PostedGroups": []
     },
     {
       "Id": "Healing-Faith-Priesthood",
-      "Link": "https://www.ldsdoctrines.com/?page=Healing-Faith-Priesthood"
+      "Link": "https://www.ldsdoctrines.com/healing-faith-priesthood/",
+      "PostedGroups": []
     },
     {
       "Id": "Healing-Sick",
-      "Link": "https://www.ldsdoctrines.com/?page=Healing-Sick"
+      "Link": "https://www.ldsdoctrines.com/healing-sick/",
+      "PostedGroups": []
     },
     {
       "Id": "Heavenly-Mother",
-      "Link": "https://www.ldsdoctrines.com/?page=Heavenly-Mother"
+      "Link": "https://www.ldsdoctrines.com/heavenly-mother/",
+      "PostedGroups": []
     },
     {
       "Id": "Helaman-Son-Of-Alma",
-      "Link": "https://www.ldsdoctrines.com/?page=Helaman-Son-Of-Alma"
+      "Link": "https://www.ldsdoctrines.com/helaman-son-of-alma/",
+      "PostedGroups": []
     },
     {
       "Id": "Helaman-Son-Of-Helaman",
-      "Link": "https://www.ldsdoctrines.com/?page=Helaman-Son-Of-Helaman"
+      "Link": "https://www.ldsdoctrines.com/helaman-son-of-helaman/",
+      "PostedGroups": []
     },
     {
       "Id": "Hezekiah",
-      "Link": "https://www.ldsdoctrines.com/?page=Hezekiah"
+      "Link": "https://www.ldsdoctrines.com/hezekiah/",
+      "PostedGroups": []
     },
     {
       "Id": "Home",
-      "Link": "https://www.ldsdoctrines.com/?page=Home",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/HeaderImage1.jpg"
+      "Link": "https://www.ldsdoctrines.com/home/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/HeaderImage1.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Hosea",
-      "Link": "https://www.ldsdoctrines.com/?page=Hosea"
+      "Link": "https://www.ldsdoctrines.com/hosea/",
+      "PostedGroups": []
     },
     {
       "Id": "Hyrum-Smith",
-      "Link": "https://www.ldsdoctrines.com/?page=Hyrum-Smith"
+      "Link": "https://www.ldsdoctrines.com/hyrum-smith/",
+      "PostedGroups": []
     },
     {
       "Id": "Intelligences",
-      "Link": "https://www.ldsdoctrines.com/?page=Intelligences"
+      "Link": "https://www.ldsdoctrines.com/intelligences/",
+      "PostedGroups": []
     },
     {
       "Id": "Isaac",
-      "Link": "https://www.ldsdoctrines.com/?page=Isaac"
+      "Link": "https://www.ldsdoctrines.com/isaac/",
+      "PostedGroups": []
     },
     {
       "Id": "Isaiah-Prophet",
-      "Link": "https://www.ldsdoctrines.com/?page=Isaiah-Prophet"
+      "Link": "https://www.ldsdoctrines.com/isaiah-prophet/",
+      "PostedGroups": []
     },
     {
       "Id": "Jacob-Israel",
-      "Link": "https://www.ldsdoctrines.com/?page=Jacob-Israel"
+      "Link": "https://www.ldsdoctrines.com/jacob-israel/",
+      "PostedGroups": []
     },
     {
       "Id": "Jacob-Son-Of-Lehi",
-      "Link": "https://www.ldsdoctrines.com/?page=Jacob-Son-Of-Lehi"
+      "Link": "https://www.ldsdoctrines.com/jacob-son-of-lehi/",
+      "PostedGroups": []
     },
     {
       "Id": "James-Lords-Brother",
-      "Link": "https://www.ldsdoctrines.com/?page=James-Lords-Brother"
+      "Link": "https://www.ldsdoctrines.com/james-lords-brother/",
+      "PostedGroups": []
     },
     {
       "Id": "James-Son-Of-Zebedee",
-      "Link": "https://www.ldsdoctrines.com/?page=James-Son-Of-Zebedee"
+      "Link": "https://www.ldsdoctrines.com/james-son-of-zebedee/",
+      "PostedGroups": []
     },
     {
       "Id": "Jared-Jaredite-Founder",
-      "Link": "https://www.ldsdoctrines.com/?page=Jared-Jaredite-Founder"
+      "Link": "https://www.ldsdoctrines.com/jared-jaredite-founder/",
+      "PostedGroups": []
     },
     {
       "Id": "Jeremiah",
-      "Link": "https://www.ldsdoctrines.com/?page=Jeremiah"
+      "Link": "https://www.ldsdoctrines.com/jeremiah/",
+      "PostedGroups": []
     },
     {
       "Id": "JesusChrist-No-Ordinary",
-      "Link": "https://www.ldsdoctrines.com/?page=JesusChrist-No-Ordinary"
+      "Link": "https://www.ldsdoctrines.com/jesuschrist-no-ordinary/",
+      "PostedGroups": []
     },
     {
       "Id": "Job",
-      "Link": "https://www.ldsdoctrines.com/?page=Job"
+      "Link": "https://www.ldsdoctrines.com/job/",
+      "PostedGroups": []
     },
     {
       "Id": "Joel-Prophet",
-      "Link": "https://www.ldsdoctrines.com/?page=Joel-Prophet"
+      "Link": "https://www.ldsdoctrines.com/joel-prophet/",
+      "PostedGroups": []
     },
     {
       "Id": "John-Taylor",
-      "Link": "https://www.ldsdoctrines.com/?page=John-Taylor"
+      "Link": "https://www.ldsdoctrines.com/john-taylor/",
+      "PostedGroups": []
     },
     {
       "Id": "John-The-Apostle",
-      "Link": "https://www.ldsdoctrines.com/?page=John-The-Apostle"
+      "Link": "https://www.ldsdoctrines.com/john-the-apostle/",
+      "PostedGroups": []
     },
     {
       "Id": "John-The-Baptist",
-      "Link": "https://www.ldsdoctrines.com/?page=John-The-Baptist"
+      "Link": "https://www.ldsdoctrines.com/john-the-baptist/",
+      "PostedGroups": []
     },
     {
       "Id": "Jonah",
-      "Link": "https://www.ldsdoctrines.com/?page=Jonah"
+      "Link": "https://www.ldsdoctrines.com/jonah/",
+      "PostedGroups": []
     },
     {
       "Id": "Jonathan",
-      "Link": "https://www.ldsdoctrines.com/?page=Jonathan"
+      "Link": "https://www.ldsdoctrines.com/jonathan/",
+      "PostedGroups": []
     },
     {
       "Id": "Joseph-Carpenter",
-      "Link": "https://www.ldsdoctrines.com/?page=Joseph-Carpenter"
+      "Link": "https://www.ldsdoctrines.com/joseph-carpenter/",
+      "PostedGroups": []
     },
     {
       "Id": "Joseph-Egypt",
-      "Link": "https://www.ldsdoctrines.com/?page=Joseph-Egypt"
+      "Link": "https://www.ldsdoctrines.com/joseph-egypt/",
+      "PostedGroups": []
     },
     {
       "Id": "Joseph-F-Smith",
-      "Link": "https://www.ldsdoctrines.com/?page=Joseph-F-Smith"
+      "Link": "https://www.ldsdoctrines.com/joseph-f-smith/",
+      "PostedGroups": []
     },
     {
       "Id": "Joseph-Of-Arimathaea",
-      "Link": "https://www.ldsdoctrines.com/?page=Joseph-Of-Arimathaea"
+      "Link": "https://www.ldsdoctrines.com/joseph-of-arimathaea/",
+      "PostedGroups": []
     },
     {
       "Id": "Joseph-Smith",
-      "Link": "https://www.ldsdoctrines.com/?page=Joseph-Smith"
+      "Link": "https://www.ldsdoctrines.com/joseph-smith/",
+      "PostedGroups": []
     },
     {
       "Id": "Joseph-Smith-Prophet",
-      "Link": "https://www.ldsdoctrines.com/?page=Joseph-Smith-Prophet"
+      "Link": "https://www.ldsdoctrines.com/joseph-smith-prophet/",
+      "PostedGroups": []
     },
     {
       "Id": "Joseph-Smith-Sr",
-      "Link": "https://www.ldsdoctrines.com/?page=Joseph-Smith-Sr"
+      "Link": "https://www.ldsdoctrines.com/joseph-smith-sr/",
+      "PostedGroups": []
     },
     {
       "Id": "Joseph-Son-Of-Lehi",
-      "Link": "https://www.ldsdoctrines.com/?page=Joseph-Son-Of-Lehi"
+      "Link": "https://www.ldsdoctrines.com/joseph-son-of-lehi/",
+      "PostedGroups": []
     },
     {
       "Id": "Joshua",
-      "Link": "https://www.ldsdoctrines.com/?page=Joshua"
+      "Link": "https://www.ldsdoctrines.com/joshua/",
+      "PostedGroups": []
     },
     {
       "Id": "Josiah",
-      "Link": "https://www.ldsdoctrines.com/?page=Josiah"
+      "Link": "https://www.ldsdoctrines.com/josiah/",
+      "PostedGroups": []
     },
     {
       "Id": "Judah-Son-Of-Jacob",
-      "Link": "https://www.ldsdoctrines.com/?page=Judah-Son-Of-Jacob"
+      "Link": "https://www.ldsdoctrines.com/judah-son-of-jacob/",
+      "PostedGroups": []
     },
     {
       "Id": "Judas-Iscariot",
-      "Link": "https://www.ldsdoctrines.com/?page=Judas-Iscariot"
+      "Link": "https://www.ldsdoctrines.com/judas-iscariot/",
+      "PostedGroups": []
     },
     {
       "Id": "Jude",
-      "Link": "https://www.ldsdoctrines.com/?page=Jude"
+      "Link": "https://www.ldsdoctrines.com/jude/",
+      "PostedGroups": []
     },
     {
       "Id": "Kabbalah-LDS",
-      "Link": "https://www.ldsdoctrines.com/?page=Kabbalah-LDS"
+      "Link": "https://www.ldsdoctrines.com/kabbalah-lds/",
+      "PostedGroups": []
     },
     {
       "Id": "Karma-Law-Restoration",
-      "Link": "https://www.ldsdoctrines.com/?page=Karma-Law-Restoration"
+      "Link": "https://www.ldsdoctrines.com/karma-law-restoration/",
+      "PostedGroups": []
     },
     {
       "Id": "King-Benjamin",
-      "Link": "https://www.ldsdoctrines.com/?page=King-Benjamin"
+      "Link": "https://www.ldsdoctrines.com/king-benjamin/",
+      "PostedGroups": []
     },
     {
       "Id": "King-Follett",
-      "Link": "https://www.ldsdoctrines.com/?page=King-Follett"
+      "Link": "https://www.ldsdoctrines.com/king-follett/",
+      "PostedGroups": []
     },
     {
       "Id": "King-Lamoni",
-      "Link": "https://www.ldsdoctrines.com/?page=King-Lamoni"
+      "Link": "https://www.ldsdoctrines.com/king-lamoni/",
+      "PostedGroups": []
     },
     {
       "Id": "King-Noah",
-      "Link": "https://www.ldsdoctrines.com/?page=King-Noah"
+      "Link": "https://www.ldsdoctrines.com/king-noah/",
+      "PostedGroups": []
     },
     {
       "Id": "Kolob",
-      "Link": "https://www.ldsdoctrines.com/?page=Kolob"
+      "Link": "https://www.ldsdoctrines.com/kolob/",
+      "PostedGroups": []
     },
     {
       "Id": "Korihor",
-      "Link": "https://www.ldsdoctrines.com/?page=Korihor"
+      "Link": "https://www.ldsdoctrines.com/korihor/",
+      "PostedGroups": []
     },
     {
       "Id": "Laman-Lemuel",
-      "Link": "https://www.ldsdoctrines.com/?page=Laman-Lemuel"
+      "Link": "https://www.ldsdoctrines.com/laman-lemuel/",
+      "PostedGroups": []
     },
     {
       "Id": "Lamonis-Father",
-      "Link": "https://www.ldsdoctrines.com/?page=Lamonis-Father"
+      "Link": "https://www.ldsdoctrines.com/lamonis-father/",
+      "PostedGroups": []
     },
     {
       "Id": "Lamanis-Queen",
-      "Link": "https://www.ldsdoctrines.com/?page=Lamanis-Queen"
+      "Link": "https://www.ldsdoctrines.com/lamanis-queen/",
+      "PostedGroups": []
     },
     {
       "Id": "Law-Of-Moses",
-      "Link": "https://www.ldsdoctrines.com/?page=Law-Of-Moses"
+      "Link": "https://www.ldsdoctrines.com/law-of-moses/",
+      "PostedGroups": []
     },
     {
       "Id": "Lazarus",
-      "Link": "https://www.ldsdoctrines.com/?page=Lazarus"
+      "Link": "https://www.ldsdoctrines.com/lazarus/",
+      "PostedGroups": []
     },
     {
       "Id": "Lehi",
-      "Link": "https://www.ldsdoctrines.com/?page=Lehi"
+      "Link": "https://www.ldsdoctrines.com/lehi/",
+      "PostedGroups": []
     },
     {
       "Id": "Lehi-Son-Of-Helaman",
-      "Link": "https://www.ldsdoctrines.com/?page=Lehi-Son-Of-Helaman"
+      "Link": "https://www.ldsdoctrines.com/lehi-son-of-helaman/",
+      "PostedGroups": []
     },
     {
       "Id": "Lesson-93",
-      "Link": "https://www.ldsdoctrines.com/?page=Lesson-93"
+      "Link": "https://www.ldsdoctrines.com/lesson-93/",
+      "PostedGroups": []
     },
     {
       "Id": "Lesson-Charity",
-      "Link": "https://www.ldsdoctrines.com/?page=Lesson-Charity"
+      "Link": "https://www.ldsdoctrines.com/lesson-charity/",
+      "PostedGroups": []
     },
     {
       "Id": "Lesson-Plans",
-      "Link": "https://www.ldsdoctrines.com/?page=Lesson-Plans"
+      "Link": "https://www.ldsdoctrines.com/lesson-plans/",
+      "PostedGroups": []
     },
     {
       "Id": "Lesson-Spiritual-Gifts",
-      "Link": "https://www.ldsdoctrines.com/?page=Lesson-Spiritual-Gifts"
+      "Link": "https://www.ldsdoctrines.com/lesson-spiritual-gifts/",
+      "PostedGroups": []
     },
     {
       "Id": "Liahona",
-      "Link": "https://www.ldsdoctrines.com/?page=Liahona"
+      "Link": "https://www.ldsdoctrines.com/liahona/",
+      "PostedGroups": []
     },
     {
       "Id": "Life-And-Atonement-Of-Christ",
-      "Link": "https://www.ldsdoctrines.com/?page=Life-And-Atonement-Of-Christ"
+      "Link": "https://www.ldsdoctrines.com/life-and-atonement-of-christ/",
+      "PostedGroups": []
     },
     {
       "Id": "Light-Of-Christ",
-      "Link": "https://www.ldsdoctrines.com/?page=Light-Of-Christ"
+      "Link": "https://www.ldsdoctrines.com/light-of-christ/",
+      "PostedGroups": []
     },
     {
       "Id": "Limhi",
-      "Link": "https://www.ldsdoctrines.com/?page=Limhi"
+      "Link": "https://www.ldsdoctrines.com/limhi/",
+      "PostedGroups": []
     },
     {
       "Id": "Living-Earth",
-      "Link": "https://www.ldsdoctrines.com/?page=Living-Earth"
+      "Link": "https://www.ldsdoctrines.com/living-earth/",
+      "PostedGroups": []
     },
     {
       "Id": "Lois-And-Eunice",
-      "Link": "https://www.ldsdoctrines.com/?page=Lois-And-Eunice"
+      "Link": "https://www.ldsdoctrines.com/lois-and-eunice/",
+      "PostedGroups": []
     },
     {
       "Id": "Lord-Prepares-A-Way",
-      "Link": "https://www.ldsdoctrines.com/?page=Lord-Prepares-A-Way"
+      "Link": "https://www.ldsdoctrines.com/lord-prepares-a-way/",
+      "PostedGroups": []
     },
     {
       "Id": "Lot",
-      "Link": "https://www.ldsdoctrines.com/?page=Lot"
+      "Link": "https://www.ldsdoctrines.com/lot/",
+      "PostedGroups": []
     },
     {
       "Id": "Love-Of-Christ",
-      "Link": "https://www.ldsdoctrines.com/?page=Love-Of-Christ",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_17051806011771180008360.png"
+      "Link": "https://www.ldsdoctrines.com/love-of-christ/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_17051806011771180008360.png",
+      "PostedGroups": []
     },
     {
       "Id": "Lucy-Mack-Smith",
-      "Link": "https://www.ldsdoctrines.com/?page=Lucy-Mack-Smith"
+      "Link": "https://www.ldsdoctrines.com/lucy-mack-smith/",
+      "PostedGroups": []
     },
     {
       "Id": "Luke",
-      "Link": "https://www.ldsdoctrines.com/?page=Luke"
+      "Link": "https://www.ldsdoctrines.com/luke/",
+      "PostedGroups": []
     },
     {
       "Id": "Lydia",
-      "Link": "https://www.ldsdoctrines.com/?page=Lydia"
+      "Link": "https://www.ldsdoctrines.com/lydia/",
+      "PostedGroups": []
     },
     {
       "Id": "Making-Keeping-Covenants",
-      "Link": "https://www.ldsdoctrines.com/?page=Making-Keeping-Covenants"
+      "Link": "https://www.ldsdoctrines.com/making-keeping-covenants/",
+      "PostedGroups": []
     },
     {
       "Id": "Malachi",
-      "Link": "https://www.ldsdoctrines.com/?page=Malachi"
+      "Link": "https://www.ldsdoctrines.com/malachi/",
+      "PostedGroups": []
     },
     {
       "Id": "Many-Called-Few-Chosen",
-      "Link": "https://www.ldsdoctrines.com/?page=Many-Called-Few-Chosen"
+      "Link": "https://www.ldsdoctrines.com/many-called-few-chosen/",
+      "PostedGroups": []
     },
     {
       "Id": "Mark",
-      "Link": "https://www.ldsdoctrines.com/?page=Mark"
+      "Link": "https://www.ldsdoctrines.com/mark/",
+      "PostedGroups": []
     },
     {
       "Id": "Martha",
-      "Link": "https://www.ldsdoctrines.com/?page=Martha"
+      "Link": "https://www.ldsdoctrines.com/martha/",
+      "PostedGroups": []
     },
     {
       "Id": "Martin-Harris",
-      "Link": "https://www.ldsdoctrines.com/?page=Martin-Harris"
+      "Link": "https://www.ldsdoctrines.com/martin-harris/",
+      "PostedGroups": []
     },
     {
       "Id": "Mary-Magdalene",
-      "Link": "https://www.ldsdoctrines.com/?page=Mary-Magdalene"
+      "Link": "https://www.ldsdoctrines.com/mary-magdalene/",
+      "PostedGroups": []
     },
     {
       "Id": "Mary-Mother-Of-Jesus",
-      "Link": "https://www.ldsdoctrines.com/?page=Mary-Mother-Of-Jesus"
+      "Link": "https://www.ldsdoctrines.com/mary-mother-of-jesus/",
+      "PostedGroups": []
     },
     {
       "Id": "Mary-Of-Bethany",
-      "Link": "https://www.ldsdoctrines.com/?page=Mary-Of-Bethany"
+      "Link": "https://www.ldsdoctrines.com/mary-of-bethany/",
+      "PostedGroups": []
     },
     {
       "Id": "Masonry-Temple",
-      "Link": "https://www.ldsdoctrines.com/?page=Masonry-Temple"
+      "Link": "https://www.ldsdoctrines.com/masonry-temple/",
+      "PostedGroups": []
     },
     {
       "Id": "Matthew-Levi",
-      "Link": "https://www.ldsdoctrines.com/?page=Matthew-Levi"
+      "Link": "https://www.ldsdoctrines.com/matthew-levi/",
+      "PostedGroups": []
     },
     {
       "Id": "Melchizedek",
-      "Link": "https://www.ldsdoctrines.com/?page=Melchizedek"
+      "Link": "https://www.ldsdoctrines.com/melchizedek/",
+      "PostedGroups": []
     },
     {
       "Id": "Micah-Prophet",
-      "Link": "https://www.ldsdoctrines.com/?page=Micah-Prophet"
+      "Link": "https://www.ldsdoctrines.com/micah-prophet/",
+      "PostedGroups": []
     },
     {
       "Id": "Miriam",
-      "Link": "https://www.ldsdoctrines.com/?page=Miriam"
+      "Link": "https://www.ldsdoctrines.com/miriam/",
+      "PostedGroups": []
     },
     {
       "Id": "Mormon",
-      "Link": "https://www.ldsdoctrines.com/?page=Mormon"
+      "Link": "https://www.ldsdoctrines.com/mormon/",
+      "PostedGroups": []
     },
     {
       "Id": "Moroni",
-      "Link": "https://www.ldsdoctrines.com/?page=Moroni"
+      "Link": "https://www.ldsdoctrines.com/moroni/",
+      "PostedGroups": []
     },
     {
       "Id": "Moses",
-      "Link": "https://www.ldsdoctrines.com/?page=Moses"
+      "Link": "https://www.ldsdoctrines.com/moses/",
+      "PostedGroups": []
     },
     {
       "Id": "MosesLastWords",
-      "Link": "https://www.ldsdoctrines.com/?page=MosesLastWords"
+      "Link": "https://www.ldsdoctrines.com/moseslastwords/",
+      "PostedGroups": []
     },
     {
       "Id": "Mosiah-I",
-      "Link": "https://www.ldsdoctrines.com/?page=Mosiah-I"
+      "Link": "https://www.ldsdoctrines.com/mosiah-i/",
+      "PostedGroups": []
     },
     {
       "Id": "Mosiah-II",
-      "Link": "https://www.ldsdoctrines.com/?page=Mosiah-II"
+      "Link": "https://www.ldsdoctrines.com/mosiah-ii/",
+      "PostedGroups": []
     },
     {
       "Id": "Mountain-Meadows",
-      "Link": "https://www.ldsdoctrines.com/?page=Mountain-Meadows"
+      "Link": "https://www.ldsdoctrines.com/mountain-meadows/",
+      "PostedGroups": []
     },
     {
       "Id": "Mysteries-Of-God",
-      "Link": "https://www.ldsdoctrines.com/?page=Mysteries-Of-God"
+      "Link": "https://www.ldsdoctrines.com/mysteries-of-god/",
+      "PostedGroups": []
     },
     {
       "Id": "Naaman",
-      "Link": "https://www.ldsdoctrines.com/?page=Naaman"
+      "Link": "https://www.ldsdoctrines.com/naaman/",
+      "PostedGroups": []
     },
     {
       "Id": "Name-Of-Church",
-      "Link": "https://www.ldsdoctrines.com/?page=Name-Of-Church"
+      "Link": "https://www.ldsdoctrines.com/name-of-church/",
+      "PostedGroups": []
     },
     {
       "Id": "Naomi",
-      "Link": "https://www.ldsdoctrines.com/?page=Naomi"
+      "Link": "https://www.ldsdoctrines.com/naomi/",
+      "PostedGroups": []
     },
     {
       "Id": "Nathan",
-      "Link": "https://www.ldsdoctrines.com/?page=Nathan"
+      "Link": "https://www.ldsdoctrines.com/nathan/",
+      "PostedGroups": []
     },
     {
       "Id": "Nehemiah",
-      "Link": "https://www.ldsdoctrines.com/?page=Nehemiah"
+      "Link": "https://www.ldsdoctrines.com/nehemiah/",
+      "PostedGroups": []
     },
     {
       "Id": "Nephi",
-      "Link": "https://www.ldsdoctrines.com/?page=Nephi"
+      "Link": "https://www.ldsdoctrines.com/nephi/",
+      "PostedGroups": []
     },
     {
       "Id": "Nephi-Son-Of-Helaman",
-      "Link": "https://www.ldsdoctrines.com/?page=Nephi-Son-Of-Helaman"
+      "Link": "https://www.ldsdoctrines.com/nephi-son-of-helaman/",
+      "PostedGroups": []
     },
     {
       "Id": "Nephi-The-Disciple",
-      "Link": "https://www.ldsdoctrines.com/?page=Nephi-The-Disciple"
+      "Link": "https://www.ldsdoctrines.com/nephi-the-disciple/",
+      "PostedGroups": []
     },
     {
       "Id": "New-Jerusalem",
-      "Link": "https://www.ldsdoctrines.com/?page=New-Jerusalem"
+      "Link": "https://www.ldsdoctrines.com/new-jerusalem/",
+      "PostedGroups": []
     },
     {
       "Id": "Nicodemus",
-      "Link": "https://www.ldsdoctrines.com/?page=Nicodemus"
+      "Link": "https://www.ldsdoctrines.com/nicodemus/",
+      "PostedGroups": []
     },
     {
       "Id": "Noah",
-      "Link": "https://www.ldsdoctrines.com/?page=Noah"
+      "Link": "https://www.ldsdoctrines.com/noah/",
+      "PostedGroups": []
     },
     {
       "Id": "Oliver-Cowdery",
-      "Link": "https://www.ldsdoctrines.com/?page=Oliver-Cowdery"
+      "Link": "https://www.ldsdoctrines.com/oliver-cowdery/",
+      "PostedGroups": []
     },
     {
       "Id": "Ordinances-And-Repentance",
-      "Link": "https://www.ldsdoctrines.com/?page=Ordinances-And-Repentance"
+      "Link": "https://www.ldsdoctrines.com/ordinances-and-repentance/",
+      "PostedGroups": []
     },
     {
       "Id": "Out-Of-Body-Visions",
-      "Link": "https://www.ldsdoctrines.com/?page=Out-Of-Body-Visions"
+      "Link": "https://www.ldsdoctrines.com/out-of-body-visions/",
+      "PostedGroups": []
     },
     {
       "Id": "Pahoran",
-      "Link": "https://www.ldsdoctrines.com/?page=Pahoran"
+      "Link": "https://www.ldsdoctrines.com/pahoran/",
+      "PostedGroups": []
     },
     {
       "Id": "Passover-Type",
-      "Link": "https://www.ldsdoctrines.com/?page=Passover-Type"
+      "Link": "https://www.ldsdoctrines.com/passover-type/",
+      "PostedGroups": []
     },
     {
       "Id": "Paul",
-      "Link": "https://www.ldsdoctrines.com/?page=Paul"
+      "Link": "https://www.ldsdoctrines.com/paul/",
+      "PostedGroups": []
     },
     {
       "Id": "Pearl-Of-Great-Price",
-      "Link": "https://www.ldsdoctrines.com/?page=Pearl-Of-Great-Price"
+      "Link": "https://www.ldsdoctrines.com/pearl-of-great-price/",
+      "PostedGroups": []
     },
     {
       "Id": "People-Of-Scripture",
-      "Link": "https://www.ldsdoctrines.com/?page=People-Of-Scripture"
+      "Link": "https://www.ldsdoctrines.com/people-of-scripture/",
+      "PostedGroups": []
     },
     {
       "Id": "Peter",
-      "Link": "https://www.ldsdoctrines.com/?page=Peter"
+      "Link": "https://www.ldsdoctrines.com/peter/",
+      "PostedGroups": []
     },
     {
       "Id": "Philip-Evangelist",
-      "Link": "https://www.ldsdoctrines.com/?page=Philip-Evangelist"
+      "Link": "https://www.ldsdoctrines.com/philip-evangelist/",
+      "PostedGroups": []
     },
     {
       "Id": "Polygamy",
-      "Link": "https://www.ldsdoctrines.com/?page=Polygamy",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_98817207411763310945626.png"
+      "Link": "https://www.ldsdoctrines.com/polygamy/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_98817207411763310945626.png",
+      "PostedGroups": []
     },
     {
       "Id": "Prepare-To-Meet-God",
-      "Link": "https://www.ldsdoctrines.com/?page=Prepare-To-Meet-God"
+      "Link": "https://www.ldsdoctrines.com/prepare-to-meet-god/",
+      "PostedGroups": []
     },
     {
       "Id": "Priesthood-Keys",
-      "Link": "https://www.ldsdoctrines.com/?page=Priesthood-Keys",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/PriesthoodKeys.jpg"
+      "Link": "https://www.ldsdoctrines.com/priesthood-keys/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/PriesthoodKeys.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Priesthood-Power-Over-Evil",
-      "Link": "https://www.ldsdoctrines.com/?page=Priesthood-Power-Over-Evil"
+      "Link": "https://www.ldsdoctrines.com/priesthood-power-over-evil/",
+      "PostedGroups": []
     },
     {
       "Id": "Priesthood-Restrictions",
-      "Link": "https://www.ldsdoctrines.com/?page=Priesthood-Restrictions"
+      "Link": "https://www.ldsdoctrines.com/priesthood-restrictions/",
+      "PostedGroups": []
     },
     {
       "Id": "Priesthood-Today",
-      "Link": "https://www.ldsdoctrines.com/?page=Priesthood-Today"
+      "Link": "https://www.ldsdoctrines.com/priesthood-today/",
+      "PostedGroups": []
     },
     {
       "Id": "Priscilla-And-Aquila",
-      "Link": "https://www.ldsdoctrines.com/?page=Priscilla-And-Aquila"
+      "Link": "https://www.ldsdoctrines.com/priscilla-and-aquila/",
+      "PostedGroups": []
     },
     {
       "Id": "Prophets-Calling",
-      "Link": "https://www.ldsdoctrines.com/?page=Prophets-Calling"
+      "Link": "https://www.ldsdoctrines.com/prophets-calling/",
+      "PostedGroups": []
     },
     {
       "Id": "Prophets-Test",
-      "Link": "https://www.ldsdoctrines.com/?page=Prophets-Test"
+      "Link": "https://www.ldsdoctrines.com/prophets-test/",
+      "PostedGroups": []
     },
     {
       "Id": "Prophets-Warning",
-      "Link": "https://www.ldsdoctrines.com/?page=Prophets-Warning",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_86663367011750602154882.png"
+      "Link": "https://www.ldsdoctrines.com/prophets-warning/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_86663367011750602154882.png",
+      "PostedGroups": []
     },
     {
       "Id": "Rachel-And-Leah",
-      "Link": "https://www.ldsdoctrines.com/?page=Rachel-And-Leah"
+      "Link": "https://www.ldsdoctrines.com/rachel-and-leah/",
+      "PostedGroups": []
     },
     {
       "Id": "Rahab",
-      "Link": "https://www.ldsdoctrines.com/?page=Rahab"
+      "Link": "https://www.ldsdoctrines.com/rahab/",
+      "PostedGroups": []
     },
     {
       "Id": "ReasonForRepentance",
-      "Link": "https://www.ldsdoctrines.com/?page=ReasonForRepentance",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_49596584411767539016725.png"
+      "Link": "https://www.ldsdoctrines.com/reasonforrepentance/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_49596584411767539016725.png",
+      "PostedGroups": []
     },
     {
       "Id": "Rebekah",
-      "Link": "https://www.ldsdoctrines.com/?page=Rebekah"
+      "Link": "https://www.ldsdoctrines.com/rebekah/",
+      "PostedGroups": []
     },
     {
       "Id": "res-required",
-      "Link": "https://www.ldsdoctrines.com/?page=res-required",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_28763593911775359102615.png"
+      "Link": "https://www.ldsdoctrines.com/res-required/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_28763593911775359102615.png",
+      "PostedGroups": []
     },
     {
       "Id": "Restoration-Of-Gospel",
-      "Link": "https://www.ldsdoctrines.com/?page=Restoration-Of-Gospel"
+      "Link": "https://www.ldsdoctrines.com/restoration-of-gospel/",
+      "PostedGroups": []
     },
     {
       "Id": "Resurrection-Detail",
-      "Link": "https://www.ldsdoctrines.com/?page=Resurrection-Detail"
+      "Link": "https://www.ldsdoctrines.com/resurrection-detail/",
+      "PostedGroups": []
     },
     {
       "Id": "Resurrection-Of-Christ",
-      "Link": "https://www.ldsdoctrines.com/?page=Resurrection-Of-Christ"
+      "Link": "https://www.ldsdoctrines.com/resurrection-of-christ/",
+      "PostedGroups": []
     },
     {
       "Id": "Revelation-How",
-      "Link": "https://www.ldsdoctrines.com/?page=Revelation-How",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_57514504011741160311488.jpg"
+      "Link": "https://www.ldsdoctrines.com/revelation-how/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_57514504011741160311488.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Rich-Young-Ruler",
-      "Link": "https://www.ldsdoctrines.com/?page=Rich-Young-Ruler"
+      "Link": "https://www.ldsdoctrines.com/rich-young-ruler/",
+      "PostedGroups": []
     },
     {
       "Id": "Ruth",
-      "Link": "https://www.ldsdoctrines.com/?page=Ruth"
+      "Link": "https://www.ldsdoctrines.com/ruth/",
+      "PostedGroups": []
     },
     {
       "Id": "Salvation-Event",
-      "Link": "https://www.ldsdoctrines.com/?page=Salvation-Event",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/SalvationImage.jpg"
+      "Link": "https://www.ldsdoctrines.com/salvation-event/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/SalvationImage.jpg",
+      "PostedGroups": []
     },
     {
       "Id": "Salvation-For-Dead",
-      "Link": "https://www.ldsdoctrines.com/?page=Salvation-For-Dead"
+      "Link": "https://www.ldsdoctrines.com/salvation-for-dead/",
+      "PostedGroups": []
     },
     {
       "Id": "Salvation-Journey",
-      "Link": "https://www.ldsdoctrines.com/?page=Salvation-Journey"
+      "Link": "https://www.ldsdoctrines.com/salvation-journey/",
+      "PostedGroups": []
     },
     {
       "Id": "Samaritan-Woman-At-The-Well",
-      "Link": "https://www.ldsdoctrines.com/?page=Samaritan-Woman-At-The-Well"
+      "Link": "https://www.ldsdoctrines.com/samaritan-woman-at-the-well/",
+      "PostedGroups": []
     },
     {
       "Id": "Samson",
-      "Link": "https://www.ldsdoctrines.com/?page=Samson"
+      "Link": "https://www.ldsdoctrines.com/samson/",
+      "PostedGroups": []
     },
     {
       "Id": "Samuel-Lamanite",
-      "Link": "https://www.ldsdoctrines.com/?page=Samuel-Lamanite"
+      "Link": "https://www.ldsdoctrines.com/samuel-lamanite/",
+      "PostedGroups": []
     },
     {
       "Id": "Samuel-Prophet",
-      "Link": "https://www.ldsdoctrines.com/?page=Samuel-Prophet"
+      "Link": "https://www.ldsdoctrines.com/samuel-prophet/",
+      "PostedGroups": []
     },
     {
       "Id": "Sarah",
-      "Link": "https://www.ldsdoctrines.com/?page=Sarah"
+      "Link": "https://www.ldsdoctrines.com/sarah/",
+      "PostedGroups": []
     },
     {
       "Id": "Sariah",
-      "Link": "https://www.ldsdoctrines.com/?page=Sariah"
+      "Link": "https://www.ldsdoctrines.com/sariah/",
+      "PostedGroups": []
     },
     {
       "Id": "Saul-King",
-      "Link": "https://www.ldsdoctrines.com/?page=Saul-King"
+      "Link": "https://www.ldsdoctrines.com/saul-king/",
+      "PostedGroups": []
     },
     {
       "Id": "Sealing-Power",
-      "Link": "https://www.ldsdoctrines.com/?page=Sealing-Power"
+      "Link": "https://www.ldsdoctrines.com/sealing-power/",
+      "PostedGroups": []
     },
     {
       "Id": "Second-Comforter",
-      "Link": "https://www.ldsdoctrines.com/?page=Second-Comforter"
+      "Link": "https://www.ldsdoctrines.com/second-comforter/",
+      "PostedGroups": []
     },
     {
       "Id": "SelfDeception",
-      "Link": "https://www.ldsdoctrines.com/?page=SelfDeception",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_87117802311750310772280.png"
+      "Link": "https://www.ldsdoctrines.com/selfdeception/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_87117802311750310772280.png",
+      "PostedGroups": []
     },
     {
       "Id": "Service-In-The-Church",
-      "Link": "https://www.ldsdoctrines.com/?page=Service-In-The-Church"
+      "Link": "https://www.ldsdoctrines.com/service-in-the-church/",
+      "PostedGroups": []
     },
     {
       "Id": "Shadrach-Meshach-Abednego",
-      "Link": "https://www.ldsdoctrines.com/?page=Shadrach-Meshach-Abednego"
+      "Link": "https://www.ldsdoctrines.com/shadrach-meshach-abednego/",
+      "PostedGroups": []
     },
     {
       "Id": "Shunammite-Woman",
-      "Link": "https://www.ldsdoctrines.com/?page=Shunammite-Woman"
+      "Link": "https://www.ldsdoctrines.com/shunammite-woman/",
+      "PostedGroups": []
     },
     {
       "Id": "Sidney-Rigdon",
-      "Link": "https://www.ldsdoctrines.com/?page=Sidney-Rigdon"
+      "Link": "https://www.ldsdoctrines.com/sidney-rigdon/",
+      "PostedGroups": []
     },
     {
       "Id": "Signs-of-the-Times",
-      "Link": "https://www.ldsdoctrines.com/?page=Signs-of-the-Times"
+      "Link": "https://www.ldsdoctrines.com/signs-of-the-times/",
+      "PostedGroups": []
     },
     {
       "Id": "Simeon",
-      "Link": "https://www.ldsdoctrines.com/?page=Simeon"
+      "Link": "https://www.ldsdoctrines.com/simeon/",
+      "PostedGroups": []
     },
     {
       "Id": "SitAlone",
-      "Link": "https://www.ldsdoctrines.com/?page=SitAlone"
+      "Link": "https://www.ldsdoctrines.com/sitalone/",
+      "PostedGroups": []
     },
     {
       "Id": "Sola-Fide-Refutation",
-      "Link": "https://www.ldsdoctrines.com/?page=Sola-Fide-Refutation",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/SolaFideCherryPicking.png"
+      "Link": "https://www.ldsdoctrines.com/sola-fide-refutation/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/SolaFideCherryPicking.png",
+      "PostedGroups": []
     },
     {
       "Id": "Solomon",
-      "Link": "https://www.ldsdoctrines.com/?page=Solomon"
+      "Link": "https://www.ldsdoctrines.com/solomon/",
+      "PostedGroups": []
     },
     {
       "Id": "Sons-Of-Mosiah-Aaron",
-      "Link": "https://www.ldsdoctrines.com/?page=Sons-Of-Mosiah-Aaron"
+      "Link": "https://www.ldsdoctrines.com/sons-of-mosiah-aaron/",
+      "PostedGroups": []
     },
     {
       "Id": "Sons-Of-Perdition",
-      "Link": "https://www.ldsdoctrines.com/?page=Sons-Of-Perdition"
+      "Link": "https://www.ldsdoctrines.com/sons-of-perdition/",
+      "PostedGroups": []
     },
     {
       "Id": "Stephen",
-      "Link": "https://www.ldsdoctrines.com/?page=Stephen"
+      "Link": "https://www.ldsdoctrines.com/stephen/",
+      "PostedGroups": []
     },
     {
       "Id": "Stripling-Warriors",
-      "Link": "https://www.ldsdoctrines.com/?page=Stripling-Warriors"
+      "Link": "https://www.ldsdoctrines.com/stripling-warriors/",
+      "PostedGroups": []
     },
     {
       "Id": "Tabernacle",
-      "Link": "https://www.ldsdoctrines.com/?page=Tabernacle"
+      "Link": "https://www.ldsdoctrines.com/tabernacle/",
+      "PostedGroups": []
     },
     {
       "Id": "talks",
-      "Link": "https://www.ldsdoctrines.com/?page=talks"
+      "Link": "https://www.ldsdoctrines.com/talks/",
+      "PostedGroups": []
     },
     {
       "Id": "Tamar",
-      "Link": "https://www.ldsdoctrines.com/?page=Tamar"
+      "Link": "https://www.ldsdoctrines.com/tamar/",
+      "PostedGroups": []
     },
     {
       "Id": "Teaching-Like-Christ-Taught",
-      "Link": "https://www.ldsdoctrines.com/?page=Teaching-Like-Christ-Taught"
+      "Link": "https://www.ldsdoctrines.com/teaching-like-christ-taught/",
+      "PostedGroups": []
     },
     {
       "Id": "Temple-Gates-Off-Hinges",
-      "Link": "https://www.ldsdoctrines.com/?page=Temple-Gates-Off-Hinges"
+      "Link": "https://www.ldsdoctrines.com/temple-gates-off-hinges/",
+      "PostedGroups": []
     },
     {
       "Id": "Temple-Gods-Way",
-      "Link": "https://www.ldsdoctrines.com/?page=Temple-Gods-Way"
+      "Link": "https://www.ldsdoctrines.com/temple-gods-way/",
+      "PostedGroups": []
     },
     {
       "Id": "Temple-Motivated-People",
-      "Link": "https://www.ldsdoctrines.com/?page=Temple-Motivated-People"
+      "Link": "https://www.ldsdoctrines.com/temple-motivated-people/",
+      "PostedGroups": []
     },
     {
       "Id": "Ten-Commandments",
-      "Link": "https://www.ldsdoctrines.com/?page=Ten-Commandments"
+      "Link": "https://www.ldsdoctrines.com/ten-commandments/",
+      "PostedGroups": []
     },
     {
       "Id": "The-Millennium",
-      "Link": "https://www.ldsdoctrines.com/?page=The-Millennium"
+      "Link": "https://www.ldsdoctrines.com/the-millennium/",
+      "PostedGroups": []
     },
     {
       "Id": "The-Veil",
-      "Link": "https://www.ldsdoctrines.com/?page=The-Veil"
+      "Link": "https://www.ldsdoctrines.com/the-veil/",
+      "PostedGroups": []
     },
     {
       "Id": "TheFall",
-      "Link": "https://www.ldsdoctrines.com/?page=TheFall",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_66916838311765863303773.png"
+      "Link": "https://www.ldsdoctrines.com/thefall/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/mceu_66916838311765863303773.png",
+      "PostedGroups": []
     },
     {
       "Id": "TheOldTestament",
-      "Link": "https://www.ldsdoctrines.com/?page=TheOldTestament",
-      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/ReturnToMe.webp"
+      "Link": "https://www.ldsdoctrines.com/theoldtestament/",
+      "ImagePath": "https://www-websitecontent.s3.us-west-2.amazonaws.com/public/assets/ldsdoctrines.com/images/ReturnToMe.webp",
+      "PostedGroups": []
     },
     {
       "Id": "Thomas",
-      "Link": "https://www.ldsdoctrines.com/?page=Thomas"
+      "Link": "https://www.ldsdoctrines.com/thomas/",
+      "PostedGroups": []
     },
     {
       "Id": "ThoseWhoFallAway",
-      "Link": "https://www.ldsdoctrines.com/?page=ThoseWhoFallAway"
+      "Link": "https://www.ldsdoctrines.com/thosewhofallaway/",
+      "PostedGroups": []
     },
     {
       "Id": "Three-Bodies",
-      "Link": "https://www.ldsdoctrines.com/?page=Three-Bodies"
+      "Link": "https://www.ldsdoctrines.com/three-bodies/",
+      "PostedGroups": []
     },
     {
       "Id": "Three-Nephites",
-      "Link": "https://www.ldsdoctrines.com/?page=Three-Nephites"
+      "Link": "https://www.ldsdoctrines.com/three-nephites/",
+      "PostedGroups": []
     },
     {
       "Id": "Three-Witnesses",
-      "Link": "https://www.ldsdoctrines.com/?page=Three-Witnesses"
+      "Link": "https://www.ldsdoctrines.com/three-witnesses/",
+      "PostedGroups": []
     },
     {
       "Id": "Timothy",
-      "Link": "https://www.ldsdoctrines.com/?page=Timothy"
+      "Link": "https://www.ldsdoctrines.com/timothy/",
+      "PostedGroups": []
     },
     {
       "Id": "Translated-Beings",
-      "Link": "https://www.ldsdoctrines.com/?page=Translated-Beings"
+      "Link": "https://www.ldsdoctrines.com/translated-beings/",
+      "PostedGroups": []
     },
     {
       "Id": "Trinity",
-      "Link": "https://www.ldsdoctrines.com/?page=Trinity"
+      "Link": "https://www.ldsdoctrines.com/trinity/",
+      "PostedGroups": []
     },
     {
       "Id": "Two-Sticks",
-      "Link": "https://www.ldsdoctrines.com/?page=Two-Sticks"
+      "Link": "https://www.ldsdoctrines.com/two-sticks/",
+      "PostedGroups": []
     },
     {
       "Id": "Urim-Thummim",
-      "Link": "https://www.ldsdoctrines.com/?page=Urim-Thummim"
+      "Link": "https://www.ldsdoctrines.com/urim-thummim/",
+      "PostedGroups": []
     },
     {
       "Id": "Why-Study-Book-Of-Mormon",
-      "Link": "https://www.ldsdoctrines.com/?page=Why-Study-Book-Of-Mormon"
+      "Link": "https://www.ldsdoctrines.com/why-study-book-of-mormon/",
+      "PostedGroups": []
     },
     {
       "Id": "Why-Suffering",
-      "Link": "https://www.ldsdoctrines.com/?page=Why-Suffering"
+      "Link": "https://www.ldsdoctrines.com/why-suffering/",
+      "PostedGroups": []
     },
     {
       "Id": "Why-Trial-Required",
-      "Link": "https://www.ldsdoctrines.com/?page=Why-Trial-Required"
+      "Link": "https://www.ldsdoctrines.com/why-trial-required/",
+      "PostedGroups": []
     },
     {
       "Id": "Widow-Of-Zarephath",
-      "Link": "https://www.ldsdoctrines.com/?page=Widow-Of-Zarephath"
+      "Link": "https://www.ldsdoctrines.com/widow-of-zarephath/",
+      "PostedGroups": []
     },
     {
       "Id": "Wilford-Woodruff",
-      "Link": "https://www.ldsdoctrines.com/?page=Wilford-Woodruff"
+      "Link": "https://www.ldsdoctrines.com/wilford-woodruff/",
+      "PostedGroups": []
     },
     {
       "Id": "Woman-Taken-In-Adultery",
-      "Link": "https://www.ldsdoctrines.com/?page=Woman-Taken-In-Adultery"
+      "Link": "https://www.ldsdoctrines.com/woman-taken-in-adultery/",
+      "PostedGroups": []
     },
     {
       "Id": "Your-Daily-Atonement",
-      "Link": "https://www.ldsdoctrines.com/?page=Your-Daily-Atonement"
+      "Link": "https://www.ldsdoctrines.com/your-daily-atonement/",
+      "PostedGroups": []
     },
     {
       "Id": "Zacchaeus",
-      "Link": "https://www.ldsdoctrines.com/?page=Zacchaeus"
+      "Link": "https://www.ldsdoctrines.com/zacchaeus/",
+      "PostedGroups": []
     },
     {
       "Id": "Zacharias",
-      "Link": "https://www.ldsdoctrines.com/?page=Zacharias"
+      "Link": "https://www.ldsdoctrines.com/zacharias/",
+      "PostedGroups": []
     },
     {
       "Id": "Zechariah-OT-Prophet",
-      "Link": "https://www.ldsdoctrines.com/?page=Zechariah-OT-Prophet"
+      "Link": "https://www.ldsdoctrines.com/zechariah-ot-prophet/",
+      "PostedGroups": []
     },
     {
       "Id": "Zeezrom",
-      "Link": "https://www.ldsdoctrines.com/?page=Zeezrom"
+      "Link": "https://www.ldsdoctrines.com/zeezrom/",
+      "PostedGroups": []
     },
     {
       "Id": "Zion-Defined",
-      "Link": "https://www.ldsdoctrines.com/?page=Zion-Defined"
+      "Link": "https://www.ldsdoctrines.com/zion-defined/",
+      "PostedGroups": []
     }
   ]
 }
